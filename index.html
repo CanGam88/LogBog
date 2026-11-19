@@ -1503,6 +1503,99 @@
 
         <!-- FANE 3: OPGAVER & HUSKELISTE -->
         <section id="panel-tasks" class="view-panel">
+          <div class="card no-print">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                <span>Tilføj opgave / huskeliste</span>
+              </h2>
+            </div>
+
+            <form id="task-form">
+              <div class="form-row form-row-3" style="margin-bottom: 12px;">
+                <div>
+                  <label class="field-label" for="task-input-title">Opgave *</label>
+                  <input type="text" id="task-input-title" placeholder="Hvad skal huskes eller udføres?" required />
+                </div>
+                <div>
+                  <label class="field-label" for="task-input-prio">Prioritet</label>
+                  <select id="task-input-prio">
+                    <option value="normal">Normal</option>
+                    <option value="high">Høj prioritet</option>
+                    <option value="low">Lav</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="field-label" for="task-input-due">Deadline (valgfrit)</label>
+                  <input type="date" id="task-input-due" />
+                </div>
+              </div>
+              <button type="submit" class="btn btn-cyan" style="width: 100%;">+ Tilføj opgave</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header no-print">
+              <div class="filter-pills" id="task-filter-pills">
+                <button type="button" class="pill active" data-taskfilter="active">Åbne opgaver</button>
+                <button type="button" class="pill" data-taskfilter="completed">Færdige</button>
+                <button type="button" class="pill" data-taskfilter="all">Alle</button>
+              </div>
+              <button type="button" class="btn btn-danger btn-sm" id="btn-clear-completed-tasks">Ryd færdige</button>
+            </div>
+
+            <div id="tasks-list"></div>
+          </div>
+        </section>
+
+        <!-- FANE 4: NOTER -->
+        <section id="panel-notes" class="view-panel">
+          <div class="card no-print">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                <span id="note-form-heading">Ny hurtig note</span>
+              </h2>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-cancel-note-edit" style="display: none;">Annullér redigering</button>
+            </div>
+
+            <form id="note-form">
+              <input type="hidden" id="note-edit-id" />
+              <div style="margin-bottom: 10px;">
+                <label class="field-label" for="note-input-title">Overskrift *</label>
+                <input type="text" id="note-input-title" placeholder="Kort titel på noten..." required />
+              </div>
+              <div style="margin-bottom: 10px;">
+                <label class="field-label" for="note-input-body">Indhold</label>
+                <textarea id="note-input-body" rows="3" placeholder="Skriv note, mål, koder eller idéer..."></textarea>
+              </div>
+              <div class="form-row form-row-2" style="margin-bottom: 12px; align-items: end;">
+                <div>
+                  <label class="field-label" for="note-input-tags">Tags (adskil med mellemrum)</label>
+                  <input type="text" id="note-input-tags" placeholder="#bil #projekt #ide" />
+                </div>
+                <div>
+                  <span class="field-label">Farvemarkering</span>
+                  <div class="color-picker-row" id="note-color-picker">
+                    <button type="button" class="color-dot selected" data-color="cyan" style="background: var(--cyan);" aria-label="Cyan"></button>
+                    <button type="button" class="color-dot" data-color="emerald" style="background: var(--emerald);" aria-label="Grøn"></button>
+                    <button type="button" class="color-dot" data-color="amber" style="background: var(--amber);" aria-label="Gul"></button>
+                    <button type="button" class="color-dot" data-color="red" style="background: var(--red);" aria-label="Rød"></button>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-cyan" style="width: 100%;">Gem note</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header no-print">
+              <h2 class="card-title">Gemte noter</h2>
+              <input type="search" id="notes-search" placeholder="Søg i noter og #tags..." style="max-width: 280px;" />
+            </div>
+            <div class="notes-grid" id="notes-grid"></div>
+          </div>
+        </section>
 
       <!-- FANE 5: PRIVAT DAGBOG (AES-GCM KRYPTERET + SEPARAT PIN/KODEORD) -->
       <section id="panel-diary" class="view-panel">
@@ -2659,102 +2752,6 @@
     }
 
     /* ==========================================================================
-       8. FANE 3: INDKØBSLISTE
-       ========================================================================== */
-    function addShopItem(name, qty, category) {
-      const cleanName = name.trim();
-      if (!cleanName) return;
-      state.shopItems.unshift({
-        id: uid('shop'),
-        name: cleanName,
-        qty: (qty || '').trim(),
-        category: category || 'Dagligvarer',
-        inCart: false,
-        pinned: false,
-        createdAt: nowISO()
-      });
-
-      // Gem i historik til 1-klik genbrug
-      const existsInHistory = state.shopHistory.some(h => h.name.toLowerCase() === cleanName.toLowerCase());
-      if (!existsInHistory) {
-        state.shopHistory.unshift({ name: cleanName, category: category || 'Dagligvarer' });
-        if (state.shopHistory.length > 16) state.shopHistory.pop();
-      }
-
-      savePublicState();
-      updateCounts();
-    }
-
-    function renderShopping() {
-      const activeItems = state.shopItems.filter(i => !i.inCart);
-      const cartItems = state.shopItems.filter(i => i.inCart);
-
-      document.getElementById('shop-remaining-count').textContent = activeItems.length;
-      document.getElementById('shop-cart-count').textContent = cartItems.length;
-
-      // Genbrug tidligere varer
-      const histWrap = document.getElementById('shop-history-wrap');
-      const histChips = document.getElementById('shop-history-chips');
-      const availableHistory = state.shopHistory.filter(
-        h => !activeItems.some(a => a.name.toLowerCase() === h.name.toLowerCase())
-      );
-
-      if (availableHistory.length > 0) {
-        histWrap.style.display = 'block';
-        histChips.innerHTML = availableHistory.slice(0, 10).map(h => `
-          <button type="button" class="history-chip" data-hist-name="${escapeHtml(h.name)}" data-hist-cat="${escapeHtml(h.category)}">+ ${escapeHtml(h.name)}</button>
-        `).join('');
-      } else {
-        histWrap.style.display = 'none';
-      }
-
-      // Grupper aktive varer efter kategori
-      const activeHost = document.getElementById('shop-active-list');
-      if (activeItems.length === 0) {
-        activeHost.innerHTML = `<div class="empty-state">Indkøbslisten er tom — du er klar!</div>`;
-      } else {
-        const categories = ['Dagligvarer', 'Byggemarked/Værksted', 'Øvrigt'];
-        let html = '';
-        categories.forEach(cat => {
-          const group = activeItems.filter(i => i.category === cat);
-          if (group.length > 0) {
-            html += `<div class="shop-group-title">${escapeHtml(cat)}</div>`;
-            html += group.map(item => `
-              <button type="button" class="shop-item-btn" data-shop-toggle="${escapeHtml(item.id)}">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                  <span class="check-circle" aria-hidden="true"></span>
-                  <span class="shop-name" style="font-weight: 700; font-size: 0.96rem;">${escapeHtml(item.name)}</span>
-                </div>
-                ${item.qty ? `<span class="badge badge-shop tabular">${escapeHtml(item.qty)}</span>` : ''}
-              </button>
-            `).join('');
-          }
-        });
-        activeHost.innerHTML = html;
-      }
-
-      // I kurven
-      const cartSection = document.getElementById('shop-cart-section');
-      const cartHost = document.getElementById('shop-cart-list');
-      if (cartItems.length === 0) {
-        cartSection.style.display = 'none';
-      } else {
-        cartSection.style.display = 'block';
-        cartHost.innerHTML = cartItems.map(item => `
-          <button type="button" class="shop-item-btn in-cart" data-shop-toggle="${escapeHtml(item.id)}">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <span class="check-circle checked" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              </span>
-              <span class="shop-name" style="font-weight: 600;">${escapeHtml(item.name)}</span>
-            </div>
-            ${item.qty ? `<span style="font-size: 0.78rem; color: var(--text-muted);">${escapeHtml(item.qty)}</span>` : ''}
-          </button>
-        `).join('');
-      }
-    }
-
-    /* ==========================================================================
        9. FANE 4: NOTER
        ========================================================================== */
     function renderNotes() {
@@ -3331,47 +3328,6 @@
           updateCounts();
           renderTasks();
         });
-      });
-
-      /* --- FANE 3: SHOPPING EVENTS --- */
-      document.getElementById('shop-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        addShopItem(
-          document.getElementById('shop-input-name').value,
-          document.getElementById('shop-input-qty').value,
-          document.getElementById('shop-input-cat').value
-        );
-        e.target.reset();
-        renderShopping();
-      });
-
-      document.getElementById('shop-history-chips').addEventListener('click', (e) => {
-        const chip = e.target.closest('[data-hist-name]');
-        if (!chip) return;
-        addShopItem(chip.dataset.histName, '', chip.dataset.histCat);
-        renderShopping();
-      });
-
-      document.getElementById('panel-shopping').addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-shop-toggle]');
-        if (!btn) return;
-        const found = state.shopItems.find(i => i.id === btn.dataset.shopToggle);
-        if (found) {
-          found.inCart = !found.inCart;
-          savePublicState();
-          updateCounts();
-          renderShopping();
-        }
-      });
-
-      document.getElementById('btn-empty-cart').addEventListener('click', () => {
-        const inCartCount = state.shopItems.filter(i => i.inCart).length;
-        if (inCartCount === 0) return;
-        state.shopItems = state.shopItems.filter(i => !i.inCart);
-        savePublicState();
-        updateCounts();
-        renderShopping();
-        showToast('Kurven er tømt');
       });
 
       /* --- FANE 4: NOTES EVENTS --- */
