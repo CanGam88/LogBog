@@ -1,3661 +1,1256 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0e14" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="LommeLog" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <title>LommeLog — Offline Logbog, Huskeliste &amp; Krypteret Dagbog</title>
-  <link id="pwa-manifest-link" rel="manifest" href="" />
-  <link id="apple-touch-icon-link" rel="apple-touch-icon" href="" />
-
-  <style>
-    /* ==========================================================================
-       1. DESIGN TOKENS & MØRKT MOBIL-FØRST TEMA (#0b0f14 / #121821 / Cyan / Rød)
-       ========================================================================== */
-    :root {
-      --bg-base: #0b0f14;
-      --bg-card: #121821;
-      --bg-elevated: #19212e;
-      --bg-input: #0e131b;
-      --border-subtle: #222c3c;
-      --border-strong: #324056;
-      --text-primary: #f1f5f9;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-
-      --cyan: #06b6d4;
-      --cyan-hover: #0891b2;
-      --cyan-soft: rgba(6, 182, 212, 0.14);
-      --cyan-border: rgba(6, 182, 212, 0.38);
-
-      --red: #ef4444;
-      --red-hover: #dc2626;
-      --red-soft: rgba(239, 68, 68, 0.14);
-      --red-border: rgba(239, 68, 68, 0.38);
-
-      --emerald: #10b981;
-      --emerald-soft: rgba(16, 185, 129, 0.15);
-      --emerald-border: rgba(16, 185, 129, 0.36);
-
-      --amber: #f59e0b;
-      --amber-soft: rgba(245, 158, 11, 0.15);
-      --amber-border: rgba(245, 158, 11, 0.38);
-
-      --radius-sm: 10px;
-      --radius-md: 14px;
-      --radius-lg: 18px;
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
-
-    *, *::before, *::after {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      background-color: var(--bg-base);
-      color: var(--text-primary);
-      font-family: var(--font-sans);
-      font-size: 15px;
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-
-    .tabular {
-      font-variant-numeric: tabular-nums;
-    }
-
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: var(--bg-base);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #283347;
-      border-radius: 999px;
-    }
-
-    /* ==========================================================================
-       2. APP SHELL: DESKTOP TOP/SIDE NAVIGATION + MOBIL BUNDNAVIGATION
-       ========================================================================== */
-    .app-layout {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      background: rgba(11, 15, 20, 0.92);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .topbar-inner {
-      max-width: 1220px;
-      margin: 0 auto;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-    }
-
-    .brand-logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(6, 182, 212, 0.24), rgba(6, 182, 212, 0.05));
-      border: 1px solid var(--cyan-border);
-      color: var(--cyan);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .brand-title {
-      font-size: 1.12rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .offline-chip {
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: var(--emerald-soft);
-      color: var(--emerald);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-
-    .brand-sub {
-      font-size: 0.76rem;
-      color: var(--text-secondary);
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* Desktop Shell: Side-navigation på bred skærm + Bund-navigation på mobil */
-    .shell-body {
-      display: flex;
-      flex: 1;
-      width: 100%;
-      max-width: 1220px;
-      margin: 0 auto;
-    }
-
-    .desktop-sidebar {
-      display: none;
-    }
-
-    @media (min-width: 860px) {
-      .desktop-sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        width: 236px;
-        flex-shrink: 0;
-        padding: 20px 14px;
-        border-right: 1px solid var(--border-subtle);
-      }
-      .mobile-bottom-nav {
-        display: none !important;
-      }
-    }
-
-    .desktop-tab {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      width: 100%;
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-secondary);
-      font-family: inherit;
-      font-size: 0.9rem;
-      font-weight: 600;
-      padding: 11px 13px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      text-align: left;
-    }
-
-    .desktop-tab-left {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .desktop-tab:hover {
-      background: var(--bg-card);
-      color: var(--text-primary);
-    }
-
-    .desktop-tab.active {
-      background: var(--cyan-soft);
-      border-color: var(--cyan-border);
-      color: var(--cyan);
-    }
-
-    .nav-count {
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 1px 7px;
-      border-radius: 999px;
-      background: var(--bg-elevated);
-      color: var(--text-secondary);
-    }
-
-    .desktop-tab.active .nav-count {
-      background: rgba(6, 182, 212, 0.25);
-      color: var(--cyan);
-    }
-
-    /* Mobile Bottom Navigation Bar */
-    .mobile-bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 50;
-      background: rgba(18, 24, 33, 0.96);
-      backdrop-filter: blur(14px);
-      border-top: 1px solid var(--border-subtle);
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      padding: 6px 4px calc(6px + var(--safe-bottom));
-    }
-
-    .mobile-tab {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      background: transparent;
-      border: none;
-      color: var(--text-secondary);
-      font-family: inherit;
-      font-size: 0.68rem;
-      font-weight: 600;
-      padding: 6px 2px;
-      border-radius: 10px;
-      cursor: pointer;
-      position: relative;
-      min-height: 48px;
-    }
-
-    .mobile-tab.active {
-      color: var(--cyan);
-    }
-
-    .mobile-tab.active svg {
-      stroke: var(--cyan);
-    }
-
-    .mobile-tab-dot {
-      position: absolute;
-      top: 4px;
-      right: calc(50% - 17px);
-      background: var(--cyan);
-      color: #06131a;
-      font-size: 0.62rem;
-      font-weight: 800;
-      min-width: 16px;
-      height: 16px;
-      padding: 0 4px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* ==========================================================================
-       3. HOVEDINDHOLD, KORT, KNAPPER & FORMULARELEMENTER
-       ========================================================================== */
-    .main-container {
-      width: 100%;
-      padding: 16px 16px calc(92px + var(--safe-bottom));
-      flex: 1;
-      min-width: 0;
-    }
-
-    @media (min-width: 860px) {
-      .main-container {
-        padding: 20px 22px 64px;
-      }
-    }
-
-    .desktop-tab {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-secondary);
-      font-family: inherit;
-      font-size: 0.88rem;
-      font-weight: 600;
-      padding: 9px 14px;
-      border-radius: 11px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .desktop-tab:hover {
-      background: var(--bg-card);
-      color: var(--text-primary);
-    }
-
-    .desktop-tab.active {
-      background: var(--cyan-soft);
-      border-color: var(--cyan-border);
-      color: var(--cyan);
-    }
-
-    .nav-count {
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 1px 7px;
-      border-radius: 999px;
-      background: var(--bg-elevated);
-      color: var(--text-secondary);
-    }
-
-    .desktop-tab.active .nav-count {
-      background: rgba(6, 182, 212, 0.25);
-      color: var(--cyan);
-    }
-
-    /* Mobile Bottom Navigation Bar */
-    .mobile-bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 50;
-      background: rgba(20, 25, 35, 0.96);
-      backdrop-filter: blur(14px);
-      border-top: 1px solid var(--border-subtle);
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      padding: 6px 4px calc(6px + var(--safe-bottom));
-    }
-
-    .mobile-tab {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      background: transparent;
-      border: none;
-      color: var(--text-secondary);
-      font-family: inherit;
-      font-size: 0.68rem;
-      font-weight: 600;
-      padding: 6px 2px;
-      border-radius: 10px;
-      cursor: pointer;
-      position: relative;
-      min-height: 48px;
-    }
-
-    .mobile-tab.active {
-      color: var(--cyan);
-    }
-
-    .mobile-tab.active svg {
-      stroke: var(--cyan);
-    }
-
-    .mobile-tab-dot {
-      position: absolute;
-      top: 4px;
-      right: calc(50% - 16px);
-      background: var(--cyan);
-      color: #06131a;
-      font-size: 0.62rem;
-      font-weight: 800;
-      min-width: 16px;
-      height: 16px;
-      padding: 0 4px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* ==========================================================================
-       3. HOVEDINDHOLD, KORT, KNAPPER & FORMULARELEMENTER
-       ========================================================================== */
-    .main-container {
-      width: 100%;
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 16px 16px calc(92px + var(--safe-bottom));
-      flex: 1;
-    }
-
-    @media (min-width: 820px) {
-      .main-container {
-        padding: 22px 16px 48px;
-      }
-    }
-
-    .view-panel {
-      display: none;
-      animation: panelFade 0.16s ease;
-    }
-
-    .view-panel.active {
-      display: block;
-    }
-
-    @keyframes panelFade {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    @media (min-width: 768px) {
-      .card {
-        padding: 20px;
-      }
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-
-    .card-title {
-      margin: 0;
-      font-size: 1.02rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .card-title svg {
-      color: var(--cyan);
-      flex-shrink: 0;
-    }
-
-    /* Fingervenlige knapper */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      font-family: inherit;
-      font-size: 0.88rem;
-      font-weight: 700;
-      padding: 10px 15px;
-      min-height: 44px;
-      border-radius: 11px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      transition: transform 0.1s ease, background-color 0.15s ease, border-color 0.15s ease;
-      white-space: nowrap;
-      user-select: none;
-    }
-
-    .btn:active {
-      transform: scale(0.97);
-    }
-
-    .btn-cyan {
-      background: var(--cyan);
-      color: #06131a;
-    }
-    .btn-cyan:hover {
-      background: var(--cyan-hover);
-      color: #ffffff;
-    }
-
-    .btn-soft-cyan {
-      background: var(--cyan-soft);
-      border-color: var(--cyan-border);
-      color: var(--cyan);
-    }
-    .btn-soft-cyan:hover {
-      background: rgba(6, 182, 212, 0.22);
-    }
-
-    .btn-secondary {
-      background: var(--bg-elevated);
-      border-color: var(--border-subtle);
-      color: var(--text-primary);
-    }
-    .btn-secondary:hover {
-      border-color: var(--border-strong);
-      background: #232c3e;
-    }
-
-    .btn-danger {
-      background: var(--red-soft);
-      border-color: var(--red-border);
-      color: var(--red);
-    }
-    .btn-danger:hover {
-      background: var(--red);
-      color: #ffffff;
-    }
-
-    .btn-sm {
-      min-height: 36px;
-      padding: 6px 11px;
-      font-size: 0.8rem;
-      border-radius: 9px;
-    }
-
-    .btn-icon {
-      min-width: 38px;
-      min-height: 38px;
-      padding: 7px;
-      border-radius: 10px;
-    }
-
-    /* Inputs & Formularer */
-    input[type="text"],
-    input[type="number"],
-    input[type="date"],
-    input[type="time"],
-    input[type="search"],
-    input[type="password"],
-    select,
-    textarea {
-      width: 100%;
-      background: var(--bg-input);
-      border: 1px solid var(--border-subtle);
-      border-radius: 11px;
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 0.94rem;
-      padding: 10px 13px;
-      min-height: 44px;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--cyan);
-      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.16);
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 84px;
-    }
-
-    .field-label {
-      display: block;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 5px;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    @media (min-width: 640px) {
-      .form-row-2 {
-        grid-template-columns: 1fr 1fr;
-      }
-      .form-row-3 {
-        grid-template-columns: 2fr 1fr 1fr;
-      }
-      .form-row-4 {
-        grid-template-columns: 1.2fr 1fr 1.4fr 1.2fr;
-      }
-    }
-
-    /* Filter Pills */
-    .filter-pills {
-      display: flex;
-      gap: 7px;
-      flex-wrap: wrap;
-    }
-
-    .pill {
-      background: var(--bg-input);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-      font-family: inherit;
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 7px 13px;
-      min-height: 36px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .pill.active {
-      background: var(--cyan-soft);
-      border-color: var(--cyan-border);
-      color: var(--cyan);
-    }
-
-    /* Badges */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 2px 9px;
-      border-radius: 999px;
-    }
-
-    .badge-log { background: var(--cyan-soft); color: var(--cyan); border: 1px solid var(--cyan-border); }
-    .badge-task { background: rgba(99, 102, 241, 0.16); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.35); }
-    .badge-note { background: var(--amber-soft); color: var(--amber); border: 1px solid var(--amber-border); }
-
-    .status-info { background: var(--cyan-soft); color: var(--cyan); border: 1px solid var(--cyan-border); }
-    .status-ok { background: var(--emerald-soft); color: var(--emerald); border: 1px solid var(--emerald-border); }
-    .status-obs { background: var(--amber-soft); color: var(--amber); border: 1px solid var(--amber-border); }
-
-    .prio-high { background: var(--red-soft); color: var(--red); border: 1px solid var(--red-border); }
-    .prio-normal { background: var(--cyan-soft); color: var(--cyan); }
-    .prio-low { background: rgba(148, 163, 184, 0.15); color: var(--text-secondary); }
-
-    /* ==========================================================================
-       4. FANE 1: ALLE / OVERSIGT (TIDSLINJE & SØGNING)
-       ========================================================================== */
-    .search-toolbar {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    @media (min-width: 680px) {
-      .search-toolbar {
-        grid-template-columns: 1fr 180px;
-      }
-    }
-
-    .timeline-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .log-entry {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      transition: border-color 0.15s ease;
-    }
-
-    .log-entry.pinned {
-      border-color: var(--cyan-border);
-      background: linear-gradient(180deg, rgba(6, 182, 212, 0.08) 0%, var(--bg-elevated) 100%);
-    }
-
-    .log-entry.status-border-obs {
-      border-left: 4px solid var(--amber);
-    }
-
-    .log-entry.status-border-ok {
-      border-left: 4px solid var(--emerald);
-    }
-
-    .log-entry.status-border-info {
-      border-left: 4px solid var(--cyan);
-    }
-
-    .log-entry-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .log-entry-meta {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      flex-wrap: wrap;
-      font-size: 0.76rem;
-      color: var(--text-secondary);
-    }
-
-    .log-entry-title {
-      font-weight: 700;
-      font-size: 0.99rem;
-      color: var(--text-primary);
-    }
-
-    .log-entry-title.done {
-      text-decoration: line-through;
-      color: var(--text-muted);
-    }
-
-    .log-entry-body {
-      font-size: 0.88rem;
-      color: var(--text-secondary);
-      white-space: pre-line;
-      word-break: break-word;
-    }
-
-    .metric-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 0.76rem;
-      font-weight: 700;
-      padding: 3px 9px;
-      border-radius: 8px;
-      background: var(--bg-input);
-      border: 1px solid var(--border-strong);
-      color: var(--text-primary);
-    }
-
-    .tag-chip {
-      display: inline-block;
-      font-size: 0.74rem;
-      font-weight: 600;
-      color: var(--cyan);
-      background: var(--cyan-soft);
-      padding: 2px 8px;
-      border-radius: 6px;
-      margin-right: 5px;
-      margin-top: 4px;
-    }
-
-    /* ==========================================================================
-       5. FANE 2: DEDIKERET LOGBOG (1-KLIK SKABELONER & FILTRE)
-       ========================================================================== */
-    .quick-templates-bar {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .template-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-strong);
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 8px 12px;
-      min-height: 38px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .template-chip:hover {
-      border-color: var(--cyan);
-      background: var(--cyan-soft);
-      color: var(--cyan);
-    }
-
-    .template-chip.warn:hover {
-      border-color: var(--amber);
-      background: var(--amber-soft);
-      color: var(--amber);
-    }
-
-    .template-chip.ok:hover {
-      border-color: var(--emerald);
-      background: var(--emerald-soft);
-      color: var(--emerald);
-    }
-
-    .log-filter-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    @media (min-width: 768px) {
-      .log-filter-grid {
-        grid-template-columns: 1.4fr 1fr 0.85fr 0.85fr;
-      }
-    }
-
-    /* ==========================================================================
-       6. FANE 3: OPGAVER & HUSKELISTE
-       ========================================================================== */
-    .task-row {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-
-    .task-row.completed {
-      opacity: 0.62;
-    }
-
-    .check-circle {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      border: 2px solid var(--border-strong);
-      background: var(--bg-input);
-      color: #06131a;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: all 0.15s ease;
-    }
-
-    .check-circle.checked {
-      background: var(--cyan);
-      border-color: var(--cyan);
-    }
-
-    .task-main {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .task-text {
-      font-weight: 600;
-      font-size: 0.95rem;
-      word-break: break-word;
-    }
-
-    .task-row.completed .task-text {
-      text-decoration: line-through;
-      color: var(--text-muted);
-    }
-
-    .task-sub {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 4px;
-      font-size: 0.76rem;
-      color: var(--text-secondary);
-    }
-
-    /* ==========================================================================
-       6. FANE 3: INDKØBSLISTE (BYGGET TIL BUTIKKEN)
-       ========================================================================== */
-    .shop-group-title {
-      font-size: 0.78rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--cyan);
-      margin: 14px 0 8px;
-    }
-
-    .shop-item-btn {
-      width: 100%;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 13px 14px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      color: var(--text-primary);
-      font-family: inherit;
-      text-align: left;
-      cursor: pointer;
-      min-height: 52px;
-      transition: background-color 0.12s ease, border-color 0.12s ease;
-    }
-
-    .shop-item-btn:active {
-      transform: scale(0.99);
-    }
-
-    .shop-item-btn.in-cart {
-      background: var(--bg-input);
-      opacity: 0.6;
-    }
-
-    .shop-item-btn.in-cart .shop-name {
-      text-decoration: line-through;
-      color: var(--text-muted);
-    }
-
-    .history-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      margin-top: 8px;
-    }
-
-    .history-chip {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 7px 12px;
-      border-radius: 999px;
-      cursor: pointer;
-      min-height: 36px;
-    }
-
-    .history-chip:hover {
-      border-color: var(--cyan);
-      color: var(--cyan);
-    }
-
-    /* ==========================================================================
-       7. FANE 4: NOTER (FARVEMARKERING & TAGS)
-       ========================================================================== */
-    .notes-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    @media (min-width: 680px) {
-      .notes-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .note-card {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      border-left-width: 4px;
-      border-radius: var(--radius-md);
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .note-color-cyan { border-left-color: var(--cyan); }
-    .note-color-emerald { border-left-color: var(--emerald); }
-    .note-color-amber { border-left-color: var(--amber); }
-    .note-color-red { border-left-color: var(--red); }
-
-    .color-picker-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .color-dot {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      cursor: pointer;
-    }
-
-    .color-dot.selected {
-      border-color: #ffffff;
-      transform: scale(1.12);
-    }
-
-    /* ==========================================================================
-       8. FANE 5: PRIVAT DAGBOG (AES-GCM KRYPTERET + MOBILT PIN-TASTATUR)
-       ========================================================================== */
-    .lock-shell {
-      max-width: 420px;
-      margin: 12px auto;
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 24px 20px;
-      text-align: center;
-    }
-
-    .lock-icon-badge {
-      width: 58px;
-      height: 58px;
-      border-radius: 16px;
-      background: var(--red-soft);
-      border: 1px solid var(--red-border);
-      color: var(--red);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-    }
-
-    .pin-dots {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin: 16px 0;
-      min-height: 20px;
-    }
-
-    .pin-dot {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      border: 2px solid var(--border-strong);
-      background: transparent;
-      transition: all 0.12s ease;
-    }
-
-    .pin-dot.filled {
-      background: var(--cyan);
-      border-color: var(--cyan);
-      box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
-    }
-
-    .numpad-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      max-width: 290px;
-      margin: 0 auto 14px;
-    }
-
-    .numpad-key {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 1.3rem;
-      font-weight: 700;
-      height: 56px;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: background-color 0.1s ease, transform 0.08s ease;
-    }
-
-    .numpad-key:active {
-      background: var(--cyan);
-      color: #06131a;
-      transform: scale(0.96);
-    }
-
-    .mood-pills {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .mood-btn {
-      background: var(--bg-input);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-      font-family: inherit;
-      font-size: 0.84rem;
-      font-weight: 600;
-      padding: 8px 13px;
-      min-height: 40px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    .mood-btn.active {
-      background: var(--cyan-soft);
-      border-color: var(--cyan-border);
-      color: var(--cyan);
-    }
-
-    /* ==========================================================================
-       9. GLOBAL HURTIG-TILFØJ (+) FAB, MODAL & TOASTS
-       ========================================================================== */
-    .fab-add {
-      position: fixed;
-      right: 18px;
-      bottom: calc(74px + var(--safe-bottom));
-      z-index: 45;
-      width: 58px;
-      height: 58px;
-      border-radius: 18px;
-      background: var(--cyan);
-      color: #06131a;
-      border: none;
-      box-shadow: 0 10px 26px rgba(6, 182, 212, 0.42);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: transform 0.15s ease, background-color 0.15s ease;
-    }
-
-    .fab-add:active {
-      transform: scale(0.93);
-    }
-
-    @media (min-width: 820px) {
-      .fab-add {
-        right: 28px;
-        bottom: 28px;
-        width: auto;
-        padding: 0 20px;
-        gap: 8px;
-        font-family: inherit;
-        font-size: 0.92rem;
-        font-weight: 800;
-      }
-    }
-
-    .fab-label {
-      display: none;
-    }
-
-    @media (min-width: 820px) {
-      .fab-label {
-        display: inline;
-      }
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 80;
-      background: rgba(5, 8, 13, 0.84);
-      backdrop-filter: blur(6px);
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-      padding: 12px;
-    }
-
-    @media (min-width: 640px) {
-      .modal-backdrop {
-        align-items: center;
-      }
-    }
-
-    .modal-backdrop.open {
-      display: flex;
-    }
-
-    .modal-sheet {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: 20px;
-      width: 100%;
-      max-width: 520px;
-      padding: 20px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
-      animation: sheetUp 0.18s ease;
-    }
-
-    @keyframes sheetUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    #toast-container {
-      position: fixed;
-      top: 72px;
-      right: 16px;
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-width: calc(100vw - 32px);
-    }
-
-    .toast {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-strong);
-      border-left: 4px solid var(--cyan);
-      color: var(--text-primary);
-      padding: 11px 14px;
-      border-radius: 11px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
-    }
-
-    .toast.danger {
-      border-left-color: var(--red);
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 28px 16px;
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      background: var(--bg-input);
-      border: 1px dashed var(--border-subtle);
-      border-radius: var(--radius-md);
-    }
-
-    /* ==========================================================================
-       10. PRINT-VENLIG OVERSIGT (@MEDIA PRINT)
-       ========================================================================== */
-    @media print {
-      body {
-        background: #ffffff !important;
-        color: #0f172a !important;
-      }
-      .topbar, .mobile-bottom-nav, .fab-add, .modal-backdrop, #toast-container, .no-print {
-        display: none !important;
-      }
-      .main-container {
-        padding: 0 !important;
-        max-width: 100% !important;
-      }
-      .card, .log-entry, .task-row, .note-card {
-        background: #ffffff !important;
-        color: #0f172a !important;
-        border: 1px solid #cbd5e1 !important;
-        box-shadow: none !important;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0b0f17">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LommeLog">
+<title>LommeLog – Offline Logbog & Opgaver</title>
+<script>
+// Dynamisk PWA Manifest + app-ikon (100 % selvforsynende uden ekstra billedfiler)
+(function() {
+  const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#0b0f17"/><rect x="36" y="36" width="440" height="440" rx="88" fill="#131a26" stroke="#22d3ee" stroke-width="14"/><path d="M150 175h212M150 256h150M150 337h185" stroke="#22d3ee" stroke-width="28" stroke-linecap="round"/><circle cx="362" cy="337" r="22" fill="#f43f5e"/></svg>`;
+  const iconUrl = 'data:image/svg+xml;base64,' + btoa(svgIcon);
+  const manifest = {
+    name: 'LommeLog – Offline Logbog & Opgaver',
+    short_name: 'LommeLog',
+    start_url: './index.html',
+    display: 'standalone',
+    background_color: '#0b0f17',
+    theme_color: '#0b0f17',
+    icons: [{ src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }]
+  };
+  const link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
+  document.head.appendChild(link);
+})();
+</script>
+<style>
+  :root {
+    --bg: #0b0f17;
+    --surface: #131a26;
+    --surface-2: #1b2434;
+    --border: #263247;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --cyan: #22d3ee;
+    --cyan-dim: rgba(34, 211, 238, 0.14);
+    --red: #f43f5e;
+    --red-dim: rgba(244, 63, 94, 0.14);
+    --green: #10b981;
+    --green-dim: rgba(16, 185, 129, 0.14);
+    --amber: #f59e0b;
+    --amber-dim: rgba(245, 158, 11, 0.14);
+    --purple: #a855f7;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+    padding-bottom: 84px;
+  }
+  header {
+    position: sticky; top: 0; z-index: 40;
+    background: rgba(11, 15, 23, 0.94);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em; }
+  .brand-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+  .badge-offline {
+    font-size: 0.72rem; padding: 3px 8px; border-radius: 99px;
+    background: var(--green-dim); color: var(--green); border: 1px solid rgba(16,185,129,0.3);
+    font-weight: 600;
+  }
+  .header-actions { display: flex; gap: 8px; }
+  button {
+    font-family: inherit; cursor: pointer; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); border-radius: 8px;
+    padding: 8px 12px; font-size: 0.88rem; font-weight: 600; transition: 0.15s;
+  }
+  button:hover { border-color: var(--cyan); }
+  button:active { transform: scale(0.98); }
+  .btn-primary { background: var(--cyan); color: #061018; border-color: var(--cyan); }
+  .btn-primary:hover { background: #38e0fa; }
+  .btn-danger { background: var(--red-dim); color: var(--red); border-color: rgba(244,63,94,0.35); }
+  .btn-sm { padding: 5px 9px; font-size: 0.8rem; }
+
+  .layout { max-width: 1060px; margin: 0 auto; padding: 16px; display: grid; grid-template-columns: 210px 1fr; gap: 18px; }
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; padding: 12px; }
+    .desktop-nav { display: none !important; }
+  }
+  @media (min-width: 769px) {
+    body { padding-bottom: 24px; }
+    .mobile-nav { display: none !important; }
+  }
+
+  .desktop-nav {
+    display: flex; flex-direction: column; gap: 6px; position: sticky; top: 68px; height: fit-content;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px;
+  }
+  .nav-btn {
+    display: flex; align-items: center; justify-content: space-between; width: 100%;
+    text-align: left; background: transparent; border: 1px solid transparent; padding: 10px 12px; color: var(--muted);
+  }
+  .nav-btn.active { background: var(--cyan-dim); color: var(--cyan); border-color: rgba(34,211,238,0.35); }
+  .nav-count { font-size: 0.75rem; background: var(--surface-2); padding: 2px 7px; border-radius: 99px; color: var(--text); }
+
+  .mobile-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+    background: rgba(19, 26, 38, 0.97); backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px 4px;
+  }
+  .m-nav-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    background: transparent; border: none; color: var(--muted); padding: 6px 2px; font-size: 0.72rem;
+  }
+  .m-nav-btn.active { color: var(--cyan); }
+  .m-nav-icon { font-size: 1.15rem; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; margin-bottom: 14px;
+  }
+  .card-title { font-size: 1rem; font-weight: 700; margin: 0 0 10px 0; display: flex; align-items: center; justify-content: space-between; }
+
+  input, select, textarea {
+    width: 100%; background: var(--bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px;
+    font-family: inherit; font-size: 0.92rem;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cyan); }
+  textarea { resize: vertical; min-height: 76px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  @media (max-width: 600px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .filter-bar input { flex: 1; min-width: 180px; }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .pill {
+    padding: 5px 11px; border-radius: 99px; font-size: 0.8rem;
+    background: var(--surface); border: 1px solid var(--border); color: var(--muted);
+  }
+  .pill.active { background: var(--cyan-dim); color: var(--cyan); border-color: var(--cyan); }
+
+  .item-card {
+    background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--cyan);
+    border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; transition: 0.15s;
+  }
+  .item-card.pinned { border-color: rgba(245, 158, 11, 0.55); border-left-color: var(--amber); }
+  .item-card.done { opacity: 0.6; }
+  .item-card.done .item-title { text-decoration: line-through; color: var(--muted); }
+  .item-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .item-title { font-weight: 700; font-size: 0.98rem; margin: 0; word-break: break-word; }
+  .item-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  .item-body { margin: 8px 0 0 0; font-size: 0.9rem; color: #cbd5e1; white-space: pre-wrap; word-break: break-word; }
+  .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 600;
+    background: var(--surface-2); color: var(--cyan); border: 1px solid var(--border);
+  }
+  .tag-ok { background: var(--green-dim); color: var(--green); border-color: rgba(16,185,129,0.3); }
+  .tag-warn { background: var(--amber-dim); color: var(--amber); border-color: rgba(245,158,11,0.3); }
+  .tag-danger { background: var(--red-dim); color: var(--red); border-color: rgba(244,63,94,0.3); }
+
+  .quick-templates { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .fab {
+    position: fixed; right: 18px; bottom: 78px; z-index: 45;
+    width: 54px; height: 54px; border-radius: 50%;
+    background: var(--cyan); color: #061018; border: none;
+    font-size: 1.7rem; font-weight: 700; box-shadow: 0 6px 20px rgba(34,211,238,0.35);
+    display: flex; align-items: center; justify-content: center;
+  }
+  @media (min-width: 769px) { .fab { bottom: 26px; right: 26px; } }
+
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(4, 7, 13, 0.82); z-index: 80;
+    display: none; align-items: center; justify-content: center; padding: 14px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; padding: 18px;
+  }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .field { margin-bottom: 11px; }
+  .field label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+
+  .pin-box { max-width: 340px; margin: 20px auto; text-align: center; }
+  .pin-dots { display: flex; justify-content: center; gap: 12px; margin: 16px 0; }
+  .pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--cyan); }
+  .pin-dot.filled { background: var(--cyan); }
+  .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 260px; margin: 0 auto; }
+  .keypad button { padding: 14px; font-size: 1.15rem; }
+
+  .empty { text-align: center; padding: 28px 14px; color: var(--muted); font-size: 0.9rem; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+</style>
 </head>
 <body>
-  <div class="app-layout">
-    <!-- ======================================================================
-         TOPBAR & DESKTOP NAVIGATION
-         ====================================================================== -->
-    <header class="topbar">
-      <div class="topbar-inner">
-        <div class="brand">
-          <div class="brand-logo" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-              <line x1="9" y1="7" x2="16" y2="7"></line>
-              <line x1="9" y1="11" x2="14" y2="11"></line>
-            </svg>
-          </div>
-          <div>
-            <div class="brand-title">
-              <span>LommeLog</span>
-              <span class="offline-chip">100% Offline PWA</span>
-            </div>
-            <div class="brand-sub">Lokal logbog, opgaver, noter &amp; krypteret dagbog</div>
-          </div>
-        </div>
 
-        <div class="topbar-right">
-          <button type="button" class="btn btn-secondary btn-sm" id="btn-open-backup" title="Backup &amp; Eksport">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            <span>Backup</span>
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <div class="shell-body">
-      <!-- DESKTOP SIDEBAR NAVIGATION -->
-      <aside class="desktop-sidebar no-print" aria-label="Hovedmenu">
-        <button type="button" class="desktop-tab active" data-tab="timeline">
-          <span class="desktop-tab-left">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            <span>Alle / Oversigt</span>
-          </span>
-          <span class="nav-count" id="d-count-all">0</span>
-        </button>
-        <button type="button" class="desktop-tab" data-tab="logbook">
-          <span class="desktop-tab-left">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><line x1="8" y1="11" x2="16" y2="11"></line><line x1="8" y1="15" x2="13" y2="15"></line></svg>
-            <span>Logbog</span>
-          </span>
-          <span class="nav-count" id="d-count-log">0</span>
-        </button>
-        <button type="button" class="desktop-tab" data-tab="tasks">
-          <span class="desktop-tab-left">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-            <span>Opgaver</span>
-          </span>
-          <span class="nav-count" id="d-count-tasks">0</span>
-        </button>
-        <button type="button" class="desktop-tab" data-tab="notes">
-          <span class="desktop-tab-left">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-            <span>Noter</span>
-          </span>
-          <span class="nav-count" id="d-count-notes">0</span>
-        </button>
-        <button type="button" class="desktop-tab" data-tab="diary">
-          <span class="desktop-tab-left">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            <span>Dagbog</span>
-          </span>
-        </button>
-      </aside>
-
-      <!-- ======================================================================
-           HOVEDINDHOLD: 5 FANER
-           ====================================================================== -->
-      <main class="main-container">
-        <!-- FANE 1: ALLE / OVERSIGT (SAMLET KRONOLOGISK STRØM) -->
-        <section id="panel-timeline" class="view-panel active">
-          <div class="card no-print">
-            <div class="search-toolbar">
-              <input type="search" id="timeline-search" placeholder="Søg på tværs af logbog, opgaver og noter (#tags, målinger)..." />
-              <input type="date" id="timeline-date-filter" aria-label="Filtrér på dato" />
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
-              <div class="filter-pills" id="timeline-cat-pills">
-                <button type="button" class="pill active" data-tcat="all">Alle</button>
-                <button type="button" class="pill" data-tcat="log">Logbog</button>
-                <button type="button" class="pill" data-tcat="task">Opgaver</button>
-                <button type="button" class="pill" data-tcat="note">Noter</button>
-              </div>
-              <button type="button" class="btn btn-secondary btn-sm" id="btn-clear-timeline-filters" style="display: none;">Nulstil filter</button>
-            </div>
-          </div>
-
-          <div class="timeline-list" id="timeline-list"></div>
-        </section>
-
-        <!-- FANE 2: DEDIKERET LOGBOG -->
-        <section id="panel-logbook" class="view-panel">
-          <div class="card no-print">
-            <div class="card-header">
-              <h2 class="card-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-                <span id="log-form-heading">Nyt logindlæg</span>
-              </h2>
-              <button type="button" class="btn btn-secondary btn-sm" id="btn-cancel-log-edit" style="display: none;">Annullér redigering</button>
-            </div>
-
-            <!-- 1-Klik Hurtigskabeloner -->
-            <div>
-              <span class="field-label">1-klik skabeloner (udfylder automatisk tidspunkt &amp; status):</span>
-              <div class="quick-templates-bar" id="log-templates-bar">
-                <button type="button" class="template-chip" data-tpl="timestamp">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                  <span>Hurtig tidsstempel-log</span>
-                </button>
-                <button type="button" class="template-chip warn" data-tpl="observation">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                  <span>Observation / Afvigelse</span>
-                </button>
-                <button type="button" class="template-chip ok" data-tpl="completed">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>Udført arbejde</span>
-                </button>
-              </div>
-            </div>
-
-            <form id="logbook-form">
-              <input type="hidden" id="log-edit-id" />
-              <div class="form-row form-row-4" style="margin-bottom: 10px;">
-                <div>
-                  <label class="field-label" for="log-input-date">Dato *</label>
-                  <input type="date" id="log-input-date" required />
-                </div>
-                <div>
-                  <label class="field-label" for="log-input-time">Klokkeslæt *</label>
-                  <input type="time" id="log-input-time" required />
-                </div>
-                <div>
-                  <label class="field-label" for="log-input-cat">Kategori</label>
-                  <select id="log-input-cat">
-                    <option value="Drift / Arbejde">Drift / Arbejde</option>
-                    <option value="Værksted / Køretøj">Værksted / Køretøj</option>
-                    <option value="Måling / Tjek">Måling / Tjek</option>
-                    <option value="Hjem &amp; Privat">Hjem &amp; Privat</option>
-                    <option value="Egen kategori...">Egen kategori...</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="field-label" for="log-input-status">Status-tag</label>
-                  <select id="log-input-status">
-                    <option value="info">Info</option>
-                    <option value="ok">OK / Udført</option>
-                    <option value="obs">Obs / Afvigelse</option>
-                  </select>
-                </div>
-              </div>
-
-              <div id="log-custom-cat-wrap" style="display: none; margin-bottom: 10px;">
-                <label class="field-label" for="log-input-custom-cat">Angiv egen kategori *</label>
-                <input type="text" id="log-input-custom-cat" placeholder="F.eks. Maskinlinje 2, Byggeprojekt, Service..." />
-              </div>
-
-              <div class="form-row form-row-2" style="margin-bottom: 10px;">
-                <div>
-                  <label class="field-label" for="log-input-title">Overskrift / Emne *</label>
-                  <input type="text" id="log-input-title" placeholder="F.eks. Rundgang i teknikrum eller Olieskift varevogn..." required />
-                </div>
-                <div>
-                  <label class="field-label" for="log-input-metric">Måleværdi / Reference (valgfrit)</label>
-                  <input type="text" id="log-input-metric" placeholder="F.eks. 142.850 km, 21,4 °C, 2,5 timer, Sagsnr. 402..." />
-                </div>
-              </div>
-
-              <div style="margin-bottom: 12px;">
-                <label class="field-label" for="log-input-body">Uddybende logtekst</label>
-                <textarea id="log-input-body" rows="3" placeholder="Notér observationer, udført arbejde, målinger eller hændelsesforløb..."></textarea>
-              </div>
-
-              <button type="submit" class="btn btn-cyan" style="width: 100%;" id="btn-submit-log">+ Gem i logbog</button>
-            </form>
-          </div>
-
-          <!-- Logbog Filter & Eksport -->
-          <div class="card no-print">
-            <div class="card-header">
-              <h2 class="card-title">Logbogsoversigt (<span id="log-filtered-count">0</span>)</h2>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button type="button" class="btn btn-soft-cyan btn-sm" id="btn-export-log-md">Eksportér Log (.md)</button>
-                <button type="button" class="btn btn-secondary btn-sm" id="btn-print-log">Udskriv / PDF</button>
-              </div>
-            </div>
-
-            <div class="log-filter-grid">
-              <div>
-                <label class="field-label" for="log-search">Søg i logbog</label>
-                <input type="search" id="log-search" placeholder="Søg på emne, måleværdi eller tekst..." />
-              </div>
-              <div>
-                <label class="field-label" for="log-filter-cat">Kategori</label>
-                <select id="log-filter-cat">
-                  <option value="all">Alle kategorier</option>
-                </select>
-              </div>
-              <div>
-                <label class="field-label" for="log-filter-from">Fra dato</label>
-                <input type="date" id="log-filter-from" />
-              </div>
-              <div>
-                <label class="field-label" for="log-filter-to">Til dato</label>
-                <input type="date" id="log-filter-to" />
-              </div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
-              <div class="filter-pills" id="log-status-pills">
-                <button type="button" class="pill active" data-lstatus="all">Alle status</button>
-                <button type="button" class="pill" data-lstatus="info">Info</button>
-                <button type="button" class="pill" data-lstatus="ok">OK / Udført</button>
-                <button type="button" class="pill" data-lstatus="obs">Obs / Afvigelse</button>
-              </div>
-              <button type="button" class="btn btn-secondary btn-sm" id="btn-reset-log-filters" style="display: none;">Nulstil filtre</button>
-            </div>
-          </div>
-
-          <div class="timeline-list" id="logbook-entries-list"></div>
-        </section>
-
-        <!-- FANE 3: OPGAVER & HUSKELISTE -->
-        <section id="panel-tasks" class="view-panel">
-          <div class="card no-print">
-            <div class="card-header">
-              <h2 class="card-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-                <span>Tilføj opgave / huskeliste</span>
-              </h2>
-            </div>
-
-            <form id="task-form">
-              <div class="form-row form-row-3" style="margin-bottom: 12px;">
-                <div>
-                  <label class="field-label" for="task-input-title">Opgave *</label>
-                  <input type="text" id="task-input-title" placeholder="Hvad skal huskes eller udføres?" required />
-                </div>
-                <div>
-                  <label class="field-label" for="task-input-prio">Prioritet</label>
-                  <select id="task-input-prio">
-                    <option value="normal">Normal</option>
-                    <option value="high">Høj prioritet</option>
-                    <option value="low">Lav</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="field-label" for="task-input-due">Deadline (valgfrit)</label>
-                  <input type="date" id="task-input-due" />
-                </div>
-              </div>
-              <button type="submit" class="btn btn-cyan" style="width: 100%;">+ Tilføj opgave</button>
-            </form>
-          </div>
-
-          <div class="card">
-            <div class="card-header no-print">
-              <div class="filter-pills" id="task-filter-pills">
-                <button type="button" class="pill active" data-taskfilter="active">Åbne opgaver</button>
-                <button type="button" class="pill" data-taskfilter="completed">Færdige</button>
-                <button type="button" class="pill" data-taskfilter="all">Alle</button>
-              </div>
-              <button type="button" class="btn btn-danger btn-sm" id="btn-clear-completed-tasks">Ryd færdige</button>
-            </div>
-
-            <div id="tasks-list"></div>
-          </div>
-        </section>
-
-        <!-- FANE 4: NOTER -->
-        <section id="panel-notes" class="view-panel">
-          <div class="card no-print">
-            <div class="card-header">
-              <h2 class="card-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                <span id="note-form-heading">Ny hurtig note</span>
-              </h2>
-              <button type="button" class="btn btn-secondary btn-sm" id="btn-cancel-note-edit" style="display: none;">Annullér redigering</button>
-            </div>
-
-            <form id="note-form">
-              <input type="hidden" id="note-edit-id" />
-              <div style="margin-bottom: 10px;">
-                <label class="field-label" for="note-input-title">Overskrift *</label>
-                <input type="text" id="note-input-title" placeholder="Kort titel på noten..." required />
-              </div>
-              <div style="margin-bottom: 10px;">
-                <label class="field-label" for="note-input-body">Indhold</label>
-                <textarea id="note-input-body" rows="3" placeholder="Skriv note, mål, koder eller idéer..."></textarea>
-              </div>
-              <div class="form-row form-row-2" style="margin-bottom: 12px; align-items: end;">
-                <div>
-                  <label class="field-label" for="note-input-tags">Tags (adskil med mellemrum)</label>
-                  <input type="text" id="note-input-tags" placeholder="#bil #projekt #ide" />
-                </div>
-                <div>
-                  <span class="field-label">Farvemarkering</span>
-                  <div class="color-picker-row" id="note-color-picker">
-                    <button type="button" class="color-dot selected" data-color="cyan" style="background: var(--cyan);" aria-label="Cyan"></button>
-                    <button type="button" class="color-dot" data-color="emerald" style="background: var(--emerald);" aria-label="Grøn"></button>
-                    <button type="button" class="color-dot" data-color="amber" style="background: var(--amber);" aria-label="Gul"></button>
-                    <button type="button" class="color-dot" data-color="red" style="background: var(--red);" aria-label="Rød"></button>
-                  </div>
-                </div>
-              </div>
-              <button type="submit" class="btn btn-cyan" style="width: 100%;">Gem note</button>
-            </form>
-          </div>
-
-          <div class="card">
-            <div class="card-header no-print">
-              <h2 class="card-title">Gemte noter</h2>
-              <input type="search" id="notes-search" placeholder="Søg i noter og #tags..." style="max-width: 280px;" />
-            </div>
-            <div class="notes-grid" id="notes-grid"></div>
-          </div>
-        </section>
-
-      <!-- FANE 5: PRIVAT DAGBOG (AES-GCM KRYPTERET + SEPARAT PIN/KODEORD) -->
-      <section id="panel-diary" class="view-panel">
-        <!-- LÅST TILSTAND / OPRET KODE -->
-        <div id="diary-locked-view" class="lock-shell">
-          <div class="lock-icon-badge">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-          </div>
-          <h2 id="diary-lock-title" style="margin: 0 0 6px 0; font-size: 1.2rem;">Privat Dagbog er låst</h2>
-          <p id="diary-lock-desc" style="margin: 0 0 14px 0; font-size: 0.85rem; color: var(--text-secondary);">
-            Indtast din 4-6 cifrede PIN-kode for at dekryptere dine dagbogsindlæg.
-          </p>
-
-          <div class="pin-dots" id="pin-dots">
-            <span class="pin-dot"></span>
-            <span class="pin-dot"></span>
-            <span class="pin-dot"></span>
-            <span class="pin-dot"></span>
-            <span class="pin-dot"></span>
-            <span class="pin-dot"></span>
-          </div>
-
-          <div id="diary-pin-error" style="color: var(--red); font-size: 0.82rem; font-weight: 700; min-height: 20px; margin-bottom: 8px;"></div>
-
-          <div class="numpad-grid" id="diary-numpad">
-            <button type="button" class="numpad-key" data-digit="1">1</button>
-            <button type="button" class="numpad-key" data-digit="2">2</button>
-            <button type="button" class="numpad-key" data-digit="3">3</button>
-            <button type="button" class="numpad-key" data-digit="4">4</button>
-            <button type="button" class="numpad-key" data-digit="5">5</button>
-            <button type="button" class="numpad-key" data-digit="6">6</button>
-            <button type="button" class="numpad-key" data-digit="7">7</button>
-            <button type="button" class="numpad-key" data-digit="8">8</button>
-            <button type="button" class="numpad-key" data-digit="9">9</button>
-            <button type="button" class="numpad-key" data-action="clear" style="font-size: 0.88rem; color: var(--red);">Ryd</button>
-            <button type="button" class="numpad-key" data-digit="0">0</button>
-            <button type="button" class="numpad-key" data-action="back" style="font-size: 1rem;">⌫</button>
-          </div>
-
-          <button type="button" class="btn btn-cyan" id="btn-diary-unlock" style="width: 100%; max-width: 290px;">Lås op</button>
-
-          <div style="margin-top: 14px; font-size: 0.76rem; color: var(--text-muted);">
-            Krypteret lokalt med AES-GCM (256-bit) &amp; PBKDF2
-          </div>
-        </div>
-
-        <!-- OPLÅST DAGBOGSVISNING -->
-        <div id="diary-unlocked-view" style="display: none;">
-          <div class="card">
-            <div class="card-header">
-              <h2 class="card-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
-                <span>Privat Dagbog (Oplåst)</span>
-              </h2>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button type="button" class="btn btn-secondary btn-sm" id="btn-open-change-pin">Skift kode</button>
-                <button type="button" class="btn btn-danger btn-sm" id="btn-lock-diary-now">Lås dagbog</button>
-              </div>
-            </div>
-
-            <form id="diary-form">
-              <div style="margin-bottom: 10px;">
-                <span class="field-label">Dagens humør / status</span>
-                <div class="mood-pills" id="diary-mood-pills">
-                  <button type="button" class="mood-btn active" data-mood="God dag">God dag</button>
-                  <button type="button" class="mood-btn" data-mood="Neutral">Neutral</button>
-                  <button type="button" class="mood-btn" data-mood="Travl">Travl</button>
-                  <button type="button" class="mood-btn" data-mood="Slidt">Slidt</button>
-                </div>
-              </div>
-              <div style="margin-bottom: 10px;">
-                <label class="field-label" for="diary-entry-title">Overskrift (valgfrit)</label>
-                <input type="text" id="diary-entry-title" placeholder="Kort overskrift på dagen..." />
-              </div>
-              <div style="margin-bottom: 12px;">
-                <label class="field-label" for="diary-entry-body">Dagbogsnotat (krypteres automatisk) *</label>
-                <textarea id="diary-entry-body" rows="4" placeholder="Skriv dine personlige tanker her. Teksten krypteres i browseren..." required></textarea>
-              </div>
-              <button type="submit" class="btn btn-cyan" style="width: 100%;">Gem krypteret dagbogsindlæg</button>
-            </form>
-          </div>
-
-          <div class="timeline-list" id="diary-entries-list"></div>
-        </div>
-      </section>
-      </main>
-    </div>
-
-    <!-- ======================================================================
-         MOBIL BUNDNAVIGATION
-         ====================================================================== -->
-    <nav class="mobile-bottom-nav no-print" aria-label="Mobilnavigation">
-      <button type="button" class="mobile-tab active" data-tab="timeline">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-        <span>Oversigt</span>
-      </button>
-      <button type="button" class="mobile-tab" data-tab="logbook">
-        <span class="mobile-tab-dot" id="m-count-log">0</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-        <span>Logbog</span>
-      </button>
-      <button type="button" class="mobile-tab" data-tab="tasks">
-        <span class="mobile-tab-dot" id="m-count-tasks">0</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-        <span>Opgaver</span>
-      </button>
-      <button type="button" class="mobile-tab" data-tab="notes">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-        <span>Noter</span>
-      </button>
-      <button type="button" class="mobile-tab" data-tab="diary">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        <span>Dagbog</span>
-      </button>
-    </nav>
-
-    <!-- GLOBAL HURTIG-TILFØJ (+) KNAP -->
-    <button type="button" class="fab-add no-print" id="btn-global-quick-add" aria-label="Hurtig-tilføj">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-      <span class="fab-label">Hurtig-tilføj</span>
-    </button>
+<header>
+  <div class="brand">
+    <span class="brand-dot"></span>
+    <span>LommeLog</span>
+    <span class="badge-offline" id="net-status">100% Lokal</span>
   </div>
+  <div class="header-actions">
+    <button class="btn-sm" id="open-backup-btn">Backup / Eksport</button>
+  </div>
+</header>
 
-  <!-- ========================================================================
-       MODAL 1: GLOBAL HURTIG-TILFØJ (< 3 SEKUNDER — STANDARD: LOGBOG)
-       ======================================================================== -->
-  <div id="quick-add-modal" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal-sheet">
-      <div class="card-header">
-        <h3 class="card-title">Hurtig-tilføj</h3>
-        <button type="button" class="btn btn-secondary btn-sm" id="btn-close-quick-modal">Luk</button>
-      </div>
+<div class="layout">
+  <aside class="desktop-nav">
+    <button class="nav-btn active" data-tab="all"><span>Oversigt (Alle)</span><span class="nav-count" id="cnt-all">0</span></button>
+    <button class="nav-btn" data-tab="log"><span>Logbog</span><span class="nav-count" id="cnt-log">0</span></button>
+    <button class="nav-btn" data-tab="tasks"><span>Opgaver</span><span class="nav-count" id="cnt-tasks">0</span></button>
+    <button class="nav-btn" data-tab="notes"><span>Noter</span><span class="nav-count" id="cnt-notes">0</span></button>
+    <button class="nav-btn" data-tab="diary"><span>Privat Dagbog</span><span class="nav-count" id="cnt-diary">Låst</span></button>
+  </aside>
 
-      <div class="filter-pills" id="quick-type-pills" style="margin-bottom: 14px;">
-        <button type="button" class="pill active" data-qtype="log">Logbog</button>
-        <button type="button" class="pill" data-qtype="task">Opgave</button>
-        <button type="button" class="pill" data-qtype="note">Note</button>
-      </div>
-
-      <form id="quick-add-form">
-        <div style="margin-bottom: 10px;">
-          <label class="field-label" for="quick-input-title" id="quick-title-label">Log-overskrift / Hændelse *</label>
-          <input type="text" id="quick-input-title" placeholder="Skriv her og tryk Gem..." required />
+  <main>
+    <!-- 1. OVERSIGT / ALLE -->
+    <section class="panel active" id="panel-all">
+      <div class="card">
+        <div class="card-title">Global søgning på tværs af alt</div>
+        <div class="filter-bar">
+          <input type="search" id="global-search" placeholder="Søg på keywords, #tags, måleværdier, dato eller kategori...">
+          <input type="date" id="global-date" style="max-width:165px;">
+          <button class="btn-sm" id="clear-global-filter">Nulstil</button>
         </div>
+        <div class="pill-row" id="global-pills">
+          <button class="pill active" data-gtype="all">Alle typer</button>
+          <button class="pill" data-gtype="log">Logbog</button>
+          <button class="pill" data-gtype="task">Opgaver</button>
+          <button class="pill" data-gtype="note">Noter</button>
+          <button class="pill" data-gtype="pinned">Fastgjorte</button>
+        </div>
+      </div>
+      <div id="list-all"></div>
+    </section>
 
-        <div id="quick-extra-log" style="margin-bottom: 12px;">
-          <div class="form-row form-row-2" style="margin-bottom: 8px;">
-            <div>
-              <label class="field-label" for="quick-log-cat">Kategori</label>
-              <select id="quick-log-cat">
+    <!-- 2. LOGBOG -->
+    <section class="panel" id="panel-log">
+      <div class="card">
+        <div class="card-title">
+          <span>Nyt logbogsindlæg</span>
+          <button class="btn-sm" id="log-now-btn">Nu (dato/tid)</button>
+        </div>
+        <div class="quick-templates">
+          <button class="btn-sm" data-tpl="Tidsstempel-tjek" data-status="OK">Hurtig tidsstempel-log</button>
+          <button class="btn-sm" data-tpl="Observation / Afvigelse" data-status="Obs">Observation / Afvigelse</button>
+          <button class="btn-sm" data-tpl="Udført vedligehold / service" data-status="OK">Udført arbejde</button>
+        </div>
+        <form id="log-form">
+          <div class="grid-3">
+            <div class="field">
+              <label>Dato & tidspunkt</label>
+              <input type="datetime-local" id="log-dt" required>
+            </div>
+            <div class="field">
+              <label>Kategori</label>
+              <select id="log-cat">
                 <option value="Drift / Arbejde">Drift / Arbejde</option>
                 <option value="Værksted / Køretøj">Værksted / Køretøj</option>
                 <option value="Måling / Tjek">Måling / Tjek</option>
-                <option value="Hjem &amp; Privat">Hjem &amp; Privat</option>
+                <option value="Hjem & Privat">Hjem & Privat</option>
               </select>
             </div>
-            <div>
-              <label class="field-label" for="quick-log-status">Status</label>
-              <select id="quick-log-status">
-                <option value="info">Info</option>
-                <option value="ok">OK / Udført</option>
-                <option value="obs">Obs / Afvigelse</option>
+            <div class="field">
+              <label>Status</label>
+              <select id="log-status">
+                <option value="Info">Info</option>
+                <option value="OK">OK / Udført</option>
+                <option value="Obs">Obs / Afvigelse</option>
               </select>
             </div>
           </div>
-          <div class="form-row form-row-2">
-            <div>
-              <label class="field-label" for="quick-log-metric">Måleværdi / Ref. (valgfrit)</label>
-              <input type="text" id="quick-log-metric" placeholder="F.eks. 142.900 km / 2,0 timer" />
+          <div class="grid-2">
+            <div class="field">
+              <label>Overskrift / Hændelse</label>
+              <input type="text" id="log-title" placeholder="F.eks. Olieskift, Rundgang linje 2, Måling..." required>
             </div>
-            <div>
-              <label class="field-label" for="quick-log-body">Kort bemærkning</label>
-              <input type="text" id="quick-log-body" placeholder="Uddybende detalje..." />
+            <div class="field">
+              <label>Måleværdi / Reference (valgfri)</label>
+              <input type="text" id="log-ref" placeholder="F.eks. 142.500 km, 2.4 bar, Sagsnr. 104...">
             </div>
           </div>
-        </div>
+          <div class="field">
+            <label>Detaljer / Beskrivelse</label>
+            <textarea id="log-body" placeholder="Beskriv observationer, udført arbejde eller næste skridt..."></textarea>
+          </div>
+          <button type="submit" class="btn-primary">Gem i logbog</button>
+        </form>
+      </div>
 
-        <div id="quick-extra-task" style="display: none; margin-bottom: 12px;">
-          <label class="field-label" for="quick-task-prio">Prioritet</label>
-          <select id="quick-task-prio">
-            <option value="normal">Normal</option>
-            <option value="high">Høj</option>
-            <option value="low">Lav</option>
+      <div class="card">
+        <div class="card-title">
+          <span>Filtrér logbog</span>
+          <button class="btn-sm" id="export-log-md">Eksportér log (.md)</button>
+        </div>
+        <div class="filter-bar">
+          <input type="search" id="log-search" placeholder="Søg i logbog...">
+          <select id="log-filter-cat" style="max-width:180px;">
+            <option value="all">Alle kategorier</option>
+            <option value="Drift / Arbejde">Drift / Arbejde</option>
+            <option value="Værksted / Køretøj">Værksted / Køretøj</option>
+            <option value="Måling / Tjek">Måling / Tjek</option>
+            <option value="Hjem & Privat">Hjem & Privat</option>
+          </select>
+          <select id="log-filter-status" style="max-width:160px;">
+            <option value="all">Alle statusser</option>
+            <option value="Info">Info</option>
+            <option value="OK">OK / Udført</option>
+            <option value="Obs">Obs / Afvigelse</option>
           </select>
         </div>
-
-        <div id="quick-extra-note" style="display: none; margin-bottom: 12px;">
-          <label class="field-label" for="quick-note-body">Notetekst</label>
-          <textarea id="quick-note-body" rows="3" placeholder="Uddybende tekst..."></textarea>
-          <div style="margin-top: 8px;">
-            <label class="field-label" for="quick-note-tags">Tags</label>
-            <input type="text" id="quick-note-tags" placeholder="#ide #bil" />
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn-cyan" style="width: 100%;">Gem med det samme</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ========================================================================
-       MODAL 2: REDIGÉR POST FRA OVERSIGT / LOGBOG
-       ======================================================================== -->
-  <div id="edit-entry-modal" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal-sheet">
-      <div class="card-header">
-        <h3 class="card-title">Redigér post</h3>
-        <button type="button" class="btn btn-secondary btn-sm" id="btn-close-edit-modal">Luk</button>
       </div>
-      <form id="edit-entry-form">
-        <input type="hidden" id="edit-entry-id" />
-        <input type="hidden" id="edit-entry-type" />
-        <div style="margin-bottom: 10px;">
-          <label class="field-label" for="edit-entry-title">Titel / Overskrift *</label>
-          <input type="text" id="edit-entry-title" required />
-        </div>
-        <div id="edit-entry-metric-wrap" style="display: none; margin-bottom: 10px;">
-          <label class="field-label" for="edit-entry-metric">Måleværdi / Reference</label>
-          <input type="text" id="edit-entry-metric" />
-        </div>
-        <div id="edit-entry-body-wrap" style="margin-bottom: 10px;">
-          <label class="field-label" for="edit-entry-body">Beskrivelse / Logtekst</label>
-          <textarea id="edit-entry-body" rows="3"></textarea>
-        </div>
-        <div id="edit-entry-tags-wrap" style="margin-bottom: 12px;">
-          <label class="field-label" for="edit-entry-tags">Tags</label>
-          <input type="text" id="edit-entry-tags" />
-        </div>
-        <button type="submit" class="btn btn-cyan" style="width: 100%;">Gem ændringer</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ========================================================================
-       MODAL 3: SKIFT DAGBOGS-PIN
-       ======================================================================== -->
-  <div id="change-pin-modal" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal-sheet">
-      <div class="card-header">
-        <h3 class="card-title">Skift kode til Privat Dagbog</h3>
-        <button type="button" class="btn btn-secondary btn-sm" id="btn-close-pin-modal">Luk</button>
-      </div>
-      <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 0;">
-        Alle eksisterende dagbogsindlæg genkrypteres automatisk med din nye 4-6 cifrede PIN-kode.
-      </p>
-      <form id="change-pin-form">
-        <div style="margin-bottom: 10px;">
-          <label class="field-label" for="new-pin-1">Ny PIN-kode (4-6 cifre) *</label>
-          <input type="password" id="new-pin-1" inputmode="numeric" pattern="[0-9]{4,6}" maxlength="6" placeholder="••••" required />
-        </div>
-        <div style="margin-bottom: 14px;">
-          <label class="field-label" for="new-pin-2">Gentag ny PIN-kode *</label>
-          <input type="password" id="new-pin-2" inputmode="numeric" pattern="[0-9]{4,6}" maxlength="6" placeholder="••••" required />
-        </div>
-        <button type="submit" class="btn btn-cyan" style="width: 100%;">Gem ny krypteringskode</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ========================================================================
-       MODAL 4: BACKUP, EKSPORT & DATA-FRIHED
-       ======================================================================== -->
-  <div id="backup-modal" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal-sheet">
-      <div class="card-header">
-        <h3 class="card-title">Sikkerhedskopi &amp; Eksport</h3>
-        <button type="button" class="btn btn-secondary btn-sm" id="btn-close-backup-modal">Luk</button>
-      </div>
-      <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 0;">
-        Al data ligger lokalt på din enhed. Tag en samlet JSON-backup (inkl. din krypterede dagbog) eller eksportér dine åbne opgaver og noter.
-      </p>
-
-      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
-        <button type="button" class="btn btn-cyan" id="btn-export-json">
-          Eksportér samlet JSON-backup (inkl. krypteret dagbog)
-        </button>
-
-        <label class="btn btn-secondary" style="cursor: pointer;">
-          Importér JSON-backup fra fil...
-          <input type="file" id="input-import-json" accept=".json,application/json" style="display: none;" />
-        </label>
-
-        <button type="button" class="btn btn-soft-cyan" id="btn-export-markdown">
-          Eksportér logbog, opgaver &amp; noter (.md tekstfil)
-        </button>
-
-        <button type="button" class="btn btn-secondary" id="btn-print-view">
-          Udskriv / Gem oversigt som PDF
-        </button>
-      </div>
-
-      <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
-        <button type="button" class="btn btn-secondary btn-sm" id="btn-seed-demo">Gendan start-eksempler</button>
-        <button type="button" class="btn btn-danger btn-sm" id="btn-wipe-all">Ryd al data (inkl. dagbog)</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================================
-       MODAL 5: BEKRÆFTELSESDIALOG (INGEN NATIVE CONFIRM/ALERT)
-       ======================================================================== -->
-  <div id="confirm-modal" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal-sheet" style="max-width: 400px;">
-      <h3 id="confirm-title" style="margin: 0 0 8px 0; font-size: 1.05rem;"></h3>
-      <p id="confirm-msg" style="margin: 0 0 18px 0; font-size: 0.88rem; color: var(--text-secondary);"></p>
-      <div style="display: flex; justify-content: flex-end; gap: 10px;">
-        <button type="button" class="btn btn-secondary btn-sm" id="confirm-no">Annullér</button>
-        <button type="button" class="btn btn-danger btn-sm" id="confirm-yes">Bekræft</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="toast-container" aria-live="polite"></div>
-
-  <script>
-    /* ==========================================================================
-       1. INLINE PWA MANIFEST & TOUCH ICON (SÅ APPEN KAN INSTALLERES PÅ MOBIL)
-       ========================================================================== */
-    (function setupPWA() {
-      try {
-        const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-          <rect width="512" height="512" rx="112" fill="#0b0e14"/>
-          <rect x="36" y="36" width="440" height="440" rx="92" fill="#141923" stroke="#06b6d4" stroke-width="18"/>
-          <path d="M168 152h176M168 232h176M168 312h112" stroke="#06b6d4" stroke-width="28" stroke-linecap="round"/>
-          <circle cx="348" cy="348" r="44" fill="#ef4444"/>
-        </svg>`;
-        const iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg);
-        const touchIcon = document.getElementById('apple-touch-icon-link');
-        if (touchIcon) touchIcon.href = iconUrl;
-
-        const manifest = {
-          name: 'LommeLog — Offline Logbog & Dagbog',
-          short_name: 'LommeLog',
-          description: 'Offline logbog til opgaver, indkøb, noter og AES-GCM krypteret privat dagbog.',
-          start_url: '.',
-          display: 'standalone',
-          background_color: '#0b0e14',
-          theme_color: '#0b0e14',
-          icons: [
-            { src: iconUrl, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
-            { src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
-          ]
-        };
-        const manifestUrl = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
-        const manifestLink = document.getElementById('pwa-manifest-link');
-        if (manifestLink) manifestLink.href = manifestUrl;
-      } catch (e) {
-        // Ignorér i restriktive sandboxes
-      }
-    })();
-
-    /* ==========================================================================
-       2. STORAGE KEYS, STATE & START-EKSEMPELDATA
-       ========================================================================== */
-    const KEYS = {
-      INIT: 'lommelog_v2_init',
-      LOGS: 'lommelog_v2_logs',
-      TASKS: 'lommelog_v2_tasks',
-      NOTES: 'lommelog_v2_notes',
-      DIARY_VAULT: 'lommelog_v2_diary_vault'
-    };
-
-    const STATUS_LABELS = {
-      info: 'Info',
-      ok: 'OK / Udført',
-      obs: 'Obs / Afvigelse'
-    };
-
-    let state = {
-      activeTab: 'timeline',
-      timelineCat: 'all',
-      timelineSearch: '',
-      timelineDate: '',
-      logSearch: '',
-      logFilterCat: 'all',
-      logFilterStatus: 'all',
-      logFilterFrom: '',
-      logFilterTo: '',
-      taskFilter: 'active',
-      notesSearch: '',
-      selectedNoteColor: 'cyan',
-      quickAddType: 'log',
-      logs: [],
-      tasks: [],
-      notes: [],
-      // Krypteret dagbog i localStorage + dekrypteret tilstand kun i RAM
-      diaryVault: null, // { salt, iv, verifier, entries: [{ id, createdAt, mood, iv, cipher }] }
-      diaryUnlocked: false,
-      diaryCryptoKey: null,
-      diaryDecryptedEntries: [],
-      pinBuffer: '',
-      selectedMood: 'God dag'
-    };
-
-    function uid(prefix = 'id') {
-      return prefix + '_' + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
-    }
-
-    function nowISO() {
-      return new Date().toISOString();
-    }
-
-    function todayDateStr() {
-      const d = new Date();
-      const pad = n => String(n).padStart(2, '0');
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    }
-
-    function currentTimeStr() {
-      const d = new Date();
-      const pad = n => String(n).padStart(2, '0');
-      return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    }
-
-    function seedDemoData() {
-      const now = Date.now();
-      const dNow = new Date(now);
-      const dYesterday = new Date(now - 3600 * 1000 * 22);
-      const dTwoDaysAgo = new Date(now - 3600 * 1000 * 46);
-      const pad = n => String(n).padStart(2, '0');
-      const toDate = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-      const toTime = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-
-      state.logs = [
-        {
-          id: uid('log'),
-          date: toDate(dNow),
-          time: toTime(dNow),
-          timestamp: dNow.toISOString(),
-          category: 'Værksted / Køretøj',
-          status: 'ok',
-          title: 'Serviceeftersyn & olieskift gennemført',
-          metric: '142.850 km',
-          body: 'Skiftet motorolie (5W-30, 4,7 L) og oliefilter. Kontrolleret bremsebelægninger for/bag samt dæktryk (2,5 bar).',
-          pinned: true
-        },
-        {
-          id: uid('log'),
-          date: toDate(dYesterday),
-          time: toTime(dYesterday),
-          timestamp: dYesterday.toISOString(),
-          category: 'Måling / Tjek',
-          status: 'obs',
-          title: 'Rundgang i teknikrum — let fugt ved ventil 3',
-          metric: '18,2 °C / 68% RF',
-          body: 'Bemærket mindre dryp under pakdåse på ventil 3. Tørret op og markeret til efterspænding ved næste service.',
-          pinned: false
-        },
-        {
-          id: uid('log'),
-          date: toDate(dTwoDaysAgo),
-          time: toTime(dTwoDaysAgo),
-          timestamp: dTwoDaysAgo.toISOString(),
-          category: 'Drift / Arbejde',
-          status: 'info',
-          title: 'Opstart og funktionstest af kompressorstation',
-          metric: '8,2 bar / 1,5 time',
-          body: 'Kørt belastningstest uden mislyde. Sikkerhedsventil og kondensafløb kontrolleret.',
-          pinned: false
-        }
-      ];
-
-      state.tasks = [
-        {
-          id: uid('task'),
-          title: 'Efterspænd pakdåse på ventil 3 i teknikrum',
-          priority: 'high',
-          dueDate: todayDateStr(),
-          completed: false,
-          pinned: true,
-          createdAt: new Date(now - 3600 * 1000 * 3).toISOString()
-        },
-        {
-          id: uid('task'),
-          title: 'Bestil nye luft- og kabinefiltre til næste service',
-          priority: 'normal',
-          dueDate: '',
-          completed: false,
-          pinned: false,
-          createdAt: new Date(now - 3600 * 1000 * 18).toISOString()
-        },
-        {
-          id: uid('task'),
-          title: 'Indsend månedlig kørebog',
-          priority: 'low',
-          dueDate: '',
-          completed: true,
-          pinned: false,
-          createdAt: new Date(now - 3600 * 1000 * 48).toISOString()
-        }
-      ];
-
-      state.notes = [
-        {
-          id: uid('note'),
-          title: 'Tilspændingsmomenter & Olie-specifikation',
-          body: 'Bundprop: 35 Nm med ny kobberskive.\nOlie: 5W-30 LongLife (4,7 liter inkl. filter).\nHjulbolte: 120 Nm.',
-          tags: ['#bil', '#værksted', '#service'],
-          color: 'cyan',
-          pinned: true,
-          createdAt: new Date(now - 3600 * 1000 * 5).toISOString()
-        },
-        {
-          id: uid('note'),
-          title: 'Idé til forbedring af arbejdsbord',
-          body: 'Montér magnetliste til toppe og nøgler på bagpladen samt 230V stikdåse med afbryder på forkanten.',
-          tags: ['#ide', '#garage'],
-          color: 'amber',
-          pinned: false,
-          createdAt: new Date(now - 3600 * 1000 * 28).toISOString()
-        }
-      ];
-
-      savePublicState();
-      localStorage.setItem(KEYS.INIT, '1');
-    }
-
-    function safeJsonParse(raw, fallback) {
-      if (!raw) return fallback;
-      try {
-        const parsed = JSON.parse(raw);
-        return parsed !== null && parsed !== undefined ? parsed : fallback;
-      } catch (e) {
-        return fallback;
-      }
-    }
-
-    function loadState() {
-      const initialized = localStorage.getItem(KEYS.INIT);
-      if (!initialized) {
-        seedDemoData();
-      } else {
-        state.logs = safeJsonParse(localStorage.getItem(KEYS.LOGS), []);
-        state.tasks = safeJsonParse(localStorage.getItem(KEYS.TASKS), []);
-        state.notes = safeJsonParse(localStorage.getItem(KEYS.NOTES), []);
-      }
-      state.diaryVault = safeJsonParse(localStorage.getItem(KEYS.DIARY_VAULT), null);
-    }
-
-    function savePublicState() {
-      try {
-        localStorage.setItem(KEYS.LOGS, JSON.stringify(state.logs));
-        localStorage.setItem(KEYS.TASKS, JSON.stringify(state.tasks));
-        localStorage.setItem(KEYS.NOTES, JSON.stringify(state.notes));
-      } catch (e) {
-        showToast('Kunne ikke gemme lokalt (tjek browserplads)', 'danger');
-      }
-    }
-
-    function saveDiaryVault() {
-      try {
-        if (state.diaryVault) {
-          localStorage.setItem(KEYS.DIARY_VAULT, JSON.stringify(state.diaryVault));
-        } else {
-          localStorage.removeItem(KEYS.DIARY_VAULT);
-        }
-      } catch (e) {
-        showToast('Fejl ved gemning af krypteret dagbog', 'danger');
-      }
-    }
-
-    /* ==========================================================================
-       3. WEB CRYPTO API (AES-GCM 256-BIT + PBKDF2 NØGLEAFLEDNING TIL DAGBOG)
-       ========================================================================== */
-    function bufToBase64(buffer) {
-      const bytes = new Uint8Array(buffer);
-      let binary = '';
-      for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      return btoa(binary);
-    }
-
-    function base64ToBuf(base64) {
-      const binary = atob(base64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
-      }
-      return bytes.buffer;
-    }
-
-    async function deriveAesKeyFromPin(pin, saltBase64) {
-      const enc = new TextEncoder();
-      const keyMaterial = await window.crypto.subtle.importKey(
-        'raw',
-        enc.encode(pin),
-        { name: 'PBKDF2' },
-        false,
-        ['deriveKey']
-      );
-      return window.crypto.subtle.deriveKey(
-        {
-          name: 'PBKDF2',
-          salt: base64ToBuf(saltBase64),
-          iterations: 120000,
-          hash: 'SHA-256'
-        },
-        keyMaterial,
-        { name: 'AES-GCM', length: 256 },
-        false,
-        ['encrypt', 'decrypt']
-      );
-    }
-
-    async function encryptStringWithKey(cryptoKey, plainText) {
-      const iv = window.crypto.getRandomValues(new Uint8Array(12));
-      const encoded = new TextEncoder().encode(plainText);
-      const cipherBuf = await window.crypto.subtle.encrypt(
-        { name: 'AES-GCM', iv },
-        cryptoKey,
-        encoded
-      );
-      return {
-        iv: bufToBase64(iv.buffer),
-        cipher: bufToBase64(cipherBuf)
-      };
-    }
-
-    async function decryptStringWithKey(cryptoKey, ivBase64, cipherBase64) {
-      const decryptedBuf = await window.crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv: new Uint8Array(base64ToBuf(ivBase64)) },
-        cryptoKey,
-        base64ToBuf(cipherBase64)
-      );
-      return new TextDecoder().decode(decryptedBuf);
-    }
-
-    async function setupNewDiaryPin(pin) {
-      const saltBytes = window.crypto.getRandomValues(new Uint8Array(16));
-      const saltBase64 = bufToBase64(saltBytes.buffer);
-      const key = await deriveAesKeyFromPin(pin, saltBase64);
-      const verifierPayload = await encryptStringWithKey(key, 'LOMMELOG_VERIFIED_OK');
-
-      // Opret et krypteret velkomstindlæg så brugeren straks ser funktionen virke
-      const welcomeObj = {
-        title: 'Velkommen til din krypterede dagbog',
-        body: 'Dette indlæg er krypteret med AES-GCM ud fra din personlige PIN-kode. Ingen kan læse teksten i browserens lager uden din kode.'
-      };
-      const encEntry = await encryptStringWithKey(key, JSON.stringify(welcomeObj));
-      const firstId = uid('diary');
-      const createdAt = nowISO();
-
-      state.diaryVault = {
-        salt: saltBase64,
-        verifier: verifierPayload,
-        entries: [
-          { id: firstId, createdAt, mood: 'God dag', iv: encEntry.iv, cipher: encEntry.cipher }
-        ]
-      };
-      saveDiaryVault();
-
-      state.diaryCryptoKey = key;
-      state.diaryUnlocked = true;
-      state.diaryDecryptedEntries = [
-        { id: firstId, createdAt, mood: 'God dag', title: welcomeObj.title, body: welcomeObj.body }
-      ];
-    }
-
-    async function unlockDiaryWithPin(pin) {
-      if (!state.diaryVault) {
-        await setupNewDiaryPin(pin);
-        return true;
-      }
-      try {
-        const key = await deriveAesKeyFromPin(pin, state.diaryVault.salt);
-        const check = await decryptStringWithKey(
-          key,
-          state.diaryVault.verifier.iv,
-          state.diaryVault.verifier.cipher
-        );
-        if (check !== 'LOMMELOG_VERIFIED_OK') return false;
-
-        const decryptedList = [];
-        for (const item of state.diaryVault.entries || []) {
-          const jsonStr = await decryptStringWithKey(key, item.iv, item.cipher);
-          const parsed = JSON.parse(jsonStr);
-          decryptedList.push({
-            id: item.id,
-            createdAt: item.createdAt,
-            mood: item.mood || 'Neutral',
-            title: parsed.title || '',
-            body: parsed.body || ''
-          });
-        }
-
-        state.diaryCryptoKey = key;
-        state.diaryUnlocked = true;
-        state.diaryDecryptedEntries = decryptedList;
-        return true;
-      } catch (e) {
-        return false;
-      }
-    }
-
-    async function changeDiaryPin(newPin) {
-      if (!state.diaryUnlocked) return;
-      const saltBytes = window.crypto.getRandomValues(new Uint8Array(16));
-      const saltBase64 = bufToBase64(saltBytes.buffer);
-      const newKey = await deriveAesKeyFromPin(newPin, saltBase64);
-      const verifierPayload = await encryptStringWithKey(newKey, 'LOMMELOG_VERIFIED_OK');
-
-      const reEncryptedEntries = [];
-      for (const dec of state.diaryDecryptedEntries) {
-        const enc = await encryptStringWithKey(newKey, JSON.stringify({ title: dec.title, body: dec.body }));
-        reEncryptedEntries.push({
-          id: dec.id,
-          createdAt: dec.createdAt,
-          mood: dec.mood,
-          iv: enc.iv,
-          cipher: enc.cipher
-        });
-      }
-
-      state.diaryVault = {
-        salt: saltBase64,
-        verifier: verifierPayload,
-        entries: reEncryptedEntries
-      };
-      state.diaryCryptoKey = newKey;
-      saveDiaryVault();
-    }
-
-    function lockDiaryImmediately() {
-      state.diaryUnlocked = false;
-      state.diaryCryptoKey = null;
-      state.diaryDecryptedEntries = [];
-      state.pinBuffer = '';
-      renderDiaryView();
-    }
-
-    /* ==========================================================================
-       4. HJÆLPEFUNKTIONER (FORMATERING, ESCAPE, TOAST & BEKRÆFTELSE)
-       ========================================================================== */
-    function escapeHtml(str) {
-      if (str === null || str === undefined) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    function formatDateTime(isoStr) {
-      if (!isoStr) return '';
-      const d = new Date(isoStr);
-      if (Number.isNaN(d.getTime())) return isoStr;
-      return d.toLocaleString('da-DK', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-
-    function formatShortDate(isoDate) {
-      if (!isoDate) return '';
-      const parts = isoDate.split('-');
-      if (parts.length !== 3) return isoDate;
-      return `${parts[2]}.${parts[1]}.${parts[0]}`;
-    }
-
-    function parseTags(rawTagsStr) {
-      if (!rawTagsStr) return [];
-      return rawTagsStr
-        .split(/[\s,]+/)
-        .map(t => t.trim())
-        .filter(Boolean)
-        .map(t => (t.startsWith('#') ? t.toLowerCase() : '#' + t.toLowerCase()));
-    }
-
-    function showToast(msg, type = 'info') {
-      const host = document.getElementById('toast-container');
-      if (!host) return;
-      const el = document.createElement('div');
-      el.className = 'toast ' + type;
-      el.textContent = msg;
-      host.appendChild(el);
-      setTimeout(() => {
-        el.style.opacity = '0';
-        el.style.transition = 'opacity 0.2s ease';
-        setTimeout(() => el.remove(), 220);
-      }, 2800);
-    }
-
-    let confirmAction = null;
-    function askConfirm(title, message, onYes) {
-      document.getElementById('confirm-title').textContent = title;
-      document.getElementById('confirm-msg').textContent = message;
-      confirmAction = onYes;
-      document.getElementById('confirm-modal').classList.add('open');
-    }
-
-    function closeConfirm() {
-      document.getElementById('confirm-modal').classList.remove('open');
-      confirmAction = null;
-    }
-
-    /* ==========================================================================
-       5. NAVIGATION & TÆLLERE
-       ========================================================================== */
-    function updateCounts() {
-      const openTasks = state.tasks.filter(t => !t.completed).length;
-      const logCount = state.logs.length;
-      const totalAll = logCount + state.tasks.length + state.notes.length;
-
-      document.getElementById('d-count-all').textContent = totalAll;
-      document.getElementById('d-count-log').textContent = logCount;
-      document.getElementById('d-count-tasks').textContent = openTasks;
-      document.getElementById('d-count-notes').textContent = state.notes.length;
-
-      const mLog = document.getElementById('m-count-log');
-      mLog.textContent = logCount;
-      mLog.style.display = logCount > 0 ? 'inline-flex' : 'none';
-
-      const mTasks = document.getElementById('m-count-tasks');
-      mTasks.textContent = openTasks;
-      mTasks.style.display = openTasks > 0 ? 'inline-flex' : 'none';
-    }
-
-    function switchTab(tabName) {
-      // Automatisk lås af Privat Dagbog når man forlader fanen
-      if (state.activeTab === 'diary' && tabName !== 'diary' && state.diaryUnlocked) {
-        lockDiaryImmediately();
-      }
-
-      state.activeTab = tabName;
-      document.querySelectorAll('.desktop-tab, .mobile-tab').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tabName);
-      });
-      document.querySelectorAll('.view-panel').forEach(panel => {
-        panel.classList.toggle('active', panel.id === 'panel-' + tabName);
-      });
-
-      if (tabName === 'timeline') renderTimeline();
-      if (tabName === 'logbook') renderLogbook();
-      if (tabName === 'tasks') renderTasks();
-      if (tabName === 'notes') renderNotes();
-      if (tabName === 'diary') renderDiaryView();
-    }
-
-    /* ==========================================================================
-       6. FANE 1: ALLE / OVERSIGT (SAMLET KRONOLOGISK STRØM)
-       ========================================================================== */
-    function buildUnifiedTimeline() {
-      const items = [];
-      state.logs.forEach(l => {
-        const dtStr = `${l.date}T${l.time || '00:00'}:00`;
-        items.push({
-          id: l.id,
-          type: 'log',
-          title: l.title,
-          body: l.body || '',
-          metric: l.metric || '',
-          category: l.category || '',
-          status: l.status || 'info',
-          tags: [],
-          done: false,
-          pinned: Boolean(l.pinned),
-          createdAt: dtStr,
-          displayDate: `${formatShortDate(l.date)} kl. ${l.time || '00:00'}`
-        });
-      });
-      state.tasks.forEach(t => {
-        items.push({
-          id: t.id,
-          type: 'task',
-          title: t.title,
-          body: t.dueDate ? `Deadline: ${formatShortDate(t.dueDate)}` : '',
-          metric: '',
-          category: '',
-          status: '',
-          tags: [],
-          priority: t.priority,
-          done: t.completed,
-          pinned: Boolean(t.pinned),
-          createdAt: t.createdAt,
-          displayDate: formatDateTime(t.createdAt)
-        });
-      });
-      state.notes.forEach(n => {
-        items.push({
-          id: n.id,
-          type: 'note',
-          title: n.title,
-          body: n.body,
-          metric: '',
-          category: '',
-          status: '',
-          tags: n.tags || [],
-          done: false,
-          pinned: Boolean(n.pinned),
-          createdAt: n.createdAt,
-          displayDate: formatDateTime(n.createdAt)
-        });
-      });
-
-      // Sortér: Fastgjorte (pinned) øverst, derefter nyeste først
-      items.sort((a, b) => {
-        if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      });
-      return items;
-    }
-
-    function renderTimeline() {
-      const list = document.getElementById('timeline-list');
-      const query = state.timelineSearch.trim().toLowerCase();
-      const dateFilter = state.timelineDate;
-      const catFilter = state.timelineCat;
-
-      const resetBtn = document.getElementById('btn-clear-timeline-filters');
-      resetBtn.style.display = (query || dateFilter || catFilter !== 'all') ? 'inline-flex' : 'none';
-
-      const unified = buildUnifiedTimeline().filter(item => {
-        if (catFilter !== 'all' && item.type !== catFilter) return false;
-        if (dateFilter && !item.createdAt.startsWith(dateFilter)) return false;
-        if (query) {
-          const hay = [item.title, item.body, item.metric, item.category, ...(item.tags || [])].join(' ').toLowerCase();
-          if (!hay.includes(query)) return false;
-        }
-        return true;
-      });
-
-      if (unified.length === 0) {
-        list.innerHTML = `<div class="empty-state">Ingen poster matcher din søgning. Tryk på <strong>+</strong> for at logge noget nyt.</div>`;
-        return;
-      }
-
-      const typeBadgeMap = {
-        log: '<span class="badge badge-log">Logbog</span>',
-        task: '<span class="badge badge-task">Opgave</span>',
-        note: '<span class="badge badge-note">Note</span>'
-      };
-
-      list.innerHTML = unified.map(item => `
-        <article class="log-entry ${item.pinned ? 'pinned' : ''} ${item.type === 'log' ? 'status-border-' + item.status : ''}">
-          <div class="log-entry-top">
-            <div class="log-entry-meta">
-              ${typeBadgeMap[item.type]}
-              ${item.type === 'log' && item.status ? `<span class="badge status-${item.status}">${escapeHtml(STATUS_LABELS[item.status] || 'Info')}</span>` : ''}
-              ${item.type === 'log' && item.category ? `<span><strong>${escapeHtml(item.category)}</strong></span>` : ''}
-              ${item.pinned ? '<span style="color: var(--cyan); font-weight: 700;">Fastgjort</span>' : ''}
-              <span class="tabular">${escapeHtml(item.displayDate)}</span>
+      <div id="list-log"></div>
+    </section>
+
+    <!-- 3. OPGAVER -->
+    <section class="panel" id="panel-tasks">
+      <div class="card">
+        <div class="card-title">Ny opgave / huskeliste</div>
+        <form id="task-form">
+          <div class="grid-3">
+            <div class="field">
+              <label>Opgave</label>
+              <input type="text" id="task-title" placeholder="Hvad skal huskes eller gøres?" required>
             </div>
-            <div style="display: flex; gap: 6px;">
-              <button type="button" class="btn btn-secondary btn-icon" data-t-pin="${escapeHtml(item.id)}" data-t-type="${item.type}" title="Fastgør øverst">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="${item.pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg>
-              </button>
-              <button type="button" class="btn btn-secondary btn-icon" data-t-edit="${escapeHtml(item.id)}" data-t-type="${item.type}" title="Redigér">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-              </button>
-              <button type="button" class="btn btn-danger btn-icon" data-t-del="${escapeHtml(item.id)}" data-t-type="${item.type}" title="Slet">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              </button>
+            <div class="field">
+              <label>Prioritet</label>
+              <select id="task-prio">
+                <option value="Normal">Normal</option>
+                <option value="Høj">Høj</option>
+                <option value="Lav">Lav</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Deadline (valgfri)</label>
+              <input type="date" id="task-due">
             </div>
           </div>
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
-            <div class="log-entry-title ${item.done ? 'done' : ''}">${escapeHtml(item.title)}</div>
-            ${item.metric ? `<span class="metric-pill tabular">${escapeHtml(item.metric)}</span>` : ''}
-          </div>
-          ${item.body ? `<div class="log-entry-body">${escapeHtml(item.body)}</div>` : ''}
-          ${item.tags && item.tags.length > 0 ? `<div>${item.tags.map(tg => `<span class="tag-chip">${escapeHtml(tg)}</span>`).join('')}</div>` : ''}
-        </article>
-      `).join('');
-    }
-
-    /* ==========================================================================
-       7. FANE 2: DEDIKERET LOGBOG
-       ========================================================================== */
-    function resetLogbookFormDefaults() {
-      document.getElementById('log-edit-id').value = '';
-      document.getElementById('logbook-form').reset();
-      document.getElementById('log-input-date').value = todayDateStr();
-      document.getElementById('log-input-time').value = currentTimeStr();
-      document.getElementById('log-custom-cat-wrap').style.display = 'none';
-      document.getElementById('log-form-heading').textContent = 'Nyt logindlæg';
-      document.getElementById('btn-submit-log').textContent = '+ Gem i logbog';
-      document.getElementById('btn-cancel-log-edit').style.display = 'none';
-    }
-
-    function applyLogTemplate(tplKey) {
-      document.getElementById('log-input-date').value = todayDateStr();
-      document.getElementById('log-input-time').value = currentTimeStr();
-      const titleInput = document.getElementById('log-input-title');
-      const statusSel = document.getElementById('log-input-status');
-      const catSel = document.getElementById('log-input-cat');
-
-      if (tplKey === 'timestamp') {
-        statusSel.value = 'info';
-        if (!titleInput.value.trim()) titleInput.value = 'Tidsstempel-registrering';
-      } else if (tplKey === 'observation') {
-        statusSel.value = 'obs';
-        catSel.value = 'Måling / Tjek';
-        if (!titleInput.value.trim()) titleInput.value = 'Observation / Afvigelse bemærket';
-      } else if (tplKey === 'completed') {
-        statusSel.value = 'ok';
-        catSel.value = 'Drift / Arbejde';
-        if (!titleInput.value.trim()) titleInput.value = 'Arbejde / opgave udført';
-      }
-      document.getElementById('log-custom-cat-wrap').style.display = 'none';
-      titleInput.focus();
-      titleInput.select();
-    }
-
-    function renderLogbook() {
-      // Opdater kategoridropdown dynamisk med alle brugte kategorier
-      const catFilterSel = document.getElementById('log-filter-cat');
-      const baseCats = ['Drift / Arbejde', 'Værksted / Køretøj', 'Måling / Tjek', 'Hjem & Privat'];
-      const usedCats = Array.from(new Set([...baseCats, ...state.logs.map(l => l.category).filter(Boolean)]));
-      const prevCat = state.logFilterCat;
-      catFilterSel.innerHTML = `<option value="all">Alle kategorier</option>` +
-        usedCats.map(c => `<option value="${escapeHtml(c)}" ${prevCat === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
-
-      const query = state.logSearch.trim().toLowerCase();
-      const statusFilter = state.logFilterStatus;
-      const catFilter = state.logFilterCat;
-      const fromDate = state.logFilterFrom;
-      const toDate = state.logFilterTo;
-
-      const hasFilters = Boolean(query || statusFilter !== 'all' || catFilter !== 'all' || fromDate || toDate);
-      document.getElementById('btn-reset-log-filters').style.display = hasFilters ? 'inline-flex' : 'none';
-
-      const filtered = state.logs
-        .filter(l => {
-          if (statusFilter !== 'all' && l.status !== statusFilter) return false;
-          if (catFilter !== 'all' && l.category !== catFilter) return false;
-          if (fromDate && l.date < fromDate) return false;
-          if (toDate && l.date > toDate) return false;
-          if (query) {
-            const hay = [l.title, l.body, l.metric, l.category].join(' ').toLowerCase();
-            if (!hay.includes(query)) return false;
-          }
-          return true;
-        })
-        .sort((a, b) => {
-          if (Boolean(a.pinned) !== Boolean(b.pinned)) return a.pinned ? -1 : 1;
-          const dtA = `${a.date}T${a.time || '00:00'}`;
-          const dtB = `${b.date}T${b.time || '00:00'}`;
-          return dtB.localeCompare(dtA);
-        });
-
-      document.getElementById('log-filtered-count').textContent = filtered.length;
-
-      const host = document.getElementById('logbook-entries-list');
-      if (filtered.length === 0) {
-        host.innerHTML = `<div class="empty-state">Ingen logindlæg matcher dine valgte filtre.</div>`;
-        return;
-      }
-
-      host.innerHTML = filtered.map(entry => `
-        <article class="log-entry ${entry.pinned ? 'pinned' : ''} status-border-${escapeHtml(entry.status || 'info')}">
-          <div class="log-entry-top">
-            <div class="log-entry-meta">
-              <span class="badge status-${escapeHtml(entry.status || 'info')}">${escapeHtml(STATUS_LABELS[entry.status] || 'Info')}</span>
-              <span class="badge badge-log">${escapeHtml(entry.category || 'Drift / Arbejde')}</span>
-              <span class="tabular" style="font-weight: 700; color: var(--text-primary);">${escapeHtml(formatShortDate(entry.date))} kl. ${escapeHtml(entry.time || '00:00')}</span>
-              ${entry.pinned ? '<span style="color: var(--cyan); font-weight: 700;">Fastgjort</span>' : ''}
+          <div class="grid-2">
+            <div class="field">
+              <label>Kategori</label>
+              <input type="text" id="task-cat" value="Generelt" placeholder="F.eks. Arbejde, Værksted, Indkøb...">
             </div>
-            <div style="display: flex; gap: 6px;" class="no-print">
-              <button type="button" class="btn btn-secondary btn-icon" data-log-pin="${escapeHtml(entry.id)}" title="Fastgør øverst">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="${entry.pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg>
-              </button>
-              <button type="button" class="btn btn-secondary btn-icon" data-log-edit="${escapeHtml(entry.id)}" title="Redigér logindlæg">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-              </button>
-              <button type="button" class="btn btn-danger btn-icon" data-log-del="${escapeHtml(entry.id)}" title="Slet logindlæg">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              </button>
+            <div class="field">
+              <label>Note / Detaljer (valgfri)</label>
+              <input type="text" id="task-body" placeholder="Evt. ekstra info eller reservedelsnr.">
             </div>
           </div>
+          <button type="submit" class="btn-primary">Tilføj opgave</button>
+        </form>
+      </div>
 
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-            <div class="log-entry-title">${escapeHtml(entry.title)}</div>
-            ${entry.metric ? `<span class="metric-pill tabular">${escapeHtml(entry.metric)}</span>` : ''}
-          </div>
-
-          ${entry.body ? `<div class="log-entry-body">${escapeHtml(entry.body)}</div>` : ''}
-        </article>
-      `).join('');
-    }
-
-    function exportLogbookToMarkdown() {
-      let md = `# LommeLog — Logbogsudtræk (${todayDateStr()})\n\n`;
-      if (state.logs.length === 0) {
-        md += '_Ingen logindlæg registreret._\n';
-      } else {
-        const sorted = [...state.logs].sort((a, b) => `${b.date}T${b.time}`.localeCompare(`${a.date}T${a.time}`));
-        md += sorted.map(l => {
-          const statusTxt = STATUS_LABELS[l.status] || 'Info';
-          const metricTxt = l.metric ? ` | **Måling/Ref:** ${l.metric}` : '';
-          return `### ${formatShortDate(l.date)} kl. ${l.time} — ${l.title}\n- **Kategori:** ${l.category} | **Status:** ${statusTxt}${metricTxt}\n${l.body ? `\n${l.body}\n` : ''}`;
-        }).join('\n---\n\n');
-      }
-      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `lommelog-logbog-${todayDateStr()}.md`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      showToast('Logbog eksporteret som .md');
-    }
-
-    /* ==========================================================================
-       8. FANE 3: OPGAVER & HUSKELISTE
-       ========================================================================== */
-    function renderTasks() {
-      const host = document.getElementById('tasks-list');
-      const filter = state.taskFilter;
-      const prioOrder = { high: 0, normal: 1, low: 2 };
-
-      const list = state.tasks
-        .filter(t => {
-          if (filter === 'active') return !t.completed;
-          if (filter === 'completed') return t.completed;
-          return true;
-        })
-        .sort((a, b) => {
-          if (a.completed !== b.completed) return a.completed ? 1 : -1;
-          if (prioOrder[a.priority] !== prioOrder[b.priority]) return prioOrder[a.priority] - prioOrder[b.priority];
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        });
-
-      if (list.length === 0) {
-        host.innerHTML = `<div class="empty-state">Ingen opgaver i denne visning.</div>`;
-        return;
-      }
-
-      const prioLabel = { high: 'Høj prioritet', normal: 'Normal', low: 'Lav' };
-
-      host.innerHTML = list.map(t => `
-        <div class="task-row ${t.completed ? 'completed' : ''}">
-          <button type="button" class="check-circle ${t.completed ? 'checked' : ''}" data-task-toggle="${escapeHtml(t.id)}" aria-label="Markér færdig">
-            ${t.completed ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
-          </button>
-          <div class="task-main">
-            <div class="task-text">${escapeHtml(t.title)}</div>
-            <div class="task-sub">
-              <span class="badge prio-${t.priority}">${prioLabel[t.priority] || 'Normal'}</span>
-              ${t.dueDate ? `<span>Deadline: <strong>${escapeHtml(formatShortDate(t.dueDate))}</strong></span>` : ''}
-              <span>Oprettet ${escapeHtml(formatDateTime(t.createdAt))}</span>
-            </div>
-          </div>
-          <button type="button" class="btn btn-danger btn-icon" data-task-del="${escapeHtml(t.id)}" title="Slet opgave">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          </button>
+      <div class="card">
+        <div class="filter-bar" style="margin-bottom:0;">
+          <input type="search" id="task-search" placeholder="Søg i opgaver...">
+          <select id="task-filter" style="max-width:170px;">
+            <option value="open">Kun åbne</option>
+            <option value="all">Alle opgaver</option>
+            <option value="done">Kun færdige</option>
+          </select>
+          <button class="btn-sm btn-danger" id="clear-done-tasks">Slet færdige</button>
         </div>
-      `).join('');
-    }
+      </div>
+      <div id="list-tasks"></div>
+    </section>
 
-    /* ==========================================================================
-       9. FANE 4: NOTER
-       ========================================================================== */
-    function renderNotes() {
-      const grid = document.getElementById('notes-grid');
-      const query = state.notesSearch.trim().toLowerCase();
+    <!-- 4. NOTER -->
+    <section class="panel" id="panel-notes">
+      <div class="card">
+        <div class="card-title">Ny note</div>
+        <form id="note-form">
+          <div class="grid-3">
+            <div class="field">
+              <label>Titel</label>
+              <input type="text" id="note-title" placeholder="Overskrift på note..." required>
+            </div>
+            <div class="field">
+              <label>Kategori</label>
+              <input type="text" id="note-cat" value="Noter" placeholder="F.eks. Idéer, Koder, Opskrifter...">
+            </div>
+            <div class="field">
+              <label>Tags (kommasepareret)</label>
+              <input type="text" id="note-tags" placeholder="f.eks. vigtigt, vfr, projekt">
+            </div>
+          </div>
+          <div class="field">
+            <label>Indhold</label>
+            <textarea id="note-body" placeholder="Skriv din note her..." required></textarea>
+          </div>
+          <button type="submit" class="btn-primary">Gem note</button>
+        </form>
+      </div>
 
-      const filtered = state.notes.filter(n => {
-        if (!query) return true;
-        const hay = [n.title, n.body, ...(n.tags || [])].join(' ').toLowerCase();
-        return hay.includes(query);
-      });
+      <div class="card">
+        <div class="filter-bar" style="margin-bottom:0;">
+          <input type="search" id="note-search" placeholder="Søg i noter og #tags...">
+        </div>
+      </div>
+      <div id="list-notes"></div>
+    </section>
 
-      if (filtered.length === 0) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;">Ingen noter fundet.</div>`;
-        return;
-      }
+    <!-- 5. PRIVAT DAGBOG (AES-GCM KRYPTERET) -->
+    <section class="panel" id="panel-diary">
+      <div id="diary-locked" class="card pin-box">
+        <h3 id="pin-heading" style="margin:0 0 6px 0;">Privat Dagbog</h3>
+        <p id="pin-sub" style="color:var(--muted); font-size:0.86rem; margin:0;">Indtast din 4-6 cifrede PIN-kode for at dekryptere dine indlæg.</p>
+        <div class="pin-dots" id="pin-dots"></div>
+        <div id="pin-error" style="color:var(--red); font-size:0.84rem; min-height:20px; margin-bottom:8px;"></div>
+        <div class="keypad" id="keypad">
+          <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+          <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+          <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+          <button type="button" data-k="clear" class="btn-danger">Ryd</button><button type="button" data-k="0">0</button><button type="button" data-k="ok" class="btn-primary">OK</button>
+        </div>
+        <div style="margin-top:16px;">
+          <button type="button" class="btn-sm btn-danger" id="reset-diary-btn">Nulstil dagbog & PIN</button>
+        </div>
+      </div>
 
-      grid.innerHTML = filtered.map(n => `
-        <article class="note-card note-color-${escapeHtml(n.color || 'cyan')}">
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px;">
-              <h3 style="margin: 0; font-size: 1rem;">${escapeHtml(n.title)}</h3>
-              <div style="display: flex; gap: 5px; flex-shrink: 0;">
-                <button type="button" class="btn btn-secondary btn-icon" data-note-edit="${escapeHtml(n.id)}" title="Redigér note">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                </button>
-                <button type="button" class="btn btn-danger btn-icon" data-note-del="${escapeHtml(n.id)}" title="Slet note">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
+      <div id="diary-unlocked" style="display:none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Krypteret Dagbog (AES-256)</span>
+            <button type="button" class="btn-sm btn-danger" id="lock-diary-btn">Lås dagbog</button>
+          </div>
+          <form id="diary-form">
+            <div class="grid-2">
+              <div class="field">
+                <label>Dato</label>
+                <input type="date" id="diary-date" required>
+              </div>
+              <div class="field">
+                <label>Overskrift</label>
+                <input type="text" id="diary-title" placeholder="Dagens overskrift..." required>
               </div>
             </div>
-            <div style="font-size: 0.88rem; color: var(--text-secondary); white-space: pre-line; word-break: break-word;">${escapeHtml(n.body)}</div>
-          </div>
-
-          <div>
-            ${n.tags && n.tags.length > 0 ? `<div style="margin-bottom: 6px;">${n.tags.map(tg => `<span class="tag-chip">${escapeHtml(tg)}</span>`).join('')}</div>` : ''}
-            <div style="font-size: 0.74rem; color: var(--text-muted);">${escapeHtml(formatDateTime(n.createdAt))}</div>
-          </div>
-        </article>
-      `).join('');
-    }
-
-    /* ==========================================================================
-       10. FANE 5: PRIVAT DAGBOG (KRYPTERET)
-       ========================================================================== */
-    function updatePinDots() {
-      const dots = document.querySelectorAll('#pin-dots .pin-dot');
-      dots.forEach((dot, i) => {
-        dot.classList.toggle('filled', i < state.pinBuffer.length);
-      });
-    }
-
-    function renderDiaryView() {
-      const lockedView = document.getElementById('diary-locked-view');
-      const unlockedView = document.getElementById('diary-unlocked-view');
-
-      if (!state.diaryUnlocked) {
-        lockedView.style.display = 'block';
-        unlockedView.style.display = 'none';
-        document.getElementById('diary-pin-error').textContent = '';
-        updatePinDots();
-
-        if (!state.diaryVault) {
-          document.getElementById('diary-lock-title').textContent = 'Opret kode til Privat Dagbog';
-          document.getElementById('diary-lock-desc').textContent = 'Vælg en personlig 4-6 cifret PIN-kode. Dine dagbogsindlæg krypteres med AES-GCM ud fra denne kode.';
-          document.getElementById('btn-diary-unlock').textContent = 'Opret kode & åbn dagbog';
-        } else {
-          document.getElementById('diary-lock-title').textContent = 'Privat Dagbog er låst';
-          document.getElementById('diary-lock-desc').textContent = 'Indtast din 4-6 cifrede PIN-kode for at dekryptere dine indlæg.';
-          document.getElementById('btn-diary-unlock').textContent = 'Lås op';
-        }
-        return;
-      }
-
-      lockedView.style.display = 'none';
-      unlockedView.style.display = 'block';
-
-      const listHost = document.getElementById('diary-entries-list');
-      if (state.diaryDecryptedEntries.length === 0) {
-        listHost.innerHTML = `<div class="empty-state">Ingen dagbogsindlæg endnu. Skriv dit første indlæg ovenfor.</div>`;
-        return;
-      }
-
-      listHost.innerHTML = state.diaryDecryptedEntries.map(entry => `
-        <article class="log-entry">
-          <div class="log-entry-top">
-            <div class="log-entry-meta">
-              <span class="badge badge-task">${escapeHtml(entry.mood)}</span>
-              <span class="tabular">${escapeHtml(formatDateTime(entry.createdAt))}</span>
+            <div class="field">
+              <label>Fortroligt indlæg</label>
+              <textarea id="diary-body" placeholder="Skrives og gemmes krypteret lokalt med din PIN..." required></textarea>
             </div>
-            <button type="button" class="btn btn-danger btn-icon" data-diary-del="${escapeHtml(entry.id)}" title="Slet dagbogsindlæg">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </button>
+            <button type="submit" class="btn-primary">Gem krypteret indlæg</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="filter-bar" style="margin-bottom:0;">
+            <input type="search" id="diary-search" placeholder="Søg i dine dekrypterede dagbogsnotater...">
           </div>
-          ${entry.title ? `<div class="log-entry-title">${escapeHtml(entry.title)}</div>` : ''}
-          <div class="log-entry-body">${escapeHtml(entry.body)}</div>
-        </article>
-      `).join('');
+        </div>
+        <div id="list-diary"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<button class="fab" id="fab-add" title="Hurtig tilføj">+</button>
+
+<nav class="mobile-nav">
+  <button class="m-nav-btn active" data-tab="all"><span class="m-nav-icon">◉</span><span>Alle</span></button>
+  <button class="m-nav-btn" data-tab="log"><span class="m-nav-icon">⏱</span><span>Logbog</span></button>
+  <button class="m-nav-btn" data-tab="tasks"><span class="m-nav-icon">✓</span><span>Opgaver</span></button>
+  <button class="m-nav-btn" data-tab="notes"><span class="m-nav-icon">✎</span><span>Noter</span></button>
+  <button class="m-nav-btn" data-tab="diary"><span class="m-nav-icon">🔒</span><span>Dagbog</span></button>
+</nav>
+
+<!-- REDIGERINGSMODAL (ALLE TYPER) -->
+<div class="modal-backdrop" id="edit-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <strong id="edit-modal-title">Rediger indlæg</strong>
+      <button type="button" class="btn-sm" id="close-edit-modal">Luk</button>
+    </div>
+    <form id="edit-form">
+      <input type="hidden" id="edit-id">
+      <input type="hidden" id="edit-type">
+      <div class="field">
+        <label>Titel / Overskrift</label>
+        <input type="text" id="edit-title" required>
+      </div>
+      <div class="grid-2" id="edit-row-meta">
+        <div class="field" id="edit-cat-wrap">
+          <label>Kategori</label>
+          <input type="text" id="edit-cat">
+        </div>
+        <div class="field" id="edit-extra-wrap">
+          <label id="edit-extra-label">Ekstra</label>
+          <input type="text" id="edit-extra">
+        </div>
+      </div>
+      <div class="grid-2" id="edit-row-dt">
+        <div class="field">
+          <label id="edit-date-label">Dato / Tid</label>
+          <input type="text" id="edit-date">
+        </div>
+        <div class="field" id="edit-select-wrap">
+          <label id="edit-select-label">Status / Prioritet</label>
+          <select id="edit-select"></select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Beskrivelse / Indhold</label>
+        <textarea id="edit-body"></textarea>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button type="button" id="cancel-edit-btn">Annuller</button>
+        <button type="submit" class="btn-primary">Gem ændringer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- BACKUP & EKSPORT MODAL -->
+<div class="modal-backdrop" id="backup-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <strong>Lokal data & Sikkerhedskopi</strong>
+      <button type="button" class="btn-sm" id="close-backup-modal">Luk</button>
+    </div>
+    <p style="font-size:0.88rem; color:var(--muted);">Al data gemmes i din browsers lokale lager (<code>localStorage</code>). Tag en JSON-sikkerhedskopi, hvis du vil flytte data til en anden enhed.</p>
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px;">
+      <button type="button" class="btn-primary" id="export-json-btn">Download fuld backup (.json)</button>
+      <label style="display:block; text-align:center; padding:10px; border:1px dashed var(--border); border-radius:8px; cursor:pointer;">
+        Gendan fra backup (.json)
+        <input type="file" id="import-json-input" accept=".json" style="display:none;">
+      </label>
+      <button type="button" class="btn-danger" id="factory-reset-btn">Slet al data og nulstil</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Registrer Service Worker for 100% offline-drift på GitHub Pages
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+(function() {
+  const STORAGE_KEY = 'lommelog_data_v2';
+  const DIARY_KEY = 'lommelog_diary_v2';
+
+  let state = loadState();
+  let activeTab = 'all';
+  let globalTypeFilter = 'all';
+  let unlockedPin = null;
+  let diaryEntries = [];
+  let pinBuffer = '';
+
+  function defaultState() {
+    const nowIso = toLocalDateTimeInput(new Date());
+    return {
+      items: [
+        {
+          id: uid(), type: 'log', pinned: true,
+          title: 'Opstart & tjek af LommeLog',
+          cat: 'Drift / Arbejde', status: 'OK', ref: 'v2.0 Offline',
+          dt: nowIso,
+          body: 'Appen kører 100 % lokalt i browseren. Brug søgefeltet øverst til at finde keywords på tværs af alle poster.',
+          createdAt: Date.now()
+        },
+        {
+          id: uid(), type: 'task', pinned: false, done: false,
+          title: 'Test redigering og sikkerhedskopi',
+          cat: 'Generelt', prio: 'Normal', due: '',
+          body: 'Tryk på Rediger på en opgave eller note for at opdatere indholdet.',
+          createdAt: Date.now() - 10000
+        },
+        {
+          id: uid(), type: 'note', pinned: false,
+          title: 'Hurtige keywords & #tags',
+          cat: 'Noter', tags: ['guide', 'offline'],
+          body: 'Du kan søge direkte på både titel, tekst, måleværdier og #tags i søgefelterne.',
+          createdAt: Date.now() - 20000
+        }
+      ]
+    };
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed.items) ? parsed : defaultState();
+    } catch (e) {
+      return defaultState();
     }
+  }
 
-    async function handlePinSubmit() {
-      const errEl = document.getElementById('diary-pin-error');
-      if (state.pinBuffer.length < 4) {
-        errEl.textContent = 'Indtast mindst 4 cifre (4-6 cifre).';
-        return;
-      }
-      errEl.textContent = '';
-      const ok = await unlockDiaryWithPin(state.pinBuffer);
-      state.pinBuffer = '';
-      updatePinDots();
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    renderAll();
+  }
 
-      if (!ok) {
-        errEl.textContent = 'Forkert PIN-kode. Prøv igen.';
-        return;
-      }
-      renderDiaryView();
-      showToast('Privat Dagbog er låst op');
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  function toLocalDateTimeInput(d) {
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function toLocalDateInput(d) {
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+
+  function formatDt(dtStr) {
+    if (!dtStr) return '';
+    return dtStr.replace('T', ' kl. ');
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // Navigation
+  function switchTab(tab) {
+    if (activeTab === 'diary' && tab !== 'diary') {
+      lockDiary();
     }
-
-    /* ==========================================================================
-       11. EVENT LISTENERS & OPSTART
-       ========================================================================== */
-    function bindEvents() {
-      // Hovednavigation (Desktop + Mobil)
-      document.querySelectorAll('.desktop-tab, .mobile-tab').forEach(btn => {
-        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-      });
-
-      // Bekræftelsesdialog
-      document.getElementById('confirm-no').addEventListener('click', closeConfirm);
-      document.getElementById('confirm-yes').addEventListener('click', () => {
-        if (typeof confirmAction === 'function') confirmAction();
-        closeConfirm();
-      });
-
-      // Global Hurtig-tilføj (+)
-      const quickModal = document.getElementById('quick-add-modal');
-      document.getElementById('btn-global-quick-add').addEventListener('click', () => {
-        document.getElementById('quick-add-form').reset();
-        state.quickAddType = 'log';
-        document.querySelectorAll('#quick-type-pills .pill').forEach(p => p.classList.toggle('active', p.dataset.qtype === 'log'));
-        document.getElementById('quick-extra-log').style.display = 'block';
-        document.getElementById('quick-extra-task').style.display = 'none';
-        document.getElementById('quick-extra-note').style.display = 'none';
-        document.getElementById('quick-title-label').textContent = 'Log-overskrift / Hændelse *';
-        quickModal.classList.add('open');
-        setTimeout(() => document.getElementById('quick-input-title').focus(), 60);
-      });
-      document.getElementById('btn-close-quick-modal').addEventListener('click', () => quickModal.classList.remove('open'));
-      quickModal.addEventListener('click', (e) => {
-        if (e.target === quickModal) quickModal.classList.remove('open');
-      });
-
-      document.getElementById('quick-type-pills').addEventListener('click', (e) => {
-        const pill = e.target.closest('[data-qtype]');
-        if (!pill) return;
-        state.quickAddType = pill.dataset.qtype;
-        document.querySelectorAll('#quick-type-pills .pill').forEach(p => p.classList.toggle('active', p === pill));
-
-        document.getElementById('quick-extra-log').style.display = state.quickAddType === 'log' ? 'block' : 'none';
-        document.getElementById('quick-extra-task').style.display = state.quickAddType === 'task' ? 'block' : 'none';
-        document.getElementById('quick-extra-note').style.display = state.quickAddType === 'note' ? 'block' : 'none';
-
-        const labelMap = {
-          log: 'Log-overskrift / Hændelse *',
-          task: 'Opgavetekst *',
-          note: 'Notetitel *'
-        };
-        document.getElementById('quick-title-label').textContent = labelMap[state.quickAddType];
-        document.getElementById('quick-input-title').focus();
-      });
-
-      document.getElementById('quick-add-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const title = document.getElementById('quick-input-title').value.trim();
-        if (!title) return;
-
-        if (state.quickAddType === 'log') {
-          const dStr = todayDateStr();
-          const tStr = currentTimeStr();
-          state.logs.unshift({
-            id: uid('log'),
-            date: dStr,
-            time: tStr,
-            timestamp: `${dStr}T${tStr}:00`,
-            category: document.getElementById('quick-log-cat').value,
-            status: document.getElementById('quick-log-status').value,
-            title,
-            metric: document.getElementById('quick-log-metric').value.trim(),
-            body: document.getElementById('quick-log-body').value.trim(),
-            pinned: false
-          });
-          savePublicState();
-          updateCounts();
-          showToast('Logindlæg gemt!');
-        } else if (state.quickAddType === 'task') {
-          state.tasks.unshift({
-            id: uid('task'),
-            title,
-            priority: document.getElementById('quick-task-prio').value,
-            dueDate: '',
-            completed: false,
-            pinned: false,
-            createdAt: nowISO()
-          });
-          savePublicState();
-          updateCounts();
-          showToast('Opgave logget!');
-        } else if (state.quickAddType === 'note') {
-          state.notes.unshift({
-            id: uid('note'),
-            title,
-            body: document.getElementById('quick-note-body').value.trim(),
-            tags: parseTags(document.getElementById('quick-note-tags').value),
-            color: 'cyan',
-            pinned: false,
-            createdAt: nowISO()
-          });
-          savePublicState();
-          updateCounts();
-          showToast('Note gemt!');
-        }
-
-        quickModal.classList.remove('open');
-        if (state.activeTab === 'timeline') renderTimeline();
-        if (state.activeTab === 'logbook') renderLogbook();
-        if (state.activeTab === 'tasks') renderTasks();
-        if (state.activeTab === 'notes') renderNotes();
-      });
-
-      /* --- FANE 1: TIMELINE EVENTS --- */
-      document.getElementById('timeline-search').addEventListener('input', (e) => {
-        state.timelineSearch = e.target.value;
-        renderTimeline();
-      });
-      document.getElementById('timeline-date-filter').addEventListener('change', (e) => {
-        state.timelineDate = e.target.value;
-        renderTimeline();
-      });
-      document.getElementById('timeline-cat-pills').addEventListener('click', (e) => {
-        const pill = e.target.closest('[data-tcat]');
-        if (!pill) return;
-        state.timelineCat = pill.dataset.tcat;
-        document.querySelectorAll('#timeline-cat-pills .pill').forEach(p => p.classList.toggle('active', p === pill));
-        renderTimeline();
-      });
-      document.getElementById('btn-clear-timeline-filters').addEventListener('click', () => {
-        state.timelineSearch = '';
-        state.timelineDate = '';
-        state.timelineCat = 'all';
-        document.getElementById('timeline-search').value = '';
-        document.getElementById('timeline-date-filter').value = '';
-        document.querySelectorAll('#timeline-cat-pills .pill').forEach(p => p.classList.toggle('active', p.dataset.tcat === 'all'));
-        renderTimeline();
-      });
-
-      document.getElementById('timeline-list').addEventListener('click', (e) => {
-        const pinBtn = e.target.closest('[data-t-pin]');
-        if (pinBtn) {
-          const id = pinBtn.dataset.tPin;
-          const type = pinBtn.dataset.tType;
-          const collection = type === 'log' ? state.logs : (type === 'task' ? state.tasks : state.notes);
-          const found = collection.find(i => i.id === id);
-          if (found) {
-            found.pinned = !found.pinned;
-            savePublicState();
-            renderTimeline();
-          }
-          return;
-        }
-
-        const editBtn = e.target.closest('[data-t-edit]');
-        if (editBtn) {
-          const id = editBtn.dataset.tEdit;
-          const type = editBtn.dataset.tType;
-          const collection = type === 'log' ? state.logs : (type === 'task' ? state.tasks : state.notes);
-          const found = collection.find(i => i.id === id);
-          if (!found) return;
-
-          document.getElementById('edit-entry-id').value = id;
-          document.getElementById('edit-entry-type').value = type;
-          document.getElementById('edit-entry-title').value = found.title;
-
-          const metricWrap = document.getElementById('edit-entry-metric-wrap');
-          const bodyWrap = document.getElementById('edit-entry-body-wrap');
-          const tagsWrap = document.getElementById('edit-entry-tags-wrap');
-          if (type === 'log') {
-            metricWrap.style.display = 'block';
-            bodyWrap.style.display = 'block';
-            tagsWrap.style.display = 'none';
-            document.getElementById('edit-entry-metric').value = found.metric || '';
-            document.getElementById('edit-entry-body').value = found.body || '';
-          } else if (type === 'note') {
-            metricWrap.style.display = 'none';
-            bodyWrap.style.display = 'block';
-            tagsWrap.style.display = 'block';
-            document.getElementById('edit-entry-body').value = found.body || '';
-            document.getElementById('edit-entry-tags').value = (found.tags || []).join(' ');
-          } else {
-            metricWrap.style.display = 'none';
-            bodyWrap.style.display = 'none';
-            tagsWrap.style.display = 'none';
-          }
-          document.getElementById('edit-entry-modal').classList.add('open');
-          return;
-        }
-
-        const delBtn = e.target.closest('[data-t-del]');
-        if (delBtn) {
-          const id = delBtn.dataset.tDel;
-          const type = delBtn.dataset.tType;
-          askConfirm('Slet post?', 'Er du sikker på, at du vil slette denne post fra oversigten?', () => {
-            if (type === 'log') state.logs = state.logs.filter(i => i.id !== id);
-            if (type === 'task') state.tasks = state.tasks.filter(i => i.id !== id);
-            if (type === 'note') state.notes = state.notes.filter(i => i.id !== id);
-            savePublicState();
-            updateCounts();
-            renderTimeline();
-          });
-        }
-      });
-
-      document.getElementById('btn-close-edit-modal').addEventListener('click', () => {
-        document.getElementById('edit-entry-modal').classList.remove('open');
-      });
-      document.getElementById('edit-entry-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const id = document.getElementById('edit-entry-id').value;
-        const type = document.getElementById('edit-entry-type').value;
-        const newTitle = document.getElementById('edit-entry-title').value.trim();
-        if (!newTitle) return;
-
-        if (type === 'log') {
-          const found = state.logs.find(i => i.id === id);
-          if (found) {
-            found.title = newTitle;
-            found.metric = document.getElementById('edit-entry-metric').value.trim();
-            found.body = document.getElementById('edit-entry-body').value.trim();
-          }
-        } else if (type === 'task') {
-          const found = state.tasks.find(i => i.id === id);
-          if (found) found.title = newTitle;
-        } else if (type === 'note') {
-          const found = state.notes.find(i => i.id === id);
-          if (found) {
-            found.title = newTitle;
-            found.body = document.getElementById('edit-entry-body').value.trim();
-            found.tags = parseTags(document.getElementById('edit-entry-tags').value);
-          }
-        }
-        savePublicState();
-        document.getElementById('edit-entry-modal').classList.remove('open');
-        renderTimeline();
-        showToast('Ændringer gemt');
-      });
-
-      /* --- FANE 2: LOGBOOK EVENTS --- */
-      document.getElementById('log-templates-bar').addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-tpl]');
-        if (btn) applyLogTemplate(btn.dataset.tpl);
-      });
-
-      document.getElementById('log-input-cat').addEventListener('change', (e) => {
-        const isCustom = e.target.value === 'Egen kategori...';
-        document.getElementById('log-custom-cat-wrap').style.display = isCustom ? 'block' : 'none';
-        if (isCustom) document.getElementById('log-input-custom-cat').focus();
-      });
-
-      document.getElementById('logbook-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const editId = document.getElementById('log-edit-id').value;
-        const dateVal = document.getElementById('log-input-date').value || todayDateStr();
-        const timeVal = document.getElementById('log-input-time').value || currentTimeStr();
-        let catVal = document.getElementById('log-input-cat').value;
-        if (catVal === 'Egen kategori...') {
-          const custom = document.getElementById('log-input-custom-cat').value.trim();
-          catVal = custom || 'Øvrigt';
-        }
-        const statusVal = document.getElementById('log-input-status').value;
-        const titleVal = document.getElementById('log-input-title').value.trim();
-        const metricVal = document.getElementById('log-input-metric').value.trim();
-        const bodyVal = document.getElementById('log-input-body').value.trim();
-
-        if (!titleVal) return;
-
-        if (editId) {
-          const found = state.logs.find(l => l.id === editId);
-          if (found) {
-            found.date = dateVal;
-            found.time = timeVal;
-            found.timestamp = `${dateVal}T${timeVal}:00`;
-            found.category = catVal;
-            found.status = statusVal;
-            found.title = titleVal;
-            found.metric = metricVal;
-            found.body = bodyVal;
-          }
-          showToast('Logindlæg opdateret');
-        } else {
-          state.logs.unshift({
-            id: uid('log'),
-            date: dateVal,
-            time: timeVal,
-            timestamp: `${dateVal}T${timeVal}:00`,
-            category: catVal,
-            status: statusVal,
-            title: titleVal,
-            metric: metricVal,
-            body: bodyVal,
-            pinned: false
-          });
-          showToast('Gemt i logbogen!');
-        }
-
-        savePublicState();
-        updateCounts();
-        resetLogbookFormDefaults();
-        renderLogbook();
-      });
-
-      document.getElementById('btn-cancel-log-edit').addEventListener('click', resetLogbookFormDefaults);
-
-      document.getElementById('log-search').addEventListener('input', (e) => {
-        state.logSearch = e.target.value;
-        renderLogbook();
-      });
-      document.getElementById('log-filter-cat').addEventListener('change', (e) => {
-        state.logFilterCat = e.target.value;
-        renderLogbook();
-      });
-      document.getElementById('log-filter-from').addEventListener('change', (e) => {
-        state.logFilterFrom = e.target.value;
-        renderLogbook();
-      });
-      document.getElementById('log-filter-to').addEventListener('change', (e) => {
-        state.logFilterTo = e.target.value;
-        renderLogbook();
-      });
-      document.getElementById('log-status-pills').addEventListener('click', (e) => {
-        const pill = e.target.closest('[data-lstatus]');
-        if (!pill) return;
-        state.logFilterStatus = pill.dataset.lstatus;
-        document.querySelectorAll('#log-status-pills .pill').forEach(p => p.classList.toggle('active', p === pill));
-        renderLogbook();
-      });
-      document.getElementById('btn-reset-log-filters').addEventListener('click', () => {
-        state.logSearch = '';
-        state.logFilterCat = 'all';
-        state.logFilterStatus = 'all';
-        state.logFilterFrom = '';
-        state.logFilterTo = '';
-        document.getElementById('log-search').value = '';
-        document.getElementById('log-filter-cat').value = 'all';
-        document.getElementById('log-filter-from').value = '';
-        document.getElementById('log-filter-to').value = '';
-        document.querySelectorAll('#log-status-pills .pill').forEach(p => p.classList.toggle('active', p.dataset.lstatus === 'all'));
-        renderLogbook();
-      });
-
-      document.getElementById('btn-export-log-md').addEventListener('click', exportLogbookToMarkdown);
-      document.getElementById('btn-print-log').addEventListener('click', () => window.print());
-
-      document.getElementById('logbook-entries-list').addEventListener('click', (e) => {
-        const pinBtn = e.target.closest('[data-log-pin]');
-        if (pinBtn) {
-          const found = state.logs.find(l => l.id === pinBtn.dataset.logPin);
-          if (found) {
-            found.pinned = !found.pinned;
-            savePublicState();
-            renderLogbook();
-          }
-          return;
-        }
-
-        const editBtn = e.target.closest('[data-log-edit]');
-        if (editBtn) {
-          const found = state.logs.find(l => l.id === editBtn.dataset.logEdit);
-          if (!found) return;
-          document.getElementById('log-edit-id').value = found.id;
-          document.getElementById('log-input-date').value = found.date;
-          document.getElementById('log-input-time').value = found.time;
-          document.getElementById('log-input-status').value = found.status || 'info';
-          document.getElementById('log-input-title').value = found.title;
-          document.getElementById('log-input-metric').value = found.metric || '';
-          document.getElementById('log-input-body').value = found.body || '';
-
-          const catSel = document.getElementById('log-input-cat');
-          const standardExists = Array.from(catSel.options).some(opt => opt.value === found.category);
-          if (standardExists) {
-            catSel.value = found.category;
-            document.getElementById('log-custom-cat-wrap').style.display = 'none';
-          } else {
-            catSel.value = 'Egen kategori...';
-            document.getElementById('log-custom-cat-wrap').style.display = 'block';
-            document.getElementById('log-input-custom-cat').value = found.category;
-          }
-
-          document.getElementById('log-form-heading').textContent = 'Redigér logindlæg';
-          document.getElementById('btn-submit-log').textContent = 'Gem ændringer';
-          document.getElementById('btn-cancel-log-edit').style.display = 'inline-flex';
-          document.getElementById('log-input-title').focus();
-          return;
-        }
-
-        const delBtn = e.target.closest('[data-log-del]');
-        if (delBtn) {
-          const id = delBtn.dataset.logDel;
-          askConfirm('Slet logindlæg?', 'Er du sikker på, at du vil slette dette logindlæg permanent?', () => {
-            state.logs = state.logs.filter(l => l.id !== id);
-            savePublicState();
-            updateCounts();
-            renderLogbook();
-          });
-        }
-      });
-
-      /* --- FANE 3: TASKS EVENTS --- */
-      document.getElementById('task-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const title = document.getElementById('task-input-title').value.trim();
-        if (!title) return;
-        state.tasks.unshift({
-          id: uid('task'),
-          title,
-          priority: document.getElementById('task-input-prio').value,
-          dueDate: document.getElementById('task-input-due').value,
-          completed: false,
-          pinned: false,
-          createdAt: nowISO()
-        });
-        savePublicState();
-        updateCounts();
-        e.target.reset();
-        renderTasks();
-        showToast('Opgave tilføjet');
-      });
-
-      document.getElementById('task-filter-pills').addEventListener('click', (e) => {
-        const pill = e.target.closest('[data-taskfilter]');
-        if (!pill) return;
-        state.taskFilter = pill.dataset.taskfilter;
-        document.querySelectorAll('#task-filter-pills .pill').forEach(p => p.classList.toggle('active', p === pill));
-        renderTasks();
-      });
-
-      document.getElementById('tasks-list').addEventListener('click', (e) => {
-        const toggle = e.target.closest('[data-task-toggle]');
-        if (toggle) {
-          const found = state.tasks.find(t => t.id === toggle.dataset.taskToggle);
-          if (found) {
-            found.completed = !found.completed;
-            savePublicState();
-            updateCounts();
-            renderTasks();
-          }
-          return;
-        }
-        const del = e.target.closest('[data-task-del]');
-        if (del) {
-          const id = del.dataset.taskDel;
-          state.tasks = state.tasks.filter(t => t.id !== id);
-          savePublicState();
-          updateCounts();
-          renderTasks();
-        }
-      });
-
-      document.getElementById('btn-clear-completed-tasks').addEventListener('click', () => {
-        const doneCount = state.tasks.filter(t => t.completed).length;
-        if (doneCount === 0) return;
-        askConfirm('Ryd færdige opgaver?', `Vil du slette ${doneCount} færdige opgaver?`, () => {
-          state.tasks = state.tasks.filter(t => !t.completed);
-          savePublicState();
-          updateCounts();
-          renderTasks();
-        });
-      });
-
-      /* --- FANE 4: NOTES EVENTS --- */
-      document.getElementById('note-color-picker').addEventListener('click', (e) => {
-        const dot = e.target.closest('[data-color]');
-        if (!dot) return;
-        state.selectedNoteColor = dot.dataset.color;
-        document.querySelectorAll('#note-color-picker .color-dot').forEach(d => d.classList.toggle('selected', d === dot));
-      });
-
-      document.getElementById('note-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const editId = document.getElementById('note-edit-id').value;
-        const title = document.getElementById('note-input-title').value.trim();
-        const body = document.getElementById('note-input-body').value.trim();
-        const tags = parseTags(document.getElementById('note-input-tags').value);
-
-        if (editId) {
-          const found = state.notes.find(n => n.id === editId);
-          if (found) {
-            found.title = title;
-            found.body = body;
-            found.tags = tags;
-            found.color = state.selectedNoteColor;
-          }
-        } else {
-          state.notes.unshift({
-            id: uid('note'),
-            title,
-            body,
-            tags,
-            color: state.selectedNoteColor,
-            pinned: false,
-            createdAt: nowISO()
-          });
-        }
-
-        savePublicState();
-        updateCounts();
-        document.getElementById('note-edit-id').value = '';
-        document.getElementById('note-form-heading').textContent = 'Ny hurtig note';
-        document.getElementById('btn-cancel-note-edit').style.display = 'none';
-        e.target.reset();
-        renderNotes();
-        showToast('Note gemt');
-      });
-
-      document.getElementById('btn-cancel-note-edit').addEventListener('click', () => {
-        document.getElementById('note-edit-id').value = '';
-        document.getElementById('note-form').reset();
-        document.getElementById('note-form-heading').textContent = 'Ny hurtig note';
-        document.getElementById('btn-cancel-note-edit').style.display = 'none';
-      });
-
-      document.getElementById('notes-search').addEventListener('input', (e) => {
-        state.notesSearch = e.target.value;
-        renderNotes();
-      });
-
-      document.getElementById('notes-grid').addEventListener('click', (e) => {
-        const editBtn = e.target.closest('[data-note-edit]');
-        if (editBtn) {
-          const found = state.notes.find(n => n.id === editBtn.dataset.noteEdit);
-          if (!found) return;
-          document.getElementById('note-edit-id').value = found.id;
-          document.getElementById('note-input-title').value = found.title;
-          document.getElementById('note-input-body').value = found.body;
-          document.getElementById('note-input-tags').value = (found.tags || []).join(' ');
-          state.selectedNoteColor = found.color || 'cyan';
-          document.querySelectorAll('#note-color-picker .color-dot').forEach(d => {
-            d.classList.toggle('selected', d.dataset.color === state.selectedNoteColor);
-          });
-          document.getElementById('note-form-heading').textContent = 'Redigér note';
-          document.getElementById('btn-cancel-note-edit').style.display = 'inline-flex';
-          document.getElementById('note-input-title').focus();
-          return;
-        }
-
-        const delBtn = e.target.closest('[data-note-del]');
-        if (delBtn) {
-          const id = delBtn.dataset.noteDel;
-          askConfirm('Slet note?', 'Er du sikker på, at du vil slette denne note?', () => {
-            state.notes = state.notes.filter(n => n.id !== id);
-            savePublicState();
-            updateCounts();
-            renderNotes();
-          });
-        }
-      });
-
-      /* --- FANE 5: PRIVAT DAGBOG EVENTS --- */
-      document.getElementById('diary-numpad').addEventListener('click', (e) => {
-        const keyBtn = e.target.closest('.numpad-key');
-        if (!keyBtn) return;
-        const digit = keyBtn.dataset.digit;
-        const action = keyBtn.dataset.action;
-
-        if (digit !== undefined && state.pinBuffer.length < 6) {
-          state.pinBuffer += digit;
-          updatePinDots();
-        } else if (action === 'back') {
-          state.pinBuffer = state.pinBuffer.slice(0, -1);
-          updatePinDots();
-        } else if (action === 'clear') {
-          state.pinBuffer = '';
-          updatePinDots();
-        }
-      });
-
-      // Understøt også fysisk tastatur på desktop når dagbogsfanen er åben
-      document.addEventListener('keydown', (e) => {
-        if (state.activeTab !== 'diary' || state.diaryUnlocked) return;
-        if (document.querySelector('.modal-backdrop.open')) return;
-        if (/^[0-9]$/.test(e.key) && state.pinBuffer.length < 6) {
-          state.pinBuffer += e.key;
-          updatePinDots();
-        } else if (e.key === 'Backspace') {
-          state.pinBuffer = state.pinBuffer.slice(0, -1);
-          updatePinDots();
-        } else if (e.key === 'Enter') {
-          handlePinSubmit();
-        }
-      });
-
-      document.getElementById('btn-diary-unlock').addEventListener('click', handlePinSubmit);
-      document.getElementById('btn-lock-diary-now').addEventListener('click', () => {
-        lockDiaryImmediately();
-        showToast('Dagbog låst');
-      });
-
-      document.getElementById('diary-mood-pills').addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-mood]');
-        if (!btn) return;
-        state.selectedMood = btn.dataset.mood;
-        document.querySelectorAll('#diary-mood-pills .mood-btn').forEach(b => b.classList.toggle('active', b === btn));
-      });
-
-      document.getElementById('diary-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!state.diaryUnlocked || !state.diaryCryptoKey) return;
-        const title = document.getElementById('diary-entry-title').value.trim();
-        const body = document.getElementById('diary-entry-body').value.trim();
-        if (!body) return;
-
-        const id = uid('diary');
-        const createdAt = nowISO();
-        const mood = state.selectedMood;
-
-        const encrypted = await encryptStringWithKey(state.diaryCryptoKey, JSON.stringify({ title, body }));
-        state.diaryVault.entries.unshift({
-          id,
-          createdAt,
-          mood,
-          iv: encrypted.iv,
-          cipher: encrypted.cipher
-        });
-        saveDiaryVault();
-
-        state.diaryDecryptedEntries.unshift({ id, createdAt, mood, title, body });
-        e.target.reset();
-        renderDiaryView();
-        showToast('Dagbogsindlæg krypteret & gemt');
-      });
-
-      document.getElementById('diary-entries-list').addEventListener('click', (e) => {
-        const delBtn = e.target.closest('[data-diary-del]');
-        if (!delBtn) return;
-        const id = delBtn.dataset.diaryDel;
-        askConfirm('Slet dagbogsindlæg?', 'Indlægget slettes permanent fra din krypterede dagbog.', () => {
-          state.diaryDecryptedEntries = state.diaryDecryptedEntries.filter(d => d.id !== id);
-          if (state.diaryVault) {
-            state.diaryVault.entries = state.diaryVault.entries.filter(d => d.id !== id);
-            saveDiaryVault();
-          }
-          renderDiaryView();
-        });
-      });
-
-      // Skift PIN-kode modal
-      const pinModal = document.getElementById('change-pin-modal');
-      document.getElementById('btn-open-change-pin').addEventListener('click', () => {
-        document.getElementById('change-pin-form').reset();
-        pinModal.classList.add('open');
-      });
-      document.getElementById('btn-close-pin-modal').addEventListener('click', () => pinModal.classList.remove('open'));
-      document.getElementById('change-pin-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const p1 = document.getElementById('new-pin-1').value.trim();
-        const p2 = document.getElementById('new-pin-2').value.trim();
-        if (!/^[0-9]{4,6}$/.test(p1)) {
-          showToast('PIN skal være 4-6 cifre', 'danger');
-          return;
-        }
-        if (p1 !== p2) {
-          showToast('De to koder er ikke ens', 'danger');
-          return;
-        }
-        await changeDiaryPin(p1);
-        pinModal.classList.remove('open');
-        showToast('Ny krypteringskode er gemt!');
-      });
-
-      /* --- BACKUP & EKSPORT MODAL --- */
-      const backupModal = document.getElementById('backup-modal');
-      document.getElementById('btn-open-backup').addEventListener('click', () => backupModal.classList.add('open'));
-      document.getElementById('btn-close-backup-modal').addEventListener('click', () => backupModal.classList.remove('open'));
-      backupModal.addEventListener('click', (e) => {
-        if (e.target === backupModal) backupModal.classList.remove('open');
-      });
-
-      document.getElementById('btn-export-json').addEventListener('click', () => {
-        const payload = {
-          app: 'LommeLog',
-          version: 2,
-          exportedAt: nowISO(),
-          logs: state.logs,
-          tasks: state.tasks,
-          notes: state.notes,
-          diaryVault: state.diaryVault
-        };
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `lommelog-backup-${todayDateStr()}.json`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        showToast('JSON-backup downloadet');
-      });
-
-      document.getElementById('input-import-json').addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          try {
-            const data = JSON.parse(evt.target.result);
-            if (!data || data.app !== 'LommeLog') throw new Error('Ugyldig fil');
-            state.logs = Array.isArray(data.logs) ? data.logs : [];
-            state.tasks = Array.isArray(data.tasks) ? data.tasks : [];
-            state.notes = Array.isArray(data.notes) ? data.notes : [];
-            state.diaryVault = data.diaryVault || null;
-            state.diaryUnlocked = false;
-            state.diaryCryptoKey = null;
-            state.diaryDecryptedEntries = [];
-            savePublicState();
-            saveDiaryVault();
-            updateCounts();
-            switchTab(state.activeTab);
-            backupModal.classList.remove('open');
-            showToast('Backup gendannet!');
-          } catch (err) {
-            showToast('Kunne ikke læse backup-filen', 'danger');
-          }
-          e.target.value = '';
-        };
-        reader.readAsText(file);
-      });
-
-      document.getElementById('btn-export-markdown').addEventListener('click', () => {
-        let md = `# LommeLog Eksport (${todayDateStr()})\n\n`;
-        md += `## Logbog\n`;
-        md += state.logs.length
-          ? state.logs.map(l => `- **${formatShortDate(l.date)} ${l.time}** [${l.category} / ${STATUS_LABELS[l.status] || 'Info'}]: ${l.title}${l.metric ? ` (${l.metric})` : ''}${l.body ? ` — ${l.body}` : ''}`).join('\n')
-          : '_Ingen logindlæg_';
-        md += `\n\n## Åbne opgaver\n`;
-        const openTasks = state.tasks.filter(t => !t.completed);
-        md += openTasks.length ? openTasks.map(t => `- [ ] ${t.title}`).join('\n') : '_Ingen åbne opgaver_';
-        md += `\n\n## Noter\n`;
-        md += state.notes.length
-          ? state.notes.map(n => `### ${n.title}\n${n.body}\n`).join('\n')
-          : '_Ingen noter_';
-
-        const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `lommelog-eksport-${todayDateStr()}.md`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        showToast('Markdown-fil (.md) downloadet');
-      });
-
-      document.getElementById('btn-print-view').addEventListener('click', () => {
-        backupModal.classList.remove('open');
-        window.print();
-      });
-
-      document.getElementById('btn-seed-demo').addEventListener('click', () => {
-        seedDemoData();
-        updateCounts();
-        switchTab(state.activeTab);
-        backupModal.classList.remove('open');
-        showToast('Start-eksempler gendannet');
-      });
-
-      document.getElementById('btn-wipe-all').addEventListener('click', () => {
-        askConfirm('Ryd al data permanent?', 'Dette sletter alle logindlæg, opgaver, noter og din krypterede dagbog fra denne enhed.', () => {
-          state.logs = [];
-          state.tasks = [];
-          state.notes = [];
-          state.diaryVault = null;
-          state.diaryUnlocked = false;
-          state.diaryCryptoKey = null;
-          state.diaryDecryptedEntries = [];
-          savePublicState();
-          saveDiaryVault();
-          localStorage.setItem(KEYS.INIT, '1');
-          updateCounts();
-          switchTab(state.activeTab);
-          backupModal.classList.remove('open');
-          showToast('Al data er ryddet', 'danger');
-        });
-      });
-    }
-
-    // Boot
-    window.addEventListener('DOMContentLoaded', () => {
-      loadState();
-      resetLogbookFormDefaults();
-      updateCounts();
-      bindEvents();
-      renderTimeline();
+    activeTab = tab;
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+    document.querySelectorAll('[data-tab]').forEach(b => {
+      b.classList.toggle('active', b.dataset.tab === tab);
     });
-  </script>
+    if (tab === 'diary') initDiaryLockView();
+  }
+
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  // Hurtig-tilføj FAB
+  document.getElementById('fab-add').addEventListener('click', () => {
+    if (activeTab === 'tasks') {
+      document.getElementById('task-title').focus();
+    } else if (activeTab === 'notes') {
+      document.getElementById('note-title').focus();
+    } else if (activeTab === 'diary' && unlockedPin) {
+      document.getElementById('diary-title').focus();
+    } else {
+      switchTab('log');
+      document.getElementById('log-dt').value = toLocalDateTimeInput(new Date());
+      document.getElementById('log-title').focus();
+    }
+  });
+
+  // Logbog formular
+  document.getElementById('log-dt').value = toLocalDateTimeInput(new Date());
+  document.getElementById('log-now-btn').addEventListener('click', () => {
+    document.getElementById('log-dt').value = toLocalDateTimeInput(new Date());
+  });
+  document.querySelectorAll('[data-tpl]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('log-dt').value = toLocalDateTimeInput(new Date());
+      document.getElementById('log-title').value = btn.dataset.tpl;
+      document.getElementById('log-status').value = btn.dataset.status;
+      document.getElementById('log-body').focus();
+    });
+  });
+
+  document.getElementById('log-form').addEventListener('submit', e => {
+    e.preventDefault();
+    state.items.unshift({
+      id: uid(), type: 'log', pinned: false,
+      dt: document.getElementById('log-dt').value || toLocalDateTimeInput(new Date()),
+      cat: document.getElementById('log-cat').value,
+      status: document.getElementById('log-status').value,
+      title: document.getElementById('log-title').value.trim(),
+      ref: document.getElementById('log-ref').value.trim(),
+      body: document.getElementById('log-body').value.trim(),
+      createdAt: Date.now()
+    });
+    e.target.reset();
+    document.getElementById('log-dt').value = toLocalDateTimeInput(new Date());
+    saveState();
+  });
+
+  // Opgave formular
+  document.getElementById('task-form').addEventListener('submit', e => {
+    e.preventDefault();
+    state.items.unshift({
+      id: uid(), type: 'task', pinned: false, done: false,
+      title: document.getElementById('task-title').value.trim(),
+      prio: document.getElementById('task-prio').value,
+      due: document.getElementById('task-due').value,
+      cat: document.getElementById('task-cat').value.trim() || 'Generelt',
+      body: document.getElementById('task-body').value.trim(),
+      createdAt: Date.now()
+    });
+    e.target.reset();
+    document.getElementById('task-cat').value = 'Generelt';
+    saveState();
+  });
+
+  // Note formular
+  document.getElementById('note-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const rawTags = document.getElementById('note-tags').value;
+    const tags = rawTags.split(',').map(t => t.trim().replace(/^#/, '')).filter(Boolean);
+    state.items.unshift({
+      id: uid(), type: 'note', pinned: false,
+      title: document.getElementById('note-title').value.trim(),
+      cat: document.getElementById('note-cat').value.trim() || 'Noter',
+      tags,
+      body: document.getElementById('note-body').value.trim(),
+      createdAt: Date.now()
+    });
+    e.target.reset();
+    document.getElementById('note-cat').value = 'Noter';
+    saveState();
+  });
+
+  // Søgning & filtre
+  ['global-search', 'global-date', 'log-search', 'log-filter-cat', 'log-filter-status', 'task-search', 'task-filter', 'note-search'].forEach(id => {
+    document.getElementById(id).addEventListener('input', renderAll);
+    document.getElementById(id).addEventListener('change', renderAll);
+  });
+
+  document.querySelectorAll('#global-pills .pill').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelectorAll('#global-pills .pill').forEach(x => x.classList.remove('active'));
+      p.classList.add('active');
+      globalTypeFilter = p.dataset.gtype;
+      renderAll();
+    });
+  });
+
+  document.getElementById('clear-global-filter').addEventListener('click', () => {
+    document.getElementById('global-search').value = '';
+    document.getElementById('global-date').value = '';
+    globalTypeFilter = 'all';
+    document.querySelectorAll('#global-pills .pill').forEach(x => x.classList.toggle('active', x.dataset.gtype === 'all'));
+    renderAll();
+  });
+
+  document.getElementById('clear-done-tasks').addEventListener('click', () => {
+    state.items = state.items.filter(i => !(i.type === 'task' && i.done));
+    saveState();
+  });
+
+  // Eksport logbog til Markdown
+  document.getElementById('export-log-md').addEventListener('click', () => {
+    const logs = state.items.filter(i => i.type === 'log');
+    const lines = ['# LommeLog – Logbog', ''];
+    logs.forEach(l => {
+      lines.push(`## ${formatDt(l.dt)} – ${l.title}`);
+      lines.push(`- **Kategori:** ${l.cat} | **Status:** ${l.status}${l.ref ? ' | **Ref:** ' + l.ref : ''}`);
+      if (l.body) lines.push(`\n${l.body}`);
+      lines.push('\n---');
+    });
+    downloadFile('lommelog-logbog.md', lines.join('\n'), 'text/markdown');
+  });
+
+  // Rendering af kort
+  function renderItemCard(item) {
+    const typeLabel = item.type === 'log' ? 'Logbog' : item.type === 'task' ? 'Opgave' : 'Note';
+    let statusBadge = '';
+    if (item.type === 'log') {
+      const cls = item.status === 'OK' ? 'tag-ok' : item.status === 'Obs' ? 'tag-warn' : '';
+      statusBadge = `<span class="tag ${cls}">${esc(item.status)}</span>`;
+    } else if (item.type === 'task') {
+      const cls = item.prio === 'Høj' ? 'tag-danger' : item.prio === 'Lav' ? '' : 'tag-warn';
+      statusBadge = `<span class="tag ${cls}">${esc(item.prio)}</span>`;
+    }
+
+    const tagsHtml = (item.tags || []).map(t => `<span class="tag">#${esc(t)}</span>`).join(' ');
+    const subMeta = [
+      `<span class="tag">${typeLabel}</span>`,
+      statusBadge,
+      item.cat ? `<span>${esc(item.cat)}</span>` : '',
+      item.dt ? `<span>${esc(formatDt(item.dt))}</span>` : '',
+      item.due ? `<span>Deadline: ${esc(item.due)}</span>` : '',
+      item.ref ? `<span>Ref: <strong>${esc(item.ref)}</strong></span>` : '',
+      tagsHtml
+    ].filter(Boolean).join(' ');
+
+    const checkBtn = item.type === 'task'
+      ? `<button class="btn-sm" data-act="toggle" data-id="${item.id}">${item.done ? 'Genåbn' : 'Udført'}</button>`
+      : '';
+
+    return `
+      <div class="item-card ${item.pinned ? 'pinned' : ''} ${item.done ? 'done' : ''}">
+        <div class="item-head">
+          <div>
+            <h4 class="item-title">${item.pinned ? '★ ' : ''}${esc(item.title)}</h4>
+            <div class="item-meta">${subMeta}</div>
+          </div>
+          <div class="item-actions">
+            ${checkBtn}
+            <button class="btn-sm" data-act="pin" data-id="${item.id}" title="Fastgør">★</button>
+            <button class="btn-sm" data-act="edit" data-id="${item.id}">Rediger</button>
+            <button class="btn-sm btn-danger" data-act="del" data-id="${item.id}">Slet</button>
+          </div>
+        </div>
+        ${item.body ? `<p class="item-body">${esc(item.body)}</p>` : ''}
+      </div>
+    `;
+  }
+
+  function matchesQuery(item, q) {
+    if (!q) return true;
+    const hay = [
+      item.title, item.body, item.cat, item.ref, item.status, item.prio,
+      (item.tags || []).map(t => '#' + t).join(' ')
+    ].join(' ').toLowerCase();
+    return q.toLowerCase().split(/\s+/).every(word => hay.includes(word));
+  }
+
+  function sortItems(arr) {
+    return [...arr].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || (b.createdAt || 0) - (a.createdAt || 0));
+  }
+
+  function renderAll() {
+    const logs = state.items.filter(i => i.type === 'log');
+    const tasks = state.items.filter(i => i.type === 'task');
+    const notes = state.items.filter(i => i.type === 'note');
+
+    document.getElementById('cnt-all').textContent = state.items.length;
+    document.getElementById('cnt-log').textContent = logs.length;
+    document.getElementById('cnt-tasks').textContent = tasks.filter(t => !t.done).length;
+    document.getElementById('cnt-notes').textContent = notes.length;
+
+    // 1. Global liste
+    const gq = document.getElementById('global-search').value.trim();
+    const gdate = document.getElementById('global-date').value;
+    const filteredAll = sortItems(state.items.filter(i => {
+      if (globalTypeFilter === 'pinned' && !i.pinned) return false;
+      if (['log', 'task', 'note'].includes(globalTypeFilter) && i.type !== globalTypeFilter) return false;
+      if (gdate) {
+        const dStr = i.dt ? i.dt.slice(0, 10) : (i.due || toLocalDateInput(new Date(i.createdAt)));
+        if (dStr !== gdate) return false;
+      }
+      return matchesQuery(i, gq);
+    }));
+    document.getElementById('list-all').innerHTML = filteredAll.length
+      ? filteredAll.map(renderItemCard).join('')
+      : '<div class="empty">Ingen indlæg matcher din søgning.</div>';
+
+    // 2. Logbog
+    const lq = document.getElementById('log-search').value.trim();
+    const lcat = document.getElementById('log-filter-cat').value;
+    const lstat = document.getElementById('log-filter-status').value;
+    const filteredLogs = sortItems(logs.filter(i => {
+      if (lcat !== 'all' && i.cat !== lcat) return false;
+      if (lstat !== 'all' && i.status !== lstat) return false;
+      return matchesQuery(i, lq);
+    }));
+    document.getElementById('list-log').innerHTML = filteredLogs.length
+      ? filteredLogs.map(renderItemCard).join('')
+      : '<div class="empty">Ingen logbogsindlæg fundet.</div>';
+
+    // 3. Opgaver
+    const tq = document.getElementById('task-search').value.trim();
+    const tf = document.getElementById('task-filter').value;
+    const filteredTasks = sortItems(tasks.filter(i => {
+      if (tf === 'open' && i.done) return false;
+      if (tf === 'done' && !i.done) return false;
+      return matchesQuery(i, tq);
+    }));
+    document.getElementById('list-tasks').innerHTML = filteredTasks.length
+      ? filteredTasks.map(renderItemCard).join('')
+      : '<div class="empty">Ingen opgaver fundet.</div>';
+
+    // 4. Noter
+    const nq = document.getElementById('note-search').value.trim();
+    const filteredNotes = sortItems(notes.filter(i => matchesQuery(i, nq)));
+    document.getElementById('list-notes').innerHTML = filteredNotes.length
+      ? filteredNotes.map(renderItemCard).join('')
+      : '<div class="empty">Ingen noter fundet.</div>';
+  }
+
+  // Delegerede klik-handlinger (Rediger, Slet, Pin, Udført)
+  document.querySelector('main').addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const act = btn.dataset.act;
+
+    if (act === 'diary-edit') {
+      const entry = diaryEntries.find(x => x.id === id);
+      if (entry) openEditModal(entry, 'diary');
+      return;
+    }
+    if (act === 'diary-del') {
+      diaryEntries = diaryEntries.filter(x => x.id !== id);
+      persistDiary();
+      return;
+    }
+
+    const item = state.items.find(x => x.id === id);
+    if (!item) return;
+
+    if (act === 'toggle') {
+      item.done = !item.done;
+      saveState();
+    } else if (act === 'pin') {
+      item.pinned = !item.pinned;
+      saveState();
+    } else if (act === 'del') {
+      state.items = state.items.filter(x => x.id !== id);
+      saveState();
+    } else if (act === 'edit') {
+      openEditModal(item, item.type);
+    }
+  });
+
+  // Samlet redigeringsmodal for alle typer
+  function openEditModal(item, type) {
+    document.getElementById('edit-id').value = item.id;
+    document.getElementById('edit-type').value = type;
+    document.getElementById('edit-title').value = item.title || '';
+    document.getElementById('edit-body').value = item.body || '';
+
+    const catWrap = document.getElementById('edit-cat-wrap');
+    const extraWrap = document.getElementById('edit-extra-wrap');
+    const rowDt = document.getElementById('edit-row-dt');
+    const selWrap = document.getElementById('edit-select-wrap');
+    const sel = document.getElementById('edit-select');
+
+    catWrap.style.display = type === 'diary' ? 'none' : 'block';
+    document.getElementById('edit-cat').value = item.cat || '';
+
+    if (type === 'log') {
+      extraWrap.style.display = 'block';
+      document.getElementById('edit-extra-label').textContent = 'Måleværdi / Reference';
+      document.getElementById('edit-extra').value = item.ref || '';
+      rowDt.style.display = 'grid';
+      document.getElementById('edit-date-label').textContent = 'Dato & tid (ÅÅÅÅ-MM-DDTHH:MM)';
+      document.getElementById('edit-date').value = item.dt || '';
+      selWrap.style.display = 'block';
+      document.getElementById('edit-select-label').textContent = 'Status';
+      sel.innerHTML = '<option value="Info">Info</option><option value="OK">OK / Udført</option><option value="Obs">Obs / Afvigelse</option>';
+      sel.value = item.status || 'Info';
+    } else if (type === 'task') {
+      extraWrap.style.display = 'none';
+      rowDt.style.display = 'grid';
+      document.getElementById('edit-date-label').textContent = 'Deadline (ÅÅÅÅ-MM-DD)';
+      document.getElementById('edit-date').value = item.due || '';
+      selWrap.style.display = 'block';
+      document.getElementById('edit-select-label').textContent = 'Prioritet';
+      sel.innerHTML = '<option value="Normal">Normal</option><option value="Høj">Høj</option><option value="Lav">Lav</option>';
+      sel.value = item.prio || 'Normal';
+    } else if (type === 'note') {
+      extraWrap.style.display = 'block';
+      document.getElementById('edit-extra-label').textContent = 'Tags (kommasepareret)';
+      document.getElementById('edit-extra').value = (item.tags || []).join(', ');
+      rowDt.style.display = 'none';
+    } else if (type === 'diary') {
+      extraWrap.style.display = 'none';
+      rowDt.style.display = 'grid';
+      document.getElementById('edit-date-label').textContent = 'Dato (ÅÅÅÅ-MM-DD)';
+      document.getElementById('edit-date').value = item.date || '';
+      selWrap.style.display = 'none';
+    }
+
+    document.getElementById('edit-modal').classList.add('open');
+  }
+
+  function closeEditModal() {
+    document.getElementById('edit-modal').classList.remove('open');
+  }
+  document.getElementById('close-edit-modal').addEventListener('click', closeEditModal);
+  document.getElementById('cancel-edit-btn').addEventListener('click', closeEditModal);
+
+  document.getElementById('edit-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const id = document.getElementById('edit-id').value;
+    const type = document.getElementById('edit-type').value;
+
+    if (type === 'diary') {
+      const entry = diaryEntries.find(x => x.id === id);
+      if (entry) {
+        entry.title = document.getElementById('edit-title').value.trim();
+        entry.date = document.getElementById('edit-date').value.trim();
+        entry.body = document.getElementById('edit-body').value.trim();
+        persistDiary();
+      }
+      closeEditModal();
+      return;
+    }
+
+    const item = state.items.find(x => x.id === id);
+    if (!item) return;
+
+    item.title = document.getElementById('edit-title').value.trim();
+    item.cat = document.getElementById('edit-cat').value.trim();
+    item.body = document.getElementById('edit-body').value.trim();
+
+    if (type === 'log') {
+      item.ref = document.getElementById('edit-extra').value.trim();
+      item.dt = document.getElementById('edit-date').value.trim();
+      item.status = document.getElementById('edit-select').value;
+    } else if (type === 'task') {
+      item.due = document.getElementById('edit-date').value.trim();
+      item.prio = document.getElementById('edit-select').value;
+    } else if (type === 'note') {
+      item.tags = document.getElementById('edit-extra').value.split(',').map(t => t.trim().replace(/^#/, '')).filter(Boolean);
+    }
+
+    closeEditModal();
+    saveState();
+  });
+
+  // AES-GCM 256-bit Krypteret Dagbog
+  async function deriveKey(pin, salt) {
+    const enc = new TextEncoder();
+    const keyMat = await crypto.subtle.importKey('raw', enc.encode(pin), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+      keyMat,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  }
+
+  async function encryptDiaryData(pin, dataObj) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await deriveKey(pin, salt);
+    const enc = new TextEncoder();
+    const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(JSON.stringify(dataObj)));
+    return {
+      salt: btoa(String.fromCharCode(...salt)),
+      iv: btoa(String.fromCharCode(...iv)),
+      cipher: btoa(String.fromCharCode(...new Uint8Array(cipher)))
+    };
+  }
+
+  async function decryptDiaryData(pin, stored) {
+    const salt = Uint8Array.from(atob(stored.salt), c => c.charCodeAt(0));
+    const iv = Uint8Array.from(atob(stored.iv), c => c.charCodeAt(0));
+    const cipher = Uint8Array.from(atob(stored.cipher), c => c.charCodeAt(0));
+    const key = await deriveKey(pin, salt);
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipher);
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+
+  function initDiaryLockView() {
+    pinBuffer = '';
+    updatePinDots();
+    document.getElementById('pin-error').textContent = '';
+    const hasDiary = !!localStorage.getItem(DIARY_KEY);
+    document.getElementById('pin-heading').textContent = hasDiary ? 'Privat Dagbog (Låst)' : 'Opret PIN-kode til Dagbog';
+    document.getElementById('pin-sub').textContent = hasDiary
+      ? 'Indtast din 4-6 cifrede PIN-kode.'
+      : 'Vælg en personlig 4-6 cifret kode til at kryptere din dagbog.';
+  }
+
+  function updatePinDots() {
+    const dots = document.getElementById('pin-dots');
+    dots.innerHTML = Array.from({ length: Math.max(4, pinBuffer.length) }, (_, idx) =>
+      `<span class="pin-dot ${idx < pinBuffer.length ? 'filled' : ''}"></span>`
+    ).join('');
+  }
+
+  document.getElementById('keypad').addEventListener('click', async e => {
+    const btn = e.target.closest('[data-k]');
+    if (!btn) return;
+    const k = btn.dataset.k;
+    if (k === 'clear') {
+      pinBuffer = '';
+      updatePinDots();
+      return;
+    }
+    if (k === 'ok') {
+      if (pinBuffer.length < 4) {
+        document.getElementById('pin-error').textContent = 'Koden skal være 4–6 cifre.';
+        return;
+      }
+      const raw = localStorage.getItem(DIARY_KEY);
+      if (!raw) {
+        unlockedPin = pinBuffer;
+        diaryEntries = [];
+        await persistDiary();
+        showUnlockedDiary();
+      } else {
+        try {
+          diaryEntries = await decryptDiaryData(pinBuffer, JSON.parse(raw));
+          unlockedPin = pinBuffer;
+          showUnlockedDiary();
+        } catch (err) {
+          pinBuffer = '';
+          updatePinDots();
+          document.getElementById('pin-error').textContent = 'Forkert PIN-kode.';
+        }
+      }
+      return;
+    }
+    if (pinBuffer.length < 6) {
+      pinBuffer += k;
+      updatePinDots();
+    }
+  });
+
+  function showUnlockedDiary() {
+    document.getElementById('diary-locked').style.display = 'none';
+    document.getElementById('diary-unlocked').style.display = 'block';
+    document.getElementById('diary-date').value = toLocalDateInput(new Date());
+    document.getElementById('cnt-diary').textContent = diaryEntries.length;
+    renderDiary();
+  }
+
+  function lockDiary() {
+    unlockedPin = null;
+    diaryEntries = [];
+    pinBuffer = '';
+    document.getElementById('diary-unlocked').style.display = 'none';
+    document.getElementById('diary-locked').style.display = 'block';
+    document.getElementById('cnt-diary').textContent = 'Låst';
+  }
+
+  document.getElementById('lock-diary-btn').addEventListener('click', lockDiary);
+  document.getElementById('reset-diary-btn').addEventListener('click', () => {
+    if (confirm('Er du sikker? Alle krypterede dagbogsindlæg slettes permanent.')) {
+      localStorage.removeItem(DIARY_KEY);
+      initDiaryLockView();
+    }
+  });
+
+  async function persistDiary() {
+    if (!unlockedPin) return;
+    const encrypted = await encryptDiaryData(unlockedPin, diaryEntries);
+    localStorage.setItem(DIARY_KEY, JSON.stringify(encrypted));
+    document.getElementById('cnt-diary').textContent = diaryEntries.length;
+    renderDiary();
+  }
+
+  document.getElementById('diary-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    diaryEntries.unshift({
+      id: uid(),
+      date: document.getElementById('diary-date').value,
+      title: document.getElementById('diary-title').value.trim(),
+      body: document.getElementById('diary-body').value.trim()
+    });
+    e.target.reset();
+    document.getElementById('diary-date').value = toLocalDateInput(new Date());
+    await persistDiary();
+  });
+
+  document.getElementById('diary-search').addEventListener('input', renderDiary);
+
+  function renderDiary() {
+    const q = document.getElementById('diary-search').value.trim().toLowerCase();
+    const list = diaryEntries.filter(d => !q || (d.title + ' ' + d.body + ' ' + d.date).toLowerCase().includes(q));
+    document.getElementById('list-diary').innerHTML = list.length
+      ? list.map(d => `
+        <div class="item-card" style="border-left-color:var(--purple);">
+          <div class="item-head">
+            <div>
+              <h4 class="item-title">${esc(d.title)}</h4>
+              <div class="item-meta"><span class="tag">${esc(d.date)}</span></div>
+            </div>
+            <div class="item-actions">
+              <button class="btn-sm" data-act="diary-edit" data-id="${d.id}">Rediger</button>
+              <button class="btn-sm btn-danger" data-act="diary-del" data-id="${d.id}">Slet</button>
+            </div>
+          </div>
+          <p class="item-body">${esc(d.body)}</p>
+        </div>
+      `).join('')
+      : '<div class="empty">Ingen dagbogsindlæg endnu.</div>';
+  }
+
+  // Backup & JSON Import/Eksport
+  const backupModal = document.getElementById('backup-modal');
+  document.getElementById('open-backup-btn').addEventListener('click', () => backupModal.classList.add('open'));
+  document.getElementById('close-backup-modal').addEventListener('click', () => backupModal.classList.remove('open'));
+
+  document.getElementById('export-json-btn').addEventListener('click', () => {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      data: state,
+      encryptedDiary: JSON.parse(localStorage.getItem(DIARY_KEY) || 'null')
+    };
+    downloadFile(`lommelog-backup-${toLocalDateInput(new Date())}.json`, JSON.stringify(payload, null, 2), 'application/json');
+  });
+
+  document.getElementById('import-json-input').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        if (parsed.data && Array.isArray(parsed.data.items)) {
+          state = parsed.data;
+          if (parsed.encryptedDiary) {
+            localStorage.setItem(DIARY_KEY, JSON.stringify(parsed.encryptedDiary));
+          }
+          saveState();
+          backupModal.classList.remove('open');
+          alert('Backup er gendannet!');
+        } else {
+          alert('Ugyldig backup-fil.');
+        }
+      } catch (err) {
+        alert('Kunne ikke læse filen.');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('factory-reset-btn').addEventListener('click', () => {
+    if (confirm('Slet ALT (logbog, opgaver, noter og dagbog) permanent?')) {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(DIARY_KEY);
+      state = defaultState();
+      lockDiary();
+      saveState();
+      backupModal.classList.remove('open');
+    }
+  });
+
+  function downloadFile(filename, content, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Online/Offline indikator
+  function updateOnlineBadge() {
+    const el = document.getElementById('net-status');
+    el.textContent = navigator.onLine ? 'Online · Lokal lagring' : 'Offline · Klar';
+  }
+  window.addEventListener('online', updateOnlineBadge);
+  window.addEventListener('offline', updateOnlineBadge);
+  updateOnlineBadge();
+
+  renderAll();
+})();
+</script>
 </body>
 </html>
