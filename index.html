@@ -1027,6 +1027,8 @@
 </head>
 <body>
 
+  <input type="file" id="import-file" accept=".json,application/json" style="position:fixed;top:-200px;left:-200px;" onchange="importJSON(event)" />
+
   <!-- VENSTRE SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div>
@@ -1071,10 +1073,9 @@
       <button class="nav-btn" onclick="exportJSON()">
         <span class="nav-left"><span class="dot" style="background: #60a5fa"></span><span class="label">Eksportér JSON backup</span></span>
       </button>
-      <button class="nav-btn" onclick="document.getElementById('import-file').click()">
+      <button class="nav-btn" onclick="triggerImport()">
         <span class="nav-left"><span class="dot" style="background: #c084fc"></span><span class="label">Importér JSON backup</span></span>
       </button>
-      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)" />
     </div>
   </aside>
 
@@ -1194,7 +1195,7 @@
       t.textContent = msg;
       t.classList.add("show");
       clearTimeout(t._timer);
-      t._timer = setTimeout(() => t.classList.remove("show"), 2800);
+      t._timer = setTimeout(() => t.classList.remove("show"), 3200);
     }
 
     function applyFontScale() {
@@ -1712,6 +1713,13 @@
       URL.revokeObjectURL(url);
     }
 
+    function triggerImport() {
+      document.getElementById("sidebar").classList.remove("open");
+      const inp = document.getElementById("import-file");
+      inp.value = "";
+      inp.click();
+    }
+
     function importJSON(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1719,18 +1727,26 @@
       reader.onload = e => {
         try {
           const imported = JSON.parse(e.target.result);
-          if (imported.categories && imported.tasks) {
-            state = imported;
+          if (imported && Array.isArray(imported.tasks)) {
+            if (Array.isArray(imported.categories) && imported.categories.length > 0) {
+              state.categories = imported.categories;
+            }
+            state.tasks = imported.tasks.map(t => ({ note: "", ...t }));
+            currentView = "all";
+            boardFilter = "";
+            statusFilter = "";
+            searchQuery = "";
             saveState();
             render();
-            showToast("Backup indlæst!");
+            showToast(`${state.tasks.length} opgaver er indlæst!`);
+          } else {
+            alert("Filen indeholdt ingen opgaver.");
           }
         } catch (err) {
-          alert("Kunne ikke læse JSON-filen.");
+          alert("Kunne ikke læse JSON-filen: " + err.message);
         }
       };
       reader.readAsText(file);
-      event.target.value = "";
     }
 
     function toggleSidebar(e) {
