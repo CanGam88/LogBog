@@ -18,25 +18,10 @@
       --text-muted: #93908a;
       --accent: #d97757;
       --accent-soft: rgba(217, 119, 87, 0.14);
-
-      --c-ca: #60a5fa;
-      --c-comm: #c084fc;
-      --c-user: #34d399;
-      --c-spon: #fbbf24;
-      --c-anch: #f472b6;
-      --c-esop: #fb923c;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      font-size: calc(16px * var(--font-scale));
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: calc(16px * var(--font-scale)); }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
       background-color: var(--bg-main);
@@ -49,7 +34,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* VENSTRE NAVIGATION */
     .sidebar {
       width: clamp(290px, 21vw, 390px);
       background-color: var(--bg-sidebar);
@@ -65,971 +49,175 @@
       overflow-y: auto;
     }
 
-    .brand {
-      padding: 0 10px 16px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 14px;
-    }
+    .brand { padding: 0 10px 16px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+    .brand-eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); font-weight: 700; margin-bottom: 3px; }
+    .brand h1 { font-size: 1.22rem; font-weight: 700; letter-spacing: -0.01em; color: var(--text-primary); }
 
-    .brand-eyebrow {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--accent);
-      font-weight: 700;
-      margin-bottom: 3px;
-    }
-
-    .brand h1 {
-      font-size: 1.22rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      color: var(--text-primary);
-    }
-
-    .nav-section-label {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-      padding: 14px 10px 6px;
-      font-weight: 700;
-    }
+    .nav-section-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); padding: 14px 10px 6px; font-weight: 700; }
 
     .nav-btn {
-      width: 100%;
-      background: transparent;
-      border: none;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 11px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 0.88rem;
-      text-align: left;
-      transition: background 0.15s, color 0.15s;
-      gap: 10px;
-    }
-
-    .nav-btn:hover {
-      background-color: var(--bg-hover);
-      color: var(--text-primary);
-    }
-
-    .nav-btn.active {
-      background-color: var(--bg-elevated);
-      color: var(--text-primary);
-      font-weight: 600;
-    }
-
-    .nav-left {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      min-width: 0;
-    }
-
-    .nav-left span.label {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .dot {
-      width: 11px;
-      height: 11px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .count-badge {
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-      background: rgba(255, 255, 255, 0.06);
-      padding: 2px 9px;
-      border-radius: 999px;
-      flex-shrink: 0;
-      font-weight: 600;
-    }
-
-    .count-badge.warn {
-      background: rgba(248, 113, 113, 0.18);
-      color: #fca5a5;
-    }
-
-    .nav-btn.active .count-badge {
-      color: var(--text-primary);
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .sidebar-footer {
-      border-top: 1px solid var(--border);
-      padding-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    /* SKRIFTSTØRRELSE KONTROL */
-    .font-controls {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 12px;
-      margin-bottom: 6px;
-      background: var(--bg-elevated);
-      border-radius: 9px;
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-    }
-
-    .font-btns {
-      display: flex;
-      gap: 6px;
-    }
-
-    .font-step-btn {
-      background: var(--bg-main);
-      border: 1px solid var(--border-strong);
-      color: var(--text-primary);
-      padding: 4px 11px;
-      border-radius: 6px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .font-step-btn:hover {
-      border-color: var(--accent);
-    }
-
-    /* HOVEDOMRÅDE */
-    .main {
-      flex: 1;
-      min-width: 0;
-      padding: 28px clamp(20px, 3vw, 48px) 80px;
-      width: 100%;
-    }
-
-    .mobile-header {
-      display: none;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 18px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-      gap: 10px;
-    }
-
-    .menu-toggle {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-strong);
-      color: var(--text-primary);
-      padding: 10px 16px;
-      border-radius: 9px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    /* SPOTLIGHT OPRETTELSE */
-    .spotlight-box {
-      background-color: var(--bg-elevated);
-      border: 1px solid var(--border-strong);
-      border-radius: 14px;
-      padding: 18px 24px;
-      margin-bottom: 26px;
-      transition: border-color 0.2s;
-      width: 100%;
-    }
-
-    .spotlight-box:focus-within {
-      border-color: var(--accent);
-    }
-
-    .spotlight-input {
-      width: 100%;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text-primary);
-      font-size: 1.12rem;
-      font-weight: 500;
-      margin-bottom: 12px;
-    }
-
-    .spotlight-input::placeholder {
-      color: var(--text-muted);
-    }
-
-    .spotlight-controls {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-    }
-
-    .controls-left {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .cat-pill-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--bg-main);
-      border: 1px solid var(--border-strong);
-      color: var(--text-primary);
-      padding: 7px 14px;
-      border-radius: 999px;
-      font-size: 0.84rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.15s;
-      max-width: 100%;
-    }
-
-    .cat-pill-btn:hover {
-      background: var(--bg-hover);
-    }
-
-    .auto-hint {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    .mini-input, .mini-select {
-      background: var(--bg-main);
-      border: 1px solid var(--border-strong);
-      color: var(--text-primary);
-      border-radius: 8px;
-      padding: 7px 11px;
-      font-size: 0.84rem;
-      outline: none;
-      color-scheme: dark;
-    }
-
-    .mini-input:focus, .mini-select:focus {
-      border-color: var(--accent);
-    }
-
-    .add-btn {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 9px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.15s;
-    }
-
-    .add-btn:hover {
-      opacity: 0.9;
-    }
-
-    /* VIEW HEADER & FILTER-BJÆLKE */
-    .view-header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      margin-bottom: 14px;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .view-title {
-      font-size: 1.45rem;
-      font-weight: 700;
-      letter-spacing: -0.015em;
-    }
-
-    .view-subtitle {
-      font-size: 0.88rem;
-      color: var(--text-secondary);
-      margin-top: 2px;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .report-btn {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-strong);
-      color: var(--text-primary);
-      padding: 8px 14px;
-      border-radius: 9px;
-      font-size: 0.84rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      transition: border-color 0.15s, background 0.15s;
-    }
-
-    .report-btn:hover {
-      border-color: var(--accent);
-      background: var(--bg-hover);
-    }
-
-    .search-bar {
-      background: var(--bg-sidebar);
-      border: 1px solid var(--border-strong);
-      color: var(--text-primary);
-      padding: 8px 14px;
-      border-radius: 9px;
-      font-size: 0.88rem;
-      width: clamp(210px, 20vw, 320px);
-      outline: none;
-    }
-
-    .search-bar:focus {
-      border-color: var(--accent);
-    }
-
-    .filter-strip {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px 16px;
-      background: var(--bg-sidebar);
-      border: 1px solid var(--border);
-      border-radius: 11px;
-      margin-bottom: 18px;
-    }
-
-    .filter-chips {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .filter-chip {
-      background: transparent;
-      border: 1px solid var(--border-strong);
-      color: var(--text-secondary);
-      padding: 5px 12px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-
-    .filter-chip:hover {
-      color: var(--text-primary);
-      border-color: var(--text-secondary);
-    }
-
-    .filter-chip.active {
-      background: var(--accent-soft);
-      border-color: var(--accent);
-      color: var(--text-primary);
-      font-weight: 600;
-    }
-
-    /* OPGAVELISTE */
-    .task-list {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-    }
-
-    .task-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 15px 14px;
-      border-bottom: 1px solid var(--border);
-      gap: 20px;
-      transition: background 0.12s;
-      border-radius: 10px;
-      width: 100%;
-    }
-
-    .task-row:hover {
-      background-color: rgba(255, 255, 255, 0.028);
-    }
-
-    .task-left {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .check-circle {
-      width: 25px;
-      height: 25px;
-      border-radius: 50%;
-      border: 2px solid var(--border-strong);
-      background: transparent;
-      cursor: pointer;
-      flex-shrink: 0;
-      margin-top: 3px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: transparent;
-      font-size: 0.85rem;
-      font-weight: 700;
-      transition: all 0.15s;
-    }
-
-    .check-circle:hover {
-      border-color: var(--accent);
-    }
-
-    .task-row.done .check-circle {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
-    .task-content {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .task-title-line {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .task-title {
-      font-size: 1.04rem;
-      font-weight: 500;
-      color: var(--text-primary);
-      word-break: break-word;
-      cursor: text;
-      outline: none;
-      border-radius: 5px;
-      padding: 2px 5px;
-      margin-left: -5px;
-    }
-
-    .task-title:hover {
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .task-title:focus {
-      background: var(--bg-elevated);
-      box-shadow: 0 0 0 1px var(--accent);
-    }
-
-    .task-row.done .task-title {
-      text-decoration: line-through;
-      color: var(--text-muted);
-    }
-
-    .due-badge {
-      font-size: 0.74rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 6px;
-      letter-spacing: 0.02em;
-    }
-
-    .due-overdue {
-      background: rgba(248, 113, 113, 0.18);
-      color: #fca5a5;
-      border: 1px solid rgba(248, 113, 113, 0.35);
-    }
-
-    .due-soon {
-      background: rgba(251, 191, 36, 0.16);
-      color: #fde047;
-      border: 1px solid rgba(251, 191, 36, 0.35);
-    }
-
-    /* DIREKTE REDIGERBAR METADATA-LINJE */
-    .task-meta {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 9px;
-      margin-top: 8px;
-      font-size: 0.81rem;
-    }
-
-    .inline-meta-field {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      padding: 4px 10px;
-      border-radius: 7px;
-      color: var(--text-secondary);
-      transition: border-color 0.15s;
-    }
-
-    .inline-meta-field:hover, .inline-meta-field:focus-within {
-      border-color: var(--border-strong);
-    }
-
-    .inline-meta-label {
-      color: var(--text-muted);
-      font-size: 0.75rem;
-    }
-
-    .inline-board-input {
-      background: transparent;
-      border: none;
-      color: var(--text-primary);
-      font-size: 0.81rem;
-      width: 110px;
-      outline: none;
-      font-family: inherit;
-    }
-
-    .inline-date-input {
-      background: transparent;
-      border: none;
-      color: var(--text-primary);
-      font-size: 0.81rem;
-      outline: none;
-      font-family: inherit;
-      cursor: pointer;
-      color-scheme: dark;
-    }
-
-    .plus-week-btn {
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid var(--border-strong);
-      color: var(--text-secondary);
-      font-size: 0.74rem;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-left: 3px;
-    }
-
-    .plus-week-btn:hover {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
-    .inline-select {
-      background: transparent;
-      border: none;
-      color: var(--text-primary);
-      font-size: 0.81rem;
-      outline: none;
-      font-family: inherit;
-      cursor: pointer;
-    }
-
-    .inline-select option {
-      background: var(--bg-sidebar);
-      color: var(--text-primary);
-    }
-
-    .inline-meta-field.status-venter {
-      border-color: rgba(251, 191, 36, 0.35);
-      background: rgba(251, 191, 36, 0.1);
-    }
-    .inline-meta-field.status-venter .inline-select {
-      color: #fbbf24;
-      font-weight: 600;
-    }
-
-    .inline-meta-field.prio-høj {
-      border-color: rgba(248, 113, 113, 0.4);
-      background: rgba(248, 113, 113, 0.12);
-    }
-    .inline-meta-field.prio-høj .inline-select {
-      color: #f87171;
-      font-weight: 600;
-    }
-
-    .inline-meta-field.prio-medium {
-      border-color: rgba(96, 165, 250, 0.35);
-      background: rgba(96, 165, 250, 0.1);
-    }
-    .inline-meta-field.prio-medium .inline-select {
-      color: #60a5fa;
-      font-weight: 600;
-    }
-
-    .note-toggle-btn {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      padding: 4px 10px;
-      border-radius: 7px;
-      font-size: 0.78rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .note-toggle-btn:hover {
-      border-color: var(--border-strong);
-      color: var(--text-primary);
-    }
-
-    .note-toggle-btn.has-note {
-      border-color: rgba(52, 211, 153, 0.4);
-      color: #6ee7b7;
-      background: rgba(52, 211, 153, 0.08);
-    }
-
-    .task-note-box {
-      margin-top: 10px;
-      width: 100%;
-      background: var(--bg-sidebar);
-      border: 1px solid var(--border-strong);
-      border-radius: 8px;
-      padding: 9px 12px;
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 0.85rem;
-      resize: vertical;
-      min-height: 58px;
-      outline: none;
-    }
-
-    .task-note-box:focus {
-      border-color: var(--accent);
-    }
-
-    .task-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
-    .row-cat-select {
-      background: var(--bg-sidebar);
-      border: 1px solid var(--border-strong);
-      color: var(--text-primary);
-      font-size: 0.82rem;
-      padding: 7px 12px;
-      border-radius: 999px;
-      cursor: pointer;
-      outline: none;
-      max-width: 260px;
-    }
-
-    .row-cat-select:hover {
-      border-color: var(--accent);
-    }
-
-    .delete-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 1.05rem;
-      padding: 6px 9px;
-      border-radius: 6px;
-      opacity: 0.65;
-      transition: opacity 0.15s, color 0.15s;
-    }
-
-    .task-row:hover .delete-btn {
-      opacity: 1;
-    }
-
-    .delete-btn:hover {
-      color: #f87171;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 48px 20px;
-      color: var(--text-muted);
-      font-size: 1rem;
-    }
-
-    /* NØGLEORDS-GRID */
-    .kw-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-      gap: 16px;
-      width: 100%;
-    }
-
-    .kw-card {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px 20px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .kw-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 700;
-      font-size: 1.05rem;
-      margin-bottom: 5px;
-    }
-
-    .kw-desc {
-      font-size: 0.88rem;
-      color: var(--text-secondary);
-      margin-bottom: 14px;
-    }
-
-    .kw-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-
-    .kw-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      background: var(--bg-main);
-      border: 1px solid var(--border-strong);
-      padding: 4px 11px;
-      border-radius: 999px;
-      font-size: 0.84rem;
-      color: var(--text-primary);
-    }
-
-    .kw-chip button {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 1rem;
-      line-height: 1;
-    }
-
-    .kw-chip button:hover {
-      color: #f87171;
-    }
-
-    .kw-add-row {
-      display: flex;
-      gap: 10px;
-    }
-
-    /* TOAST BEKRÆFTELSE */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--accent);
-      color: var(--text-primary);
-      padding: 12px 18px;
-      border-radius: 10px;
-      font-size: 0.88rem;
-      font-weight: 500;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
-      z-index: 100;
-      opacity: 0;
-      transform: translateY(10px);
-      pointer-events: none;
-      transition: opacity 0.2s, transform 0.2s;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
+      width: 100%; background: transparent; border: none; color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 12px; border-radius: 10px; cursor: pointer; font-size: 0.88rem;
+      text-align: left; transition: background 0.15s, color 0.15s; gap: 10px; font-family: inherit;
+    }
+    .nav-btn:hover { background-color: var(--bg-hover); color: var(--text-primary); }
+    .nav-btn.active { background-color: var(--bg-elevated); color: var(--text-primary); font-weight: 600; }
+    .nav-left { display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .nav-left span.label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+    .count-badge { font-size: 0.78rem; color: var(--text-secondary); background: rgba(255,255,255,0.06); padding: 2px 9px; border-radius: 999px; flex-shrink: 0; font-weight: 600; }
+    .count-badge.warn { background: rgba(248,113,113,0.18); color: #fca5a5; }
+    .nav-btn.active .count-badge { color: var(--text-primary); background: rgba(255,255,255,0.12); }
+
+    .sidebar-footer { border-top: 1px solid var(--border); padding-top: 12px; display: flex; flex-direction: column; gap: 3px; }
+    .font-controls { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; margin-bottom: 6px; background: var(--bg-elevated); border-radius: 9px; font-size: 0.8rem; color: var(--text-secondary); }
+    .font-btns { display: flex; gap: 6px; }
+    .font-step-btn { background: var(--bg-main); border: 1px solid var(--border-strong); color: var(--text-primary); padding: 4px 11px; border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+    .font-step-btn:hover { border-color: var(--accent); }
+
+    .main { flex: 1; min-width: 0; padding: 28px clamp(20px, 3vw, 48px) 80px; width: 100%; }
+    .mobile-header { display: none; align-items: center; justify-content: space-between; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border); gap: 10px; }
+    .menu-toggle { background: var(--bg-elevated); border: 1px solid var(--border-strong); color: var(--text-primary); padding: 10px 16px; border-radius: 9px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+
+    .spotlight-box { background-color: var(--bg-elevated); border: 1px solid var(--border-strong); border-radius: 14px; padding: 18px 24px; margin-bottom: 26px; transition: border-color 0.2s; width: 100%; }
+    .spotlight-box:focus-within { border-color: var(--accent); }
+    .spotlight-input { width: 100%; background: transparent; border: none; outline: none; color: var(--text-primary); font-size: 1.12rem; font-weight: 500; margin-bottom: 12px; }
+    .spotlight-input::placeholder { color: var(--text-muted); }
+    .spotlight-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .controls-left { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+    .cat-pill-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-main); border: 1px solid var(--border-strong); color: var(--text-primary); padding: 7px 14px; border-radius: 999px; font-size: 0.84rem; font-weight: 500; cursor: pointer; transition: background 0.15s; max-width: 100%; }
+    .cat-pill-btn:hover { background: var(--bg-hover); }
+    .auto-hint { font-size: 0.78rem; color: var(--text-muted); }
+    .mini-input, .mini-select { background: var(--bg-main); border: 1px solid var(--border-strong); color: var(--text-primary); border-radius: 8px; padding: 7px 11px; font-size: 0.84rem; outline: none; color-scheme: dark; }
+    .mini-input:focus, .mini-select:focus { border-color: var(--accent); }
+    .add-btn { background: var(--accent); color: #fff; border: none; padding: 8px 20px; border-radius: 9px; font-size: 0.88rem; font-weight: 600; cursor: pointer; }
+    .add-btn:hover { opacity: 0.9; }
+
+    .view-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 14px; gap: 14px; flex-wrap: wrap; }
+    .view-title { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.015em; }
+    .view-subtitle { font-size: 0.88rem; color: var(--text-secondary); margin-top: 2px; }
+    .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .report-btn { background: var(--bg-elevated); border: 1px solid var(--border-strong); color: var(--text-primary); padding: 8px 14px; border-radius: 9px; font-size: 0.84rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+    .report-btn:hover { border-color: var(--accent); background: var(--bg-hover); }
+    .search-bar { background: var(--bg-sidebar); border: 1px solid var(--border-strong); color: var(--text-primary); padding: 8px 14px; border-radius: 9px; font-size: 0.88rem; width: clamp(210px, 20vw, 320px); outline: none; }
+    .search-bar:focus { border-color: var(--accent); }
+
+    .filter-strip { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 16px; background: var(--bg-sidebar); border: 1px solid var(--border); border-radius: 11px; margin-bottom: 18px; }
+    .filter-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .filter-chip { background: transparent; border: 1px solid var(--border-strong); color: var(--text-secondary); padding: 5px 12px; border-radius: 999px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+    .filter-chip:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+    .filter-chip.active { background: var(--accent-soft); border-color: var(--accent); color: var(--text-primary); font-weight: 600; }
+
+    .task-list { display: flex; flex-direction: column; width: 100%; }
+    .task-row { display: flex; align-items: center; justify-content: space-between; padding: 15px 14px; border-bottom: 1px solid var(--border); gap: 20px; border-radius: 10px; width: 100%; }
+    .task-row:hover { background-color: rgba(255,255,255,0.028); }
+    .task-left { display: flex; align-items: flex-start; gap: 14px; flex: 1; min-width: 0; }
+    .check-circle { width: 25px; height: 25px; border-radius: 50%; border: 2px solid var(--border-strong); background: transparent; cursor: pointer; flex-shrink: 0; margin-top: 3px; display: flex; align-items: center; justify-content: center; color: transparent; font-size: 0.85rem; font-weight: 700; }
+    .check-circle:hover { border-color: var(--accent); }
+    .task-row.done .check-circle { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .task-content { flex: 1; min-width: 0; }
+    .task-title-line { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .task-title { font-size: 1.04rem; font-weight: 500; color: var(--text-primary); word-break: break-word; cursor: text; outline: none; border-radius: 5px; padding: 2px 5px; margin-left: -5px; }
+    .task-title:hover { background: rgba(255,255,255,0.04); }
+    .task-title:focus { background: var(--bg-elevated); box-shadow: 0 0 0 1px var(--accent); }
+    .task-row.done .task-title { text-decoration: line-through; color: var(--text-muted); }
+
+    .due-badge { font-size: 0.74rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+    .due-overdue { background: rgba(248,113,113,0.18); color: #fca5a5; border: 1px solid rgba(248,113,113,0.35); }
+    .due-soon { background: rgba(251,191,36,0.16); color: #fde047; border: 1px solid rgba(251,191,36,0.35); }
+
+    .task-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 8px; font-size: 0.81rem; }
+    .inline-meta-field { display: inline-flex; align-items: center; gap: 5px; background: var(--bg-elevated); border: 1px solid var(--border); padding: 4px 10px; border-radius: 7px; color: var(--text-secondary); }
+    .inline-meta-field:hover, .inline-meta-field:focus-within { border-color: var(--border-strong); }
+    .inline-meta-label { color: var(--text-muted); font-size: 0.75rem; }
+    .inline-board-input { background: transparent; border: none; color: var(--text-primary); font-size: 0.81rem; width: 110px; outline: none; font-family: inherit; }
+    .inline-date-input { background: transparent; border: none; color: var(--text-primary); font-size: 0.81rem; outline: none; font-family: inherit; cursor: pointer; color-scheme: dark; }
+    .plus-week-btn { background: rgba(255,255,255,0.07); border: 1px solid var(--border-strong); color: var(--text-secondary); font-size: 0.74rem; font-weight: 600; padding: 2px 7px; border-radius: 5px; cursor: pointer; margin-left: 3px; }
+    .plus-week-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .inline-select { background: transparent; border: none; color: var(--text-primary); font-size: 0.81rem; outline: none; font-family: inherit; cursor: pointer; }
+    .inline-select option { background: var(--bg-sidebar); color: var(--text-primary); }
+
+    .inline-meta-field.status-venter { border-color: rgba(251,191,36,0.35); background: rgba(251,191,36,0.1); }
+    .inline-meta-field.status-venter .inline-select { color: #fbbf24; font-weight: 600; }
+    .inline-meta-field.prio-høj { border-color: rgba(248,113,113,0.4); background: rgba(248,113,113,0.12); }
+    .inline-meta-field.prio-høj .inline-select { color: #f87171; font-weight: 600; }
+    .inline-meta-field.prio-medium { border-color: rgba(96,165,250,0.35); background: rgba(96,165,250,0.1); }
+    .inline-meta-field.prio-medium .inline-select { color: #60a5fa; font-weight: 600; }
+
+    .note-toggle-btn { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); padding: 4px 10px; border-radius: 7px; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+    .note-toggle-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
+    .note-toggle-btn.has-note { border-color: rgba(52,211,153,0.4); color: #6ee7b7; background: rgba(52,211,153,0.08); }
+    .task-note-box { margin-top: 10px; width: 100%; background: var(--bg-sidebar); border: 1px solid var(--border-strong); border-radius: 8px; padding: 9px 12px; color: var(--text-primary); font-family: inherit; font-size: 0.85rem; resize: vertical; min-height: 58px; outline: none; }
+    .task-note-box:focus { border-color: var(--accent); }
+
+    .task-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .row-cat-select { background: var(--bg-sidebar); border: 1px solid var(--border-strong); color: var(--text-primary); font-size: 0.82rem; padding: 7px 12px; border-radius: 999px; cursor: pointer; outline: none; max-width: 260px; }
+    .row-cat-select:hover { border-color: var(--accent); }
+    .delete-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.05rem; padding: 6px 9px; border-radius: 6px; opacity: 0.65; }
+    .task-row:hover .delete-btn { opacity: 1; }
+    .delete-btn:hover { color: #f87171; }
+    .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); font-size: 1rem; }
+
+    .kw-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 16px; width: 100%; }
+    .kw-card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; justify-content: space-between; }
+    .kw-header { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.05rem; margin-bottom: 5px; }
+    .kw-desc { font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 14px; }
+    .kw-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .kw-chip { display: inline-flex; align-items: center; gap: 7px; background: var(--bg-main); border: 1px solid var(--border-strong); padding: 4px 11px; border-radius: 999px; font-size: 0.84rem; color: var(--text-primary); }
+    .kw-chip button { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; line-height: 1; }
+    .kw-chip button:hover { color: #f87171; }
+    .kw-add-row { display: flex; gap: 10px; }
+
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg-elevated); border: 1px solid var(--accent); color: var(--text-primary); padding: 12px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 500; box-shadow: 0 10px 28px rgba(0,0,0,0.45); z-index: 100; opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity 0.2s, transform 0.2s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
 
-    /* TABLET LANDSCAPE (11" PÅ TVÆRS — ca. 1024px–1280px) */
     @media (max-width: 1280px) {
-      .sidebar {
-        width: 280px;
-        padding: 18px 12px;
-      }
-      .main {
-        padding: 22px 22px 70px;
-      }
-      .task-row {
-        align-items: flex-start;
-      }
+      .sidebar { width: 280px; padding: 18px 12px; }
+      .main { padding: 22px 22px 70px; }
+      .task-row { align-items: flex-start; }
     }
 
-    /* TABLET PORTRAIT & MINDRE SKÆRME (under 960px) */
     @media (max-width: 960px) {
-      .sidebar {
-        position: fixed;
-        left: -340px;
-        width: 320px;
-        z-index: 50;
-        transition: left 0.22s ease;
-      }
-      .sidebar.open {
-        left: 0;
-        box-shadow: 12px 0 32px rgba(0, 0, 0, 0.55);
-      }
-      .mobile-header {
-        display: flex;
-      }
-      .main {
-        padding: 18px 16px 60px;
-      }
-      .task-row {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-      }
-      .task-right {
-        justify-content: flex-end;
-        padding-left: 39px;
-      }
-      .kw-grid {
-        grid-template-columns: 1fr;
-      }
-      .check-circle {
-        width: 28px;
-        height: 28px;
-      }
-      .inline-meta-field, .row-cat-select, .filter-chip {
-        padding-top: 6px;
-        padding-bottom: 6px;
-      }
+      .sidebar { position: fixed; left: -340px; width: 320px; z-index: 50; transition: left 0.22s ease; }
+      .sidebar.open { left: 0; box-shadow: 12px 0 32px rgba(0,0,0,0.55); }
+      .mobile-header { display: flex; }
+      .main { padding: 18px 16px 60px; }
+      .task-row { flex-direction: column; align-items: stretch; gap: 12px; }
+      .task-right { justify-content: flex-end; padding-left: 39px; }
+      .kw-grid { grid-template-columns: 1fr; }
     }
 
-    /* TELEFON (GALAXY S24 / SMARTPHONES — under 600px) */
     @media (max-width: 600px) {
-      html {
-        font-size: calc(14px * var(--font-scale));
-      }
-      .sidebar {
-        width: 85vw;
-        max-width: 330px;
-        left: -90vw;
-      }
-      .main {
-        padding: 12px 12px 70px;
-      }
-      .spotlight-box {
-        padding: 14px 14px;
-        margin-bottom: 18px;
-        border-radius: 12px;
-      }
-      .spotlight-input {
-        font-size: 1.02rem;
-      }
-      .spotlight-controls {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-      }
-      .controls-left {
-        width: 100%;
-      }
-      .cat-pill-btn {
-        width: 100%;
-        justify-content: center;
-      }
-      #board-input, #date-input, #prio-input {
-        flex: 1 1 45%;
-        width: auto !important;
-        min-width: 0;
-      }
-      .add-btn {
-        width: 100%;
-        padding: 11px;
-        font-size: 0.95rem;
-      }
-      .view-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-      }
-      .header-actions {
-        width: 100%;
-      }
-      .report-btn {
-        flex: 1;
-        justify-content: center;
-      }
-      .search-bar {
-        width: 100%;
-      }
-      .filter-strip {
-        padding: 8px 10px;
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .filter-chips {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        padding-bottom: 4px;
-        -webkit-overflow-scrolling: touch;
-      }
-      .filter-strip .mini-select {
-        width: 100%;
-      }
-      .task-row {
-        padding: 14px 8px;
-      }
-      .task-left {
-        gap: 10px;
-      }
-      .task-meta {
-        gap: 6px;
-      }
-      .inline-meta-field {
-        flex: 1 1 auto;
-        justify-content: space-between;
-      }
-      .inline-board-input {
-        width: 85px;
-      }
-      .task-right {
-        padding-left: 0;
-        justify-content: space-between;
-      }
-      .row-cat-select {
-        flex: 1;
-        max-width: none;
-      }
-      .kw-add-row {
-        flex-direction: column;
-      }
-      .toast {
-        left: 12px;
-        right: 12px;
-        bottom: 14px;
-        text-align: center;
-      }
+      html { font-size: calc(14px * var(--font-scale)); }
+      .sidebar { width: 85vw; max-width: 330px; left: -90vw; }
+      .main { padding: 12px 12px 70px; }
+      .spotlight-box { padding: 14px; margin-bottom: 18px; border-radius: 12px; }
+      .spotlight-controls { flex-direction: column; align-items: stretch; gap: 10px; }
+      .controls-left { width: 100%; }
+      .cat-pill-btn { width: 100%; justify-content: center; }
+      #board-input, #date-input, #prio-input { flex: 1 1 45%; width: auto !important; min-width: 0; }
+      .add-btn { width: 100%; padding: 11px; font-size: 0.95rem; }
+      .view-header { flex-direction: column; align-items: stretch; gap: 10px; }
+      .header-actions, .search-bar { width: 100%; }
+      .report-btn { flex: 1; justify-content: center; }
+      .filter-strip { padding: 8px 10px; flex-direction: column; align-items: stretch; }
+      .filter-chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+      .filter-strip .mini-select { width: 100%; }
+      .task-row { padding: 14px 8px; }
+      .task-left { gap: 10px; }
+      .inline-meta-field { flex: 1 1 auto; justify-content: space-between; }
+      .inline-board-input { width: 85px; }
+      .task-right { padding-left: 0; justify-content: space-between; }
+      .row-cat-select { flex: 1; max-width: none; }
+      .kw-add-row { flex-direction: column; }
+      .toast { left: 12px; right: 12px; bottom: 14px; text-align: center; }
     }
   </style>
 </head>
 <body>
 
-  <input type="file" id="import-file" accept=".json,application/json" style="position:fixed;top:-200px;left:-200px;" onchange="importJSON(event)" />
-
-  <!-- VENSTRE SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div>
       <div class="brand">
@@ -1055,8 +243,8 @@
       <div class="font-controls">
         <span>Tekststørrelse</span>
         <div class="font-btns">
-          <button class="font-step-btn" onclick="changeFontScale(-0.1)" title="Mindre tekst">A-</button>
-          <button class="font-step-btn" onclick="changeFontScale(0.1)" title="Større tekst">A+</button>
+          <button class="font-step-btn" onclick="changeFontScale(-0.1)">A-</button>
+          <button class="font-step-btn" onclick="changeFontScale(0.1)">A+</button>
         </div>
       </div>
 
@@ -1073,13 +261,13 @@
       <button class="nav-btn" onclick="exportJSON()">
         <span class="nav-left"><span class="dot" style="background: #60a5fa"></span><span class="label">Eksportér JSON backup</span></span>
       </button>
-      <button class="nav-btn" onclick="triggerImport()">
-        <span class="nav-left"><span class="dot" style="background: #c084fc"></span><span class="label">Importér JSON backup</span></span>
-      </button>
+      <label class="nav-btn" style="cursor:pointer;">
+        <span class="nav-left"><span class="dot" style="background: #c084fc"></span><span class="label">Importér JSON fil</span></span>
+        <input type="file" id="import-file" accept=".json,application/json,text/plain" style="display:none" onchange="importJSON(event)" />
+      </label>
     </div>
   </aside>
 
-  <!-- HOVEDINDHOLD -->
   <main class="main" onclick="closeSidebarOnOutsideClick(event)">
     <div class="mobile-header">
       <button class="menu-toggle" onclick="toggleSidebar(event)">☰ Kategorier</button>
@@ -1089,7 +277,6 @@
       </div>
     </div>
 
-    <!-- SPOTLIGHT OPRETTELSESFELT -->
     <section class="spotlight-box">
       <input
         type="text"
@@ -1101,7 +288,7 @@
       />
       <div class="spotlight-controls">
         <div class="controls-left">
-          <button type="button" class="cat-pill-btn" id="selected-cat-pill" onclick="cycleManualCategory()" title="Klik for at skifte kategori manuelt">
+          <button type="button" class="cat-pill-btn" id="selected-cat-pill" onclick="cycleManualCategory()">
             <span class="dot" id="pill-dot"></span>
             <span id="pill-label">C&amp;A &amp; Projektintegration</span>
           </button>
@@ -1122,7 +309,6 @@
       </div>
     </section>
 
-    <!-- DYNAMISK VISNING -->
     <div id="content-area"></div>
   </main>
 
@@ -1130,51 +316,13 @@
 
   <script>
     const DEFAULT_CATEGORIES = [
-      {
-        id: "ca",
-        name: "C&A & Projektintegration",
-        color: "#60a5fa",
-        desc: "Fokusere på menneskesiden af projekter og sikre, at C&A-aktiviteter integreres i projektplanerne i tæt samarbejde med projektlederne.",
-        keywords: ["projekt", "projektplan", "projektleder", "projekttavle", "task force", "c&a", "change", "menneskesiden", "interessent", "rasci", "tidsplan", "milepæl", "ombyg", "runi", "wincc", "mmr", "cloud"]
-      },
-      {
-        id: "comm",
-        name: "Forandringskommunikation",
-        color: "#c084fc",
-        desc: "Sikre og understøtte projekternes kommunikationsindsats og den samlede kommunikationsplan (hvorfor & betydning i hverdagen).",
-        keywords: ["kommunikation", "kommunikationsplan", "hvorfor", "budskab", "nyhedsbrev", "infoskærm", "tavlemøde", "præsentation", "orientering", "dialog", "fortælling"]
-      },
-      {
-        id: "users",
-        name: "Understøttelse af slutbrugere",
-        color: "#34d399",
-        desc: "Understøtte det lokale ejerskab, samt støtte de ansvarlige undervejs, så organisationen forstår og mestrer nye funktioner og arbejdsmetoder.",
-        keywords: ["slutbruger", "ejerskab", "operatør", "hjælp til", "driftskontrolant", "træning", "oplæring", "sidemandsoplæring", "arbejdsmetode", "superbruger", "mestre", "støtte"]
-      },
-      {
-        id: "sponsors",
-        name: "Sponsorer & Ledere",
-        color: "#fbbf24",
-        desc: "Understøtte sponsorkoalitionen og klæde sponsorer og people managers på til deres forandringsroller.",
-        keywords: ["sponsor", "sponsorkoalition", "leder", "ledere", "people manager", "arbejdsleder", "teamleder", "ledelse", "forandringsrolle", "sparring", "klæde på"]
-      },
-      {
-        id: "anchoring",
-        name: "Forankring & Opfølgning",
-        color: "#f472b6",
-        desc: "Sikre opfølgning på implementering af nye værktøjer og arbejdsmåder, og fejre succeser i de relevante afdelinger.",
-        keywords: ["forankring", "opfølgning", "følg op", "implementering", "fejre", "succes", "audit", "6s", "eftersyn", "fastholdelse", "evaluering", "status"]
-      },
-      {
-        id: "esop",
-        name: "Dokumentation & eSOP",
-        color: "#fb923c",
-        desc: "Deltage i og drive eSOP som forandringsprojekt; sikre træning i udarbejdelse af eSOPs og understøtte introduktionen.",
-        keywords: ["esop", "sop", "instruks", "procedure", "betjeningsvejledning", "betjeningsvejledninger", "dokumentation", "vejledning", "kold-ende", "vedligehold", "oem"]
-      }
+      { id: "ca", name: "C&A & Projektintegration", color: "#60a5fa", desc: "Fokusere på menneskesiden af projekter og sikre, at C&A-aktiviteter integreres i projektplanerne i tæt samarbejde med projektlederne.", keywords: ["projekt", "projektplan", "projektleder", "projekttavle", "task force", "c&a", "change", "menneskesiden", "interessent", "rasci", "tidsplan", "milepæl", "ombyg", "runi", "wincc", "mmr", "cloud"] },
+      { id: "comm", name: "Forandringskommunikation", color: "#c084fc", desc: "Sikre og understøtte projekternes kommunikationsindsats og den samlede kommunikationsplan (hvorfor & betydning i hverdagen).", keywords: ["kommunikation", "kommunikationsplan", "hvorfor", "budskab", "nyhedsbrev", "infoskærm", "tavlemøde", "præsentation", "orientering", "dialog", "fortælling"] },
+      { id: "users", name: "Understøttelse af slutbrugere", color: "#34d399", desc: "Understøtte det lokale ejerskab, samt støtte de ansvarlige undervejs, så organisationen forstår og mestrer nye funktioner og arbejdsmetoder.", keywords: ["slutbruger", "ejerskab", "operatør", "hjælp til", "driftskontrolant", "træning", "oplæring", "sidemandsoplæring", "arbejdsmetode", "superbruger", "mestre", "støtte"] },
+      { id: "sponsors", name: "Sponsorer & Ledere", color: "#fbbf24", desc: "Understøtte sponsorkoalitionen og klæde sponsorer og people managers på til deres forandringsroller.", keywords: ["sponsor", "sponsorkoalition", "leder", "ledere", "people manager", "arbejdsleder", "teamleder", "ledelse", "forandringsrolle", "sparring", "klæde på"] },
+      { id: "anchoring", name: "Forankring & Opfølgning", color: "#f472b6", desc: "Sikre opfølgning på implementering af nye værktøjer og arbejdsmåder, og fejre succeser i de relevante afdelinger.", keywords: ["forankring", "opfølgning", "følg op", "implementering", "fejre", "succes", "audit", "6s", "eftersyn", "fastholdelse", "evaluering", "status"] },
+      { id: "esop", name: "Dokumentation & eSOP", color: "#fb923c", desc: "Deltage i og drive eSOP som forandringsprojekt; sikre træning i udarbejdelse af eSOPs og understøtte introduktionen.", keywords: ["esop", "sop", "instruks", "procedure", "betjeningsvejledning", "betjeningsvejledninger", "dokumentation", "vejledning", "kold-ende", "vedligehold", "oem"] }
     ];
-
-    const INITIAL_TASKS = [];
 
     const STORAGE_KEY = "cm_cockpit_clean_v1";
     const FONT_KEY = "cm_cockpit_font_scale";
@@ -1195,7 +343,7 @@
       t.textContent = msg;
       t.classList.add("show");
       clearTimeout(t._timer);
-      t._timer = setTimeout(() => t.classList.remove("show"), 3200);
+      t._timer = setTimeout(() => t.classList.remove("show"), 3500);
     }
 
     function applyFontScale() {
@@ -1213,17 +361,50 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed.categories && parsed.tasks) {
-            parsed.tasks = parsed.tasks.map(t => ({ note: "", ...t }));
-            return parsed;
+          if (parsed && Array.isArray(parsed.tasks)) {
+            return {
+              categories: Array.isArray(parsed.categories) && parsed.categories.length ? parsed.categories : DEFAULT_CATEGORIES,
+              tasks: parsed.tasks.map(t => ({ note: "", ...t }))
+            };
           }
         }
       } catch (e) {}
-      return { categories: DEFAULT_CATEGORIES, tasks: INITIAL_TASKS };
+      return { categories: DEFAULT_CATEGORIES, tasks: [] };
     }
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!imported || !Array.isArray(imported.tasks)) {
+            alert("Ugyldig JSON-fil: Kunne ikke finde opgavelisten.");
+            return;
+          }
+          if (Array.isArray(imported.categories) && imported.categories.length > 0) {
+            state.categories = imported.categories;
+          }
+          state.tasks = imported.tasks.map(t => ({ note: "", ...t }));
+          currentView = "all";
+          boardFilter = "";
+          statusFilter = "";
+          searchQuery = "";
+          saveState();
+          render();
+          document.getElementById("sidebar").classList.remove("open");
+          showToast(`${state.tasks.length} opgaver er indlæst!`);
+        } catch (err) {
+          alert("Fejl ved læsning af JSON-fil: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = "";
     }
 
     function getDueInfo(dateStr) {
@@ -1240,26 +421,18 @@
     }
 
     function isUrgentTask(task) {
-      if (task.done || !task.date) return false;
-      return getDueInfo(task.date) !== null;
+      return !task.done && !!task.date && getDueInfo(task.date) !== null;
     }
 
     function detectCategory(text) {
       const lower = text.toLowerCase();
-      let bestId = null;
-      let bestScore = 0;
-
+      let bestId = null, bestScore = 0;
       for (const cat of state.categories) {
         let score = 0;
         for (const kw of cat.keywords) {
-          if (kw && lower.includes(kw.toLowerCase())) {
-            score += kw.length > 4 ? 2 : 1;
-          }
+          if (kw && lower.includes(kw.toLowerCase())) score += kw.length > 4 ? 2 : 1;
         }
-        if (score > bestScore) {
-          bestScore = score;
-          bestId = cat.id;
-        }
+        if (score > bestScore) { bestScore = score; bestId = cat.id; }
       }
       return bestId;
     }
@@ -1269,45 +442,30 @@
       for (const task of state.tasks) {
         if (task.done) continue;
         const matched = detectCategory(`${task.title} ${task.board || ""}`);
-        if (matched && matched !== task.categoryId) {
-          task.categoryId = matched;
-          moved++;
-        }
+        if (matched && matched !== task.categoryId) { task.categoryId = matched; moved++; }
       }
       saveState();
       render();
-      showToast(moved > 0 ? `${moved} opgaver blev flyttet ud fra dine nøgleord.` : "Alle aktive opgaver matcher allerede reglerne.");
+      showToast(moved > 0 ? `${moved} opgaver flyttet ud fra nøgleord.` : "Alle opgaver matcher allerede.");
     }
 
     function handleLiveCategorize() {
       const text = document.getElementById("task-input").value;
       if (!text.trim()) {
         manualOverride = false;
-        if (state.categories.some(c => c.id === currentView)) {
-          selectedCategoryId = currentView;
-        } else {
-          selectedCategoryId = state.categories[0].id;
-        }
+        selectedCategoryId = state.categories.some(c => c.id === currentView) ? currentView : state.categories[0].id;
         updatePillUI("Standard");
         return;
       }
-
       if (manualOverride) return;
-
       const matched = detectCategory(text);
-      if (matched) {
-        selectedCategoryId = matched;
-        updatePillUI("Auto-match på nøgleord");
-      } else {
-        selectedCategoryId = state.categories.some(c => c.id === currentView) ? currentView : state.categories[0].id;
-        updatePillUI("Ingen match — standard");
-      }
+      if (matched) { selectedCategoryId = matched; updatePillUI("Auto-match på nøgleord"); }
+      else { selectedCategoryId = state.categories.some(c => c.id === currentView) ? currentView : state.categories[0].id; updatePillUI("Ingen match — standard"); }
     }
 
     function cycleManualCategory() {
       const idx = state.categories.findIndex(c => c.id === selectedCategoryId);
-      const next = state.categories[(idx + 1) % state.categories.length];
-      selectedCategoryId = next.id;
+      selectedCategoryId = state.categories[(idx + 1) % state.categories.length].id;
       manualOverride = true;
       updatePillUI("Valgt manuelt");
     }
@@ -1323,23 +481,17 @@
       const input = document.getElementById("task-input");
       const title = input.value.trim();
       if (!title) return;
-
-      const board = document.getElementById("board-input").value.trim();
-      const date = document.getElementById("date-input").value;
-      const priority = document.getElementById("prio-input").value;
-
       state.tasks.unshift({
         id: "t_" + Date.now(),
         title,
         categoryId: selectedCategoryId,
-        board,
+        board: document.getElementById("board-input").value.trim(),
         status: "Igangsat",
-        date,
-        priority,
+        date: document.getElementById("date-input").value,
+        priority: document.getElementById("prio-input").value,
         note: "",
         done: false
       });
-
       input.value = "";
       document.getElementById("board-input").value = "";
       document.getElementById("date-input").value = "";
@@ -1353,20 +505,12 @@
 
     function toggleDone(id) {
       const task = state.tasks.find(t => t.id === id);
-      if (task) {
-        task.done = !task.done;
-        saveState();
-        render();
-      }
+      if (task) { task.done = !task.done; saveState(); render(); }
     }
 
     function updateTaskField(id, field, value) {
       const task = state.tasks.find(t => t.id === id);
-      if (task) {
-        task[field] = value;
-        saveState();
-        if (field !== "note") render();
-      }
+      if (task) { task[field] = value; saveState(); if (field !== "note") render(); }
     }
 
     function postponeOneWeek(id) {
@@ -1374,27 +518,18 @@
       if (!task) return;
       const base = task.date ? new Date(task.date + "T00:00:00") : new Date();
       base.setDate(base.getDate() + 7);
-      const yyyy = base.getFullYear();
-      const mm = String(base.getMonth() + 1).padStart(2, "0");
-      const dd = String(base.getDate()).padStart(2, "0");
+      const yyyy = base.getFullYear(), mm = String(base.getMonth() + 1).padStart(2, "0"), dd = String(base.getDate()).padStart(2, "0");
       task.date = `${yyyy}-${mm}-${dd}`;
       saveState();
       render();
       showToast(`Ny dato: ${dd}-${mm}-${yyyy}`);
     }
 
-    function toggleNoteBox(id) {
-      openNotes[id] = !openNotes[id];
-      render();
-    }
+    function toggleNoteBox(id) { openNotes[id] = !openNotes[id]; render(); }
 
     function updateTaskTitle(id, newTitle) {
       const task = state.tasks.find(t => t.id === id);
-      const clean = newTitle.trim();
-      if (task && clean) {
-        task.title = clean;
-        saveState();
-      }
+      if (task && newTitle.trim()) { task.title = newTitle.trim(); saveState(); }
     }
 
     function deleteTask(id) {
@@ -1408,27 +543,17 @@
       const val = input.value.trim().toLowerCase();
       if (!val) return;
       const cat = state.categories.find(c => c.id === catId);
-      if (cat && !cat.keywords.includes(val)) {
-        cat.keywords.push(val);
-        saveState();
-        render();
-      }
+      if (cat && !cat.keywords.includes(val)) { cat.keywords.push(val); saveState(); render(); }
     }
 
     function removeKeyword(catId, kw) {
       const cat = state.categories.find(c => c.id === catId);
-      if (cat) {
-        cat.keywords = cat.keywords.filter(k => k !== kw);
-        saveState();
-        render();
-      }
+      if (cat) { cat.keywords = cat.keywords.filter(k => k !== kw); saveState(); render(); }
     }
 
     function setView(viewId) {
       currentView = viewId;
-      searchQuery = "";
-      boardFilter = "";
-      statusFilter = "";
+      searchQuery = ""; boardFilter = ""; statusFilter = "";
       if (state.categories.some(c => c.id === viewId) && !manualOverride) {
         selectedCategoryId = viewId;
         updatePillUI("Standard for visning");
@@ -1449,258 +574,19 @@
 
     function copyStatusReport() {
       const active = state.tasks.filter(t => !t.done);
-      const todayStr = new Date().toLocaleDateString("da-DK");
-      let lines = [`CHANGE MASTER STATUSOVERSIGT (${todayStr})`, `Aktive opgaver i alt: ${active.length}`, ""];
-
+      let lines = [`CHANGE MASTER STATUSOVERSIGT (${new Date().toLocaleDateString("da-DK")})`, `Aktive opgaver i alt: ${active.length}`, ""];
       for (const cat of state.categories) {
         const items = active.filter(t => t.categoryId === cat.id);
-        if (items.length === 0) continue;
+        if (!items.length) continue;
         lines.push(`■ ${cat.name.toUpperCase()} (${items.length})`);
         for (const t of items) {
-          const meta = [
-            t.board ? `Tavle: ${t.board}` : "",
-            t.status || "",
-            t.date ? `Dato: ${formatDateDK(t.date)}` : "",
-            t.priority || ""
-          ].filter(Boolean).join(" | ");
+          const meta = [t.board ? `Tavle: ${t.board}` : "", t.status || "", t.date ? `Dato: ${formatDateDK(t.date)}` : "", t.priority || ""].filter(Boolean).join(" | ");
           lines.push(`  - ${t.title}${meta ? ` [${meta}]` : ""}`);
-          if (t.note && t.note.trim()) {
-            lines.push(`    Note: ${t.note.trim()}`);
-          }
+          if (t.note && t.note.trim()) lines.push(`    Note: ${t.note.trim()}`);
         }
         lines.push("");
       }
-
-      const text = lines.join("\n");
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-          showToast("Statusrapport kopieret til udklipsholder — klar til Outlook/Teams!");
-        }).catch(() => fallbackCopy(text));
-      } else {
-        fallbackCopy(text);
-      }
-    }
-
-    function fallbackCopy(text) {
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
-      showToast("Statusrapport kopieret til udklipsholder!");
-    }
-
-    function render() {
-      const activeTasks = state.tasks.filter(t => !t.done);
-      const urgentTasks = activeTasks.filter(isUrgentTask);
-      const doneTasks = state.tasks.filter(t => t.done);
-
-      document.getElementById("count-all").textContent = activeTasks.length;
-      document.getElementById("count-urgent").textContent = urgentTasks.length;
-      document.getElementById("count-done").textContent = doneTasks.length;
-
-      const navContainer = document.getElementById("category-nav");
-      navContainer.innerHTML = state.categories.map(cat => {
-        const count = activeTasks.filter(t => t.categoryId === cat.id).length;
-        const activeClass = currentView === cat.id ? "active" : "";
-        return `
-          <button class="nav-btn ${activeClass}" onclick="setView('${cat.id}')">
-            <span class="nav-left">
-              <span class="dot" style="background:${cat.color}"></span>
-              <span class="label">${cat.name}</span>
-            </span>
-            <span class="count-badge">${count}</span>
-          </button>
-        `;
-      }).join("");
-
-      document.querySelectorAll(".sidebar > div > .nav-btn, .sidebar-footer > .nav-btn").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.view === currentView);
-      });
-
-      const content = document.getElementById("content-area");
-
-      if (currentView === "keywords") {
-        content.innerHTML = `
-          <div class="view-header">
-            <div>
-              <h2 class="view-title">Nøgleord &amp; Auto-sortering</h2>
-              <p class="view-subtitle">Tilføj interne projektnavne, tavler eller fagudtryk — appen sorterer automatisk efter disse ord.</p>
-            </div>
-            <button class="report-btn" onclick="reCategorizeAllActive()">↻ Gen-sorter alle aktive opgaver nu</button>
-          </div>
-          <div class="kw-grid">
-            ${state.categories.map(cat => `
-              <div class="kw-card">
-                <div>
-                  <div class="kw-header">
-                    <span class="dot" style="background:${cat.color}"></span>
-                    <span>${cat.name}</span>
-                  </div>
-                  <p class="kw-desc">${cat.desc}</p>
-                  <div class="kw-tags">
-                    ${cat.keywords.map(kw => `
-                      <span class="kw-chip">${escapeHtml(kw)} <button onclick="removeKeyword('${cat.id}', '${kw.replace(/'/g, "\\'")}')">&times;</button></span>
-                    `).join("")}
-                  </div>
-                </div>
-                <div class="kw-add-row">
-                  <input type="text" id="kw-input-${cat.id}" class="mini-input" placeholder="Tilføj nyt nøgleord..." style="flex:1;" onkeydown="if(event.key==='Enter') addKeyword('${cat.id}')" />
-                  <button class="cat-pill-btn" onclick="addKeyword('${cat.id}')">+ Tilføj</button>
-                </div>
-              </div>
-            `).join("")}
-          </div>
-        `;
-        return;
-      }
-
-      let baseList = [];
-      let title = "";
-      let subtitle = "";
-
-      if (currentView === "all") {
-        baseList = activeTasks;
-        title = "Alle aktive opgaver";
-        subtitle = `${activeTasks.length} aktive opgaver fordelt på dine 6 ansvarsområder`;
-      } else if (currentView === "urgent") {
-        baseList = urgentTasks;
-        title = "Forfaldne & Næste 7 dage";
-        subtitle = `${urgentTasks.length} opgaver der kræver opmærksomhed nu`;
-      } else if (currentView === "done") {
-        baseList = doneTasks;
-        title = "Afsluttede opgaver";
-        subtitle = `${doneTasks.length} gennemførte opgaver`;
-      } else {
-        const cat = state.categories.find(c => c.id === currentView);
-        baseList = activeTasks.filter(t => t.categoryId === currentView);
-        title = cat ? cat.name : "";
-        subtitle = cat ? cat.desc : "";
-      }
-
-      const boards = [...new Set(baseList.map(t => (t.board || "").trim()).filter(Boolean))];
-
-      let filtered = [...baseList];
-      if (boardFilter) {
-        filtered = filtered.filter(t => (t.board || "").trim() === boardFilter);
-      }
-      if (statusFilter) {
-        filtered = filtered.filter(t => t.status === statusFilter);
-      }
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        filtered = filtered.filter(t =>
-          t.title.toLowerCase().includes(q) ||
-          (t.board && t.board.toLowerCase().includes(q)) ||
-          (t.note && t.note.toLowerCase().includes(q))
-        );
-      }
-
-      if (sortBy === "date") {
-        filtered.sort((a, b) => (a.date || "9999-12-31").localeCompare(b.date || "9999-12-31"));
-      } else if (sortBy === "priority") {
-        const rank = { "Høj prioritet": 1, "Medium prioritet": 2, "Lav prioritet": 3, "": 4 };
-        filtered.sort((a, b) => (rank[a.priority || ""] || 4) - (rank[b.priority || ""] || 4));
-      }
-
-      content.innerHTML = `
-        <div class="view-header">
-          <div>
-            <h2 class="view-title">${title}</h2>
-            <p class="view-subtitle">${subtitle}</p>
-          </div>
-          <div class="header-actions">
-            <button class="report-btn" onclick="copyStatusReport()" title="Kopiér pæn statusoversigt til Outlook eller Teams">📋 Kopiér status</button>
-            <input type="text" class="search-bar" placeholder="Søg i opgaver & noter..." value="${escapeHtml(searchQuery)}" oninput="searchQuery = this.value; render();" />
-          </div>
-        </div>
-
-        <div class="filter-strip">
-          <div class="filter-chips">
-            <button class="filter-chip ${!boardFilter && !statusFilter ? "active" : ""}" onclick="boardFilter=''; statusFilter=''; render();">Alle (${baseList.length})</button>
-            <button class="filter-chip ${statusFilter === 'Venter' ? "active" : ""}" onclick="statusFilter = statusFilter === 'Venter' ? '' : 'Venter'; render();">Venter</button>
-            <button class="filter-chip ${statusFilter === 'Igangsat' ? "active" : ""}" onclick="statusFilter = statusFilter === 'Igangsat' ? '' : 'Igangsat'; render();">Igangsat</button>
-            ${boards.map(b => `
-              <button class="filter-chip ${boardFilter === b ? "active" : ""}" onclick="boardFilter = boardFilter === '${b.replace(/'/g, "\\'")}' ? '' : '${b.replace(/'/g, "\\'")}'; render();">${escapeHtml(b)}</button>
-            `).join("")}
-          </div>
-
-          <select class="mini-select" onchange="sortBy = this.value; render();" title="Sortering">
-            <option value="date" ${sortBy === "date" ? "selected" : ""}>Sortér: Nærmeste dato</option>
-            <option value="priority" ${sortBy === "priority" ? "selected" : ""}>Sortér: Prioritet</option>
-            <option value="manual" ${sortBy === "manual" ? "selected" : ""}>Sortér: Senest oprettet</option>
-          </select>
-        </div>
-
-        <div class="task-list">
-          ${filtered.length === 0 ? `<div class="empty-state">Ingen opgaver i denne visning endnu — opret en opgave øverst eller importér din JSON-backup.</div>` : filtered.map(task => {
-            const cat = state.categories.find(c => c.id === task.categoryId) || state.categories[0];
-            const statusClass = task.status === "Venter" ? "status-venter" : "";
-            const prioClass = task.priority && task.priority.includes("Høj") ? "prio-høj" : (task.priority && task.priority.includes("Medium") ? "prio-medium" : "");
-            const due = !task.done ? getDueInfo(task.date) : null;
-            const hasNote = task.note && task.note.trim().length > 0;
-            const noteOpen = !!openNotes[task.id] || hasNote;
-
-            return `
-              <div class="task-row ${task.done ? "done" : ""}">
-                <div class="task-left">
-                  <button class="check-circle" onclick="toggleDone('${task.id}')" title="Markér som udført">✓</button>
-                  <div class="task-content">
-                    <div class="task-title-line">
-                      <div class="task-title" contenteditable="true" onblur="updateTaskTitle('${task.id}', this.textContent)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}">${escapeHtml(task.title)}</div>
-                      ${due ? `<span class="due-badge ${due.type === 'overdue' ? 'due-overdue' : 'due-soon'}">${due.label}</span>` : ""}
-                    </div>
-
-                    <div class="task-meta">
-                      <label class="inline-meta-field" title="Ret tavlenavn">
-                        <span class="inline-meta-label">Tavle:</span>
-                        <input type="text" class="inline-board-input" value="${escapeHtml(task.board)}" placeholder="Ingen" onchange="updateTaskField('${task.id}', 'board', this.value.trim())" onkeydown="if(event.key==='Enter') this.blur()" />
-                      </label>
-
-                      <label class="inline-meta-field ${statusClass}" title="Skift status">
-                        <select class="inline-select" onchange="updateTaskField('${task.id}', 'status', this.value)">
-                          <option value="Igangsat" ${task.status === "Igangsat" ? "selected" : ""}>Igangsat</option>
-                          <option value="Venter" ${task.status === "Venter" ? "selected" : ""}>Venter</option>
-                        </select>
-                      </label>
-
-                      <span class="inline-meta-field" title="Vælg ny dato eller udsæt +1 uge">
-                        <span class="inline-meta-label">Dato:</span>
-                        <input type="date" class="inline-date-input" value="${task.date || ""}" onchange="updateTaskField('${task.id}', 'date', this.value)" />
-                        <button type="button" class="plus-week-btn" onclick="postponeOneWeek('${task.id}')" title="Udsæt frist 7 dage">+7d</button>
-                      </span>
-
-                      <label class="inline-meta-field ${prioClass}" title="Skift prioritet">
-                        <select class="inline-select" onchange="updateTaskField('${task.id}', 'priority', this.value)">
-                          <option value="" ${!task.priority ? "selected" : ""}>Ingen prioritet</option>
-                          <option value="Høj prioritet" ${task.priority === "Høj prioritet" ? "selected" : ""}>Høj prioritet</option>
-                          <option value="Medium prioritet" ${task.priority === "Medium prioritet" ? "selected" : ""}>Medium prioritet</option>
-                          <option value="Lav prioritet" ${task.priority === "Lav prioritet" ? "selected" : ""}>Lav prioritet</option>
-                        </select>
-                      </label>
-
-                      <button type="button" class="note-toggle-btn ${hasNote ? "has-note" : ""}" onclick="toggleNoteBox('${task.id}')">
-                        ${hasNote ? "📝 Note" : "+ Note"}
-                      </button>
-                    </div>
-
-                    ${noteOpen ? `
-                      <textarea class="task-note-box" placeholder="Skriv næste skridt, aftale eller afklaring her..." oninput="updateTaskField('${task.id}', 'note', this.value)">${escapeHtml(task.note)}</textarea>
-                    ` : ""}
-                  </div>
-                </div>
-                <div class="task-right">
-                  <select class="row-cat-select" style="border-left: 4px solid ${cat.color}" onchange="updateTaskField('${task.id}', 'categoryId', this.value)">
-                    ${state.categories.map(c => `<option value="${c.id}" ${c.id === task.categoryId ? "selected" : ""}>${c.name}</option>`).join("")}
-                  </select>
-                  <button class="delete-btn" onclick="deleteTask('${task.id}')" title="Slet opgave">✕</button>
-                </div>
-              </div>
-            `;
-          }).join("")}
-        </div>
-      `;
+      navigator.clipboard.writeText(lines.join("\n")).then(() => showToast("Statusrapport kopieret!"));
     }
 
     function exportJSON() {
@@ -1713,53 +599,130 @@
       URL.revokeObjectURL(url);
     }
 
-    function triggerImport() {
-      document.getElementById("sidebar").classList.remove("open");
-      const inp = document.getElementById("import-file");
-      inp.value = "";
-      inp.click();
-    }
+    function render() {
+      const activeTasks = state.tasks.filter(t => !t.done);
+      const urgentTasks = activeTasks.filter(isUrgentTask);
+      const doneTasks = state.tasks.filter(t => t.done);
 
-    function importJSON(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (imported && Array.isArray(imported.tasks)) {
-            if (Array.isArray(imported.categories) && imported.categories.length > 0) {
-              state.categories = imported.categories;
-            }
-            state.tasks = imported.tasks.map(t => ({ note: "", ...t }));
-            currentView = "all";
-            boardFilter = "";
-            statusFilter = "";
-            searchQuery = "";
-            saveState();
-            render();
-            showToast(`${state.tasks.length} opgaver er indlæst!`);
-          } else {
-            alert("Filen indeholdt ingen opgaver.");
-          }
-        } catch (err) {
-          alert("Kunne ikke læse JSON-filen: " + err.message);
-        }
-      };
-      reader.readAsText(file);
-    }
+      document.getElementById("count-all").textContent = activeTasks.length;
+      document.getElementById("count-urgent").textContent = urgentTasks.length;
+      document.getElementById("count-done").textContent = doneTasks.length;
 
-    function toggleSidebar(e) {
-      e.stopPropagation();
-      document.getElementById("sidebar").classList.toggle("open");
-    }
+      document.getElementById("category-nav").innerHTML = state.categories.map(cat => {
+        const count = activeTasks.filter(t => t.categoryId === cat.id).length;
+        return `<button class="nav-btn ${currentView === cat.id ? "active" : ""}" onclick="setView('${cat.id}')"><span class="nav-left"><span class="dot" style="background:${cat.color}"></span><span class="label">${cat.name}</span></span><span class="count-badge">${count}</span></button>`;
+      }).join("");
 
-    function closeSidebarOnOutsideClick(e) {
-      const sb = document.getElementById("sidebar");
-      if (sb.classList.contains("open") && !sb.contains(e.target)) {
-        sb.classList.remove("open");
+      document.querySelectorAll(".sidebar > div > .nav-btn, .sidebar-footer > .nav-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.view === currentView);
+      });
+
+      const content = document.getElementById("content-area");
+
+      if (currentView === "keywords") {
+        content.innerHTML = `
+          <div class="view-header">
+            <div><h2 class="view-title">Nøgleord &amp; Auto-sortering</h2><p class="view-subtitle">Tilføj interne projektnavne eller fagudtryk.</p></div>
+            <button class="report-btn" onclick="reCategorizeAllActive()">↻ Gen-sorter aktive opgaver</button>
+          </div>
+          <div class="kw-grid">
+            ${state.categories.map(cat => `
+              <div class="kw-card">
+                <div>
+                  <div class="kw-header"><span class="dot" style="background:${cat.color}"></span><span>${cat.name}</span></div>
+                  <p class="kw-desc">${cat.desc}</p>
+                  <div class="kw-tags">${cat.keywords.map(kw => `<span class="kw-chip">${escapeHtml(kw)} <button onclick="removeKeyword('${cat.id}', '${kw.replace(/'/g, "\\'")}')">&times;</button></span>`).join("")}</div>
+                </div>
+                <div class="kw-add-row">
+                  <input type="text" id="kw-input-${cat.id}" class="mini-input" placeholder="Nyt nøgleord..." style="flex:1;" onkeydown="if(event.key==='Enter') addKeyword('${cat.id}')" />
+                  <button class="cat-pill-btn" onclick="addKeyword('${cat.id}')">+ Tilføj</button>
+                </div>
+              </div>
+            `).join("")}
+          </div>`;
+        return;
       }
+
+      let baseList = [], title = "", subtitle = "";
+      if (currentView === "all") { baseList = activeTasks; title = "Alle aktive opgaver"; subtitle = `${activeTasks.length} aktive opgaver fordelt på dine 6 ansvarsområder`; }
+      else if (currentView === "urgent") { baseList = urgentTasks; title = "Forfaldne & Næste 7 dage"; subtitle = `${urgentTasks.length} opgaver der kræver opmærksomhed nu`; }
+      else if (currentView === "done") { baseList = doneTasks; title = "Afsluttede opgaver"; subtitle = `${doneTasks.length} gennemførte opgaver`; }
+      else { const cat = state.categories.find(c => c.id === currentView); baseList = activeTasks.filter(t => t.categoryId === currentView); title = cat ? cat.name : ""; subtitle = cat ? cat.desc : ""; }
+
+      const boards = [...new Set(baseList.map(t => (t.board || "").trim()).filter(Boolean))];
+      let filtered = [...baseList];
+      if (boardFilter) filtered = filtered.filter(t => (t.board || "").trim() === boardFilter);
+      if (statusFilter) filtered = filtered.filter(t => t.status === statusFilter);
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        filtered = filtered.filter(t => t.title.toLowerCase().includes(q) || (t.board && t.board.toLowerCase().includes(q)) || (t.note && t.note.toLowerCase().includes(q)));
+      }
+      if (sortBy === "date") filtered.sort((a, b) => (a.date || "9999-12-31").localeCompare(b.date || "9999-12-31"));
+      else if (sortBy === "priority") {
+        const rank = { "Høj prioritet": 1, "Medium prioritet": 2, "Lav prioritet": 3, "": 4 };
+        filtered.sort((a, b) => (rank[a.priority || ""] || 4) - (rank[b.priority || ""] || 4));
+      }
+
+      content.innerHTML = `
+        <div class="view-header">
+          <div><h2 class="view-title">${title}</h2><p class="view-subtitle">${subtitle}</p></div>
+          <div class="header-actions">
+            <button class="report-btn" onclick="copyStatusReport()">📋 Kopiér status</button>
+            <input type="text" class="search-bar" placeholder="Søg i opgaver & noter..." value="${escapeHtml(searchQuery)}" oninput="searchQuery = this.value; render();" />
+          </div>
+        </div>
+        <div class="filter-strip">
+          <div class="filter-chips">
+            <button class="filter-chip ${!boardFilter && !statusFilter ? "active" : ""}" onclick="boardFilter=''; statusFilter=''; render();">Alle (${baseList.length})</button>
+            <button class="filter-chip ${statusFilter === 'Venter' ? "active" : ""}" onclick="statusFilter = statusFilter === 'Venter' ? '' : 'Venter'; render();">Venter</button>
+            <button class="filter-chip ${statusFilter === 'Igangsat' ? "active" : ""}" onclick="statusFilter = statusFilter === 'Igangsat' ? '' : 'Igangsat'; render();">Igangsat</button>
+            ${boards.map(b => `<button class="filter-chip ${boardFilter === b ? "active" : ""}" onclick="boardFilter = boardFilter === '${b.replace(/'/g, "\\'")}' ? '' : '${b.replace(/'/g, "\\'")}'; render();">${escapeHtml(b)}</button>`).join("")}
+          </div>
+          <select class="mini-select" onchange="sortBy = this.value; render();">
+            <option value="date" ${sortBy === "date" ? "selected" : ""}>Sortér: Nærmeste dato</option>
+            <option value="priority" ${sortBy === "priority" ? "selected" : ""}>Sortér: Prioritet</option>
+            <option value="manual" ${sortBy === "manual" ? "selected" : ""}>Sortér: Senest oprettet</option>
+          </select>
+        </div>
+        <div class="task-list">
+          ${filtered.length === 0 ? `<div class="empty-state">Ingen opgaver i denne visning endnu — opret en opgave øverst eller importér din JSON-backup.</div>` : filtered.map(task => {
+            const cat = state.categories.find(c => c.id === task.categoryId) || state.categories[0];
+            const statusClass = task.status === "Venter" ? "status-venter" : "";
+            const prioClass = task.priority && task.priority.includes("Høj") ? "prio-høj" : (task.priority && task.priority.includes("Medium") ? "prio-medium" : "");
+            const due = !task.done ? getDueInfo(task.date) : null;
+            const hasNote = task.note && task.note.trim().length > 0;
+            const noteOpen = !!openNotes[task.id] || hasNote;
+
+            return `
+              <div class="task-row ${task.done ? "done" : ""}">
+                <div class="task-left">
+                  <button class="check-circle" onclick="toggleDone('${task.id}')">✓</button>
+                  <div class="task-content">
+                    <div class="task-title-line">
+                      <div class="task-title" contenteditable="true" onblur="updateTaskTitle('${task.id}', this.textContent)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}">${escapeHtml(task.title)}</div>
+                      ${due ? `<span class="due-badge ${due.type === 'overdue' ? 'due-overdue' : 'due-soon'}">${due.label}</span>` : ""}
+                    </div>
+                    <div class="task-meta">
+                      <label class="inline-meta-field"><span class="inline-meta-label">Tavle:</span><input type="text" class="inline-board-input" value="${escapeHtml(task.board)}" placeholder="Ingen" onchange="updateTaskField('${task.id}', 'board', this.value.trim())" onkeydown="if(event.key==='Enter') this.blur()" /></label>
+                      <label class="inline-meta-field ${statusClass}"><select class="inline-select" onchange="updateTaskField('${task.id}', 'status', this.value)"><option value="Igangsat" ${task.status === "Igangsat" ? "selected" : ""}>Igangsat</option><option value="Venter" ${task.status === "Venter" ? "selected" : ""}>Venter</option></select></label>
+                      <span class="inline-meta-field"><span class="inline-meta-label">Dato:</span><input type="date" class="inline-date-input" value="${task.date || ""}" onchange="updateTaskField('${task.id}', 'date', this.value)" /><button type="button" class="plus-week-btn" onclick="postponeOneWeek('${task.id}')">+7d</button></span>
+                      <label class="inline-meta-field ${prioClass}"><select class="inline-select" onchange="updateTaskField('${task.id}', 'priority', this.value)"><option value="" ${!task.priority ? "selected" : ""}>Ingen prioritet</option><option value="Høj prioritet" ${task.priority === "Høj prioritet" ? "selected" : ""}>Høj prioritet</option><option value="Medium prioritet" ${task.priority === "Medium prioritet" ? "selected" : ""}>Medium prioritet</option><option value="Lav prioritet" ${task.priority === "Lav prioritet" ? "selected" : ""}>Lav prioritet</option></select></label>
+                      <button type="button" class="note-toggle-btn ${hasNote ? "has-note" : ""}" onclick="toggleNoteBox('${task.id}')">${hasNote ? "📝 Note" : "+ Note"}</button>
+                    </div>
+                    ${noteOpen ? `<textarea class="task-note-box" placeholder="Skriv næste skridt, aftale eller afklaring her..." oninput="updateTaskField('${task.id}', 'note', this.value)">${escapeHtml(task.note)}</textarea>` : ""}
+                  </div>
+                </div>
+                <div class="task-right">
+                  <select class="row-cat-select" style="border-left: 4px solid ${cat.color}" onchange="updateTaskField('${task.id}', 'categoryId', this.value)">${state.categories.map(c => `<option value="${c.id}" ${c.id === task.categoryId ? "selected" : ""}>${c.name}</option>`).join("")}</select>
+                  <button class="delete-btn" onclick="deleteTask('${task.id}')">✕</button>
+                </div>
+              </div>`;
+          }).join("")}
+        </div>`;
     }
+
+    function toggleSidebar(e) { e.stopPropagation(); document.getElementById("sidebar").classList.toggle("open"); }
+    function closeSidebarOnOutsideClick(e) { const sb = document.getElementById("sidebar"); if (sb.classList.contains("open") && !sb.contains(e.target)) sb.classList.remove("open"); }
 
     applyFontScale();
     updatePillUI("Standard");
