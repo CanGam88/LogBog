@@ -920,7 +920,6 @@
     /* TELEFON (GALAXY S24 / SMARTPHONES — under 600px) */
     @media (max-width: 600px) {
       html {
-        /* Lidt strammere skalering på smal mobilskærm, stadig meget læsbar */
         font-size: calc(14px * var(--font-scale));
       }
       .sidebar {
@@ -976,7 +975,6 @@
       .search-bar {
         width: 100%;
       }
-      /* Vandret swipe-bjælke til tavlefiltre på mobil, så de ikke fylder 4 linjer */
       .filter-strip {
         padding: 8px 10px;
         flex-direction: column;
@@ -1175,25 +1173,9 @@
       }
     ];
 
-    const INITIAL_TASKS = [
-      { id: "t1", title: "Blækanlæg", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-11-20", priority: "", note: "", done: false },
-      { id: "t2", title: "Vægte til færdigvarer", categoryId: "ca", board: "Task Force", status: "Igangsat", date: "2026-11-19", priority: "Høj prioritet", note: "", done: false },
-      { id: "t3", title: "Hjælp til Driftskontrolant eSOP: Udtagningsfrekvens", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-11-16", priority: "", note: "", done: false },
-      { id: "t4", title: "Laves ny eSOP til Opfyldning af råvare", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-11-24", priority: "", note: "", done: false },
-      { id: "t5", title: "Overvågning og tømning af betontank", categoryId: "esop", board: "eSOP", status: "Venter", date: "2026-11-16", priority: "", note: "", done: false },
-      { id: "t6", title: "7 - Ovnbygning: Dæk 2+3 - 6S - Nødvendige eSOPs ikke opdateret", categoryId: "esop", board: "eSOP", status: "Venter", date: "2026-12-02", priority: "", note: "", done: false },
-      { id: "t7", title: "Foranstaltninger ved arbejde med og omkring hængende vægt", categoryId: "esop", board: "eSOP", status: "Venter", date: "2026-11-16", priority: "Medium prioritet", note: "", done: false },
-      { id: "t8", title: "Tilføjelse til eSOP Trådning af synål", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-12-14", priority: "", note: "", done: false },
-      { id: "t9", title: "eSOp ønskes på visuel kontrol", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-11-23", priority: "Medium prioritet", note: "", done: false },
-      { id: "t10", title: "Procedure for skift af hønsetråd", categoryId: "esop", board: "Kold-ende", status: "Igangsat", date: "2027-01-18", priority: "", note: "", done: false },
-      { id: "t11", title: "Ombyg hættestrækker - trådning af folie", categoryId: "ca", board: "Projekttavle", status: "Igangsat", date: "2026-11-16", priority: "", note: "", done: false },
-      { id: "t12", title: "trækstyrke (KUN OEM'er)", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-12-02", priority: "Medium prioritet", note: "", done: false },
-      { id: "t13", title: "Vedligeholdelse af delamineringen (Vokskar tøm og rens)", categoryId: "esop", board: "eSOP", status: "Venter", date: "2026-12-14", priority: "", note: "", done: false },
-      { id: "t14", title: "Opdatering af betjeningsvejledninger", categoryId: "esop", board: "Vedligehold", status: "Igangsat", date: "2026-11-16", priority: "Lav prioritet", note: "", done: false },
-      { id: "t15", title: "Fines brænder", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-12-14", priority: "Medium prioritet", note: "", done: false }
-    ];
+    const INITIAL_TASKS = [];
 
-    const STORAGE_KEY = "cm_cockpit_v6";
+    const STORAGE_KEY = "cm_cockpit_clean_v1";
     const FONT_KEY = "cm_cockpit_font_scale";
 
     let state = loadState();
@@ -1227,7 +1209,7 @@
 
     function loadState() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("cm_cockpit_v5") || localStorage.getItem("cm_cockpit_v4");
+        const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed.categories && parsed.tasks) {
@@ -1651,7 +1633,7 @@
         </div>
 
         <div class="task-list">
-          ${filtered.length === 0 ? `<div class="empty-state">Ingen opgaver matcher det valgte filter.</div>` : filtered.map(task => {
+          ${filtered.length === 0 ? `<div class="empty-state">Ingen opgaver i denne visning endnu — opret en opgave øverst eller importér din JSON-backup.</div>` : filtered.map(task => {
             const cat = state.categories.find(c => c.id === task.categoryId) || state.categories[0];
             const statusClass = task.status === "Venter" ? "status-venter" : "";
             const prioClass = task.priority && task.priority.includes("Høj") ? "prio-høj" : (task.priority && task.priority.includes("Medium") ? "prio-medium" : "");
