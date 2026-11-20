@@ -1,1256 +1,1659 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0b0f17">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="LommeLog">
-<title>LommeLog – Offline Logbog & Opgaver</title>
-<script>
-// Dynamisk PWA Manifest + app-ikon (100 % selvforsynende uden ekstra billedfiler)
-(function() {
-  const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#0b0f17"/><rect x="36" y="36" width="440" height="440" rx="88" fill="#131a26" stroke="#22d3ee" stroke-width="14"/><path d="M150 175h212M150 256h150M150 337h185" stroke="#22d3ee" stroke-width="28" stroke-linecap="round"/><circle cx="362" cy="337" r="22" fill="#f43f5e"/></svg>`;
-  const iconUrl = 'data:image/svg+xml;base64,' + btoa(svgIcon);
-  const manifest = {
-    name: 'LommeLog – Offline Logbog & Opgaver',
-    short_name: 'LommeLog',
-    start_url: './index.html',
-    display: 'standalone',
-    background_color: '#0b0f17',
-    theme_color: '#0b0f17',
-    icons: [{ src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }]
-  };
-  const link = document.createElement('link');
-  link.rel = 'manifest';
-  link.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
-  document.head.appendChild(link);
-})();
-</script>
-<style>
-  :root {
-    --bg: #0b0f17;
-    --surface: #131a26;
-    --surface-2: #1b2434;
-    --border: #263247;
-    --text: #f1f5f9;
-    --muted: #94a3b8;
-    --cyan: #22d3ee;
-    --cyan-dim: rgba(34, 211, 238, 0.14);
-    --red: #f43f5e;
-    --red-dim: rgba(244, 63, 94, 0.14);
-    --green: #10b981;
-    --green-dim: rgba(16, 185, 129, 0.14);
-    --amber: #f59e0b;
-    --amber-dim: rgba(245, 158, 11, 0.14);
-    --purple: #a855f7;
-    --radius: 12px;
-  }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.45;
-    padding-bottom: 84px;
-  }
-  header {
-    position: sticky; top: 0; z-index: 40;
-    background: rgba(11, 15, 23, 0.94);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 16px;
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em; }
-  .brand-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
-  .badge-offline {
-    font-size: 0.72rem; padding: 3px 8px; border-radius: 99px;
-    background: var(--green-dim); color: var(--green); border: 1px solid rgba(16,185,129,0.3);
-    font-weight: 600;
-  }
-  .header-actions { display: flex; gap: 8px; }
-  button {
-    font-family: inherit; cursor: pointer; border: 1px solid var(--border);
-    background: var(--surface-2); color: var(--text); border-radius: 8px;
-    padding: 8px 12px; font-size: 0.88rem; font-weight: 600; transition: 0.15s;
-  }
-  button:hover { border-color: var(--cyan); }
-  button:active { transform: scale(0.98); }
-  .btn-primary { background: var(--cyan); color: #061018; border-color: var(--cyan); }
-  .btn-primary:hover { background: #38e0fa; }
-  .btn-danger { background: var(--red-dim); color: var(--red); border-color: rgba(244,63,94,0.35); }
-  .btn-sm { padding: 5px 9px; font-size: 0.8rem; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Change Master Cockpit — Fokus & Opgaver</title>
+  <style>
+    :root {
+      --font-scale: 1.25;
+      --bg-sidebar: #161719;
+      --bg-main: #1d1e21;
+      --bg-elevated: #26272b;
+      --bg-hover: #2d2f34;
+      --border: #2f3136;
+      --border-strong: #464950;
+      --text-primary: #f5f4f0;
+      --text-secondary: #c4c1ba;
+      --text-muted: #93908a;
+      --accent: #d97757;
+      --accent-soft: rgba(217, 119, 87, 0.14);
 
-  .layout { max-width: 1060px; margin: 0 auto; padding: 16px; display: grid; grid-template-columns: 210px 1fr; gap: 18px; }
-  @media (max-width: 768px) {
-    .layout { grid-template-columns: 1fr; padding: 12px; }
-    .desktop-nav { display: none !important; }
-  }
-  @media (min-width: 769px) {
-    body { padding-bottom: 24px; }
-    .mobile-nav { display: none !important; }
-  }
+      --c-ca: #60a5fa;
+      --c-comm: #c084fc;
+      --c-user: #34d399;
+      --c-spon: #fbbf24;
+      --c-anch: #f472b6;
+      --c-esop: #fb923c;
+    }
 
-  .desktop-nav {
-    display: flex; flex-direction: column; gap: 6px; position: sticky; top: 68px; height: fit-content;
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px;
-  }
-  .nav-btn {
-    display: flex; align-items: center; justify-content: space-between; width: 100%;
-    text-align: left; background: transparent; border: 1px solid transparent; padding: 10px 12px; color: var(--muted);
-  }
-  .nav-btn.active { background: var(--cyan-dim); color: var(--cyan); border-color: rgba(34,211,238,0.35); }
-  .nav-count { font-size: 0.75rem; background: var(--surface-2); padding: 2px 7px; border-radius: 99px; color: var(--text); }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  .mobile-nav {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
-    background: rgba(19, 26, 38, 0.97); backdrop-filter: blur(10px);
-    border-top: 1px solid var(--border);
-    display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px 4px;
-  }
-  .m-nav-btn {
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    background: transparent; border: none; color: var(--muted); padding: 6px 2px; font-size: 0.72rem;
-  }
-  .m-nav-btn.active { color: var(--cyan); }
-  .m-nav-icon { font-size: 1.15rem; }
+    html {
+      font-size: calc(16px * var(--font-scale));
+    }
 
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 14px; margin-bottom: 14px;
-  }
-  .card-title { font-size: 1rem; font-weight: 700; margin: 0 0 10px 0; display: flex; align-items: center; justify-content: space-between; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
 
-  input, select, textarea {
-    width: 100%; background: var(--bg); color: var(--text);
-    border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px;
-    font-family: inherit; font-size: 0.92rem;
-  }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cyan); }
-  textarea { resize: vertical; min-height: 76px; }
+    /* VENSTRE NAVIGATION */
+    .sidebar {
+      width: clamp(290px, 21vw, 390px);
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 18px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
 
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-  @media (max-width: 600px) {
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
-  }
+    .brand {
+      padding: 0 10px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
 
-  .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-  .filter-bar input { flex: 1; min-width: 180px; }
-  .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .pill {
-    padding: 5px 11px; border-radius: 99px; font-size: 0.8rem;
-    background: var(--surface); border: 1px solid var(--border); color: var(--muted);
-  }
-  .pill.active { background: var(--cyan-dim); color: var(--cyan); border-color: var(--cyan); }
+    .brand-eyebrow {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
 
-  .item-card {
-    background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--cyan);
-    border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; transition: 0.15s;
-  }
-  .item-card.pinned { border-color: rgba(245, 158, 11, 0.55); border-left-color: var(--amber); }
-  .item-card.done { opacity: 0.6; }
-  .item-card.done .item-title { text-decoration: line-through; color: var(--muted); }
-  .item-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-  .item-title { font-weight: 700; font-size: 0.98rem; margin: 0; word-break: break-word; }
-  .item-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
-  .item-body { margin: 8px 0 0 0; font-size: 0.9rem; color: #cbd5e1; white-space: pre-wrap; word-break: break-word; }
-  .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .brand h1 {
+      font-size: 1.22rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
 
-  .tag {
-    display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 600;
-    background: var(--surface-2); color: var(--cyan); border: 1px solid var(--border);
-  }
-  .tag-ok { background: var(--green-dim); color: var(--green); border-color: rgba(16,185,129,0.3); }
-  .tag-warn { background: var(--amber-dim); color: var(--amber); border-color: rgba(245,158,11,0.3); }
-  .tag-danger { background: var(--red-dim); color: var(--red); border-color: rgba(244,63,94,0.3); }
+    .nav-section-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 14px 10px 6px;
+      font-weight: 700;
+    }
 
-  .quick-templates { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-  .fab {
-    position: fixed; right: 18px; bottom: 78px; z-index: 45;
-    width: 54px; height: 54px; border-radius: 50%;
-    background: var(--cyan); color: #061018; border: none;
-    font-size: 1.7rem; font-weight: 700; box-shadow: 0 6px 20px rgba(34,211,238,0.35);
-    display: flex; align-items: center; justify-content: center;
-  }
-  @media (min-width: 769px) { .fab { bottom: 26px; right: 26px; } }
+    .nav-btn {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      text-align: left;
+      transition: background 0.15s, color 0.15s;
+      gap: 10px;
+    }
 
-  .modal-backdrop {
-    position: fixed; inset: 0; background: rgba(4, 7, 13, 0.82); z-index: 80;
-    display: none; align-items: center; justify-content: center; padding: 14px;
-  }
-  .modal-backdrop.open { display: flex; }
-  .modal {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-    width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; padding: 18px;
-  }
-  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .field { margin-bottom: 11px; }
-  .field label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+    .nav-btn:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-primary);
+    }
 
-  .pin-box { max-width: 340px; margin: 20px auto; text-align: center; }
-  .pin-dots { display: flex; justify-content: center; gap: 12px; margin: 16px 0; }
-  .pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--cyan); }
-  .pin-dot.filled { background: var(--cyan); }
-  .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 260px; margin: 0 auto; }
-  .keypad button { padding: 14px; font-size: 1.15rem; }
+    .nav-btn.active {
+      background-color: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
 
-  .empty { text-align: center; padding: 28px 14px; color: var(--muted); font-size: 0.9rem; }
-  .panel { display: none; }
-  .panel.active { display: block; }
-</style>
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .nav-left span.label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .count-badge {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 9px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      font-weight: 600;
+    }
+
+    .count-badge.warn {
+      background: rgba(248, 113, 113, 0.18);
+      color: #fca5a5;
+    }
+
+    .nav-btn.active .count-badge {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .sidebar-footer {
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    /* SKRIFTSTØRRELSE KONTROL */
+    .font-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      background: var(--bg-elevated);
+      border-radius: 9px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .font-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .font-step-btn {
+      background: var(--bg-main);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 4px 11px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .font-step-btn:hover {
+      border-color: var(--accent);
+    }
+
+    /* HOVEDOMRÅDE — FYLDER HELE RESTERENDE SKÆRMBREDDE */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 28px clamp(20px, 3vw, 48px) 80px;
+      width: 100%;
+    }
+
+    .mobile-header {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .menu-toggle {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 10px 16px;
+      border-radius: 9px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* SPOTLIGHT OPRETTELSE */
+    .spotlight-box {
+      background-color: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 18px 24px;
+      margin-bottom: 26px;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    .spotlight-box:focus-within {
+      border-color: var(--accent);
+    }
+
+    .spotlight-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 1.12rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .spotlight-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .spotlight-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .controls-left {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cat-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-main);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .cat-pill-btn:hover {
+      background: var(--bg-hover);
+    }
+
+    .auto-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .mini-input, .mini-select {
+      background: var(--bg-main);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      border-radius: 8px;
+      padding: 7px 11px;
+      font-size: 0.84rem;
+      outline: none;
+      color-scheme: dark;
+    }
+
+    .mini-input:focus, .mini-select:focus {
+      border-color: var(--accent);
+    }
+
+    .add-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .add-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* VIEW HEADER & FILTER-BJÆLKE */
+    .view-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .view-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+    }
+
+    .view-subtitle {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .report-btn {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 9px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .report-btn:hover {
+      border-color: var(--accent);
+      background: var(--bg-hover);
+    }
+
+    .search-bar {
+      background: var(--bg-sidebar);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      width: clamp(210px, 20vw, 320px);
+      outline: none;
+    }
+
+    .search-bar:focus {
+      border-color: var(--accent);
+    }
+
+    .filter-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--bg-sidebar);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      margin-bottom: 18px;
+    }
+
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-chip {
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      color: var(--text-secondary);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-chip:hover {
+      color: var(--text-primary);
+      border-color: var(--text-secondary);
+    }
+
+    .filter-chip.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* OPGAVELISTE — SKALERER MED SKÆRMBREDDEN */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .task-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 14px;
+      border-bottom: 1px solid var(--border);
+      gap: 20px;
+      transition: background 0.12s;
+      border-radius: 10px;
+      width: 100%;
+    }
+
+    .task-row:hover {
+      background-color: rgba(255, 255, 255, 0.028);
+    }
+
+    .task-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .check-circle {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      border: 2px solid var(--border-strong);
+      background: transparent;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: transparent;
+      font-size: 0.85rem;
+      font-weight: 700;
+      transition: all 0.15s;
+    }
+
+    .check-circle:hover {
+      border-color: var(--accent);
+    }
+
+    .task-row.done .check-circle {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .task-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-title-line {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .task-title {
+      font-size: 1.04rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      word-break: break-word;
+      cursor: text;
+      outline: none;
+      border-radius: 5px;
+      padding: 2px 5px;
+      margin-left: -5px;
+    }
+
+    .task-title:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .task-title:focus {
+      background: var(--bg-elevated);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .task-row.done .task-title {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .due-badge {
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    .due-overdue {
+      background: rgba(248, 113, 113, 0.18);
+      color: #fca5a5;
+      border: 1px solid rgba(248, 113, 113, 0.35);
+    }
+
+    .due-soon {
+      background: rgba(251, 191, 36, 0.16);
+      color: #fde047;
+      border: 1px solid rgba(251, 191, 36, 0.35);
+    }
+
+    /* DIREKTE REDIGERBAR METADATA-LINJE */
+    .task-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 9px;
+      margin-top: 8px;
+      font-size: 0.81rem;
+    }
+
+    .inline-meta-field {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 7px;
+      color: var(--text-secondary);
+      transition: border-color 0.15s;
+    }
+
+    .inline-meta-field:hover, .inline-meta-field:focus-within {
+      border-color: var(--border-strong);
+    }
+
+    .inline-meta-label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .inline-board-input {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 0.81rem;
+      width: 110px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .inline-date-input {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 0.81rem;
+      outline: none;
+      font-family: inherit;
+      cursor: pointer;
+      color-scheme: dark;
+    }
+
+    .plus-week-btn {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border-strong);
+      color: var(--text-secondary);
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 3px;
+    }
+
+    .plus-week-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .inline-select {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 0.81rem;
+      outline: none;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .inline-select option {
+      background: var(--bg-sidebar);
+      color: var(--text-primary);
+    }
+
+    .inline-meta-field.status-venter {
+      border-color: rgba(251, 191, 36, 0.35);
+      background: rgba(251, 191, 36, 0.1);
+    }
+    .inline-meta-field.status-venter .inline-select {
+      color: #fbbf24;
+      font-weight: 600;
+    }
+
+    .inline-meta-field.prio-høj {
+      border-color: rgba(248, 113, 113, 0.4);
+      background: rgba(248, 113, 113, 0.12);
+    }
+    .inline-meta-field.prio-høj .inline-select {
+      color: #f87171;
+      font-weight: 600;
+    }
+
+    .inline-meta-field.prio-medium {
+      border-color: rgba(96, 165, 250, 0.35);
+      background: rgba(96, 165, 250, 0.1);
+    }
+    .inline-meta-field.prio-medium .inline-select {
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    .note-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 7px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .note-toggle-btn:hover {
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .note-toggle-btn.has-note {
+      border-color: rgba(52, 211, 153, 0.4);
+      color: #6ee7b7;
+      background: rgba(52, 211, 153, 0.08);
+    }
+
+    .task-note-box {
+      margin-top: 10px;
+      width: 100%;
+      background: var(--bg-sidebar);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.85rem;
+      resize: vertical;
+      min-height: 58px;
+      outline: none;
+    }
+
+    .task-note-box:focus {
+      border-color: var(--accent);
+    }
+
+    .task-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .row-cat-select {
+      background: var(--bg-sidebar);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      font-size: 0.82rem;
+      padding: 7px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      outline: none;
+      max-width: 260px;
+    }
+
+    .row-cat-select:hover {
+      border-color: var(--accent);
+    }
+
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.05rem;
+      padding: 6px 9px;
+      border-radius: 6px;
+      opacity: 0.65;
+      transition: opacity 0.15s, color 0.15s;
+    }
+
+    .task-row:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .delete-btn:hover {
+      color: #f87171;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    /* NØGLEORDS-GRID (2 COLONNER PÅ BREDE SKÆRME) */
+    .kw-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 16px;
+      width: 100%;
+    }
+
+    .kw-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .kw-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 5px;
+    }
+
+    .kw-desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+    }
+
+    .kw-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .kw-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--bg-main);
+      border: 1px solid var(--border-strong);
+      padding: 4px 11px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      color: var(--text-primary);
+    }
+
+    .kw-chip button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .kw-chip button:hover {
+      color: #f87171;
+    }
+
+    .kw-add-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* TOAST BEKRÆFTELSE */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--accent);
+      color: var(--text-primary);
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* TABLET LANDSCAPE (11" PÅ TVÆRS — ca. 1024px–1280px) */
+    @media (max-width: 1280px) {
+      .sidebar {
+        width: 280px;
+        padding: 18px 12px;
+      }
+      .main {
+        padding: 22px 22px 70px;
+      }
+      .task-row {
+        align-items: flex-start;
+      }
+    }
+
+    /* TABLET PORTRAIT & MINDRE SKÆRME (11" PÅ HØJKANT — under 960px) */
+    @media (max-width: 960px) {
+      .sidebar {
+        position: fixed;
+        left: -340px;
+        width: 320px;
+        z-index: 50;
+        transition: left 0.22s ease;
+      }
+      .sidebar.open {
+        left: 0;
+        box-shadow: 12px 0 32px rgba(0, 0, 0, 0.55);
+      }
+      .mobile-header {
+        display: flex;
+      }
+      .main {
+        padding: 18px 16px 60px;
+      }
+      .task-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .task-right {
+        justify-content: flex-end;
+        padding-left: 39px;
+      }
+      .kw-grid {
+        grid-template-columns: 1fr;
+      }
+      /* Større trykflader til finger/pen på tablet */
+      .check-circle {
+        width: 28px;
+        height: 28px;
+      }
+      .inline-meta-field, .row-cat-select, .filter-chip {
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<header>
-  <div class="brand">
-    <span class="brand-dot"></span>
-    <span>LommeLog</span>
-    <span class="badge-offline" id="net-status">100% Lokal</span>
-  </div>
-  <div class="header-actions">
-    <button class="btn-sm" id="open-backup-btn">Backup / Eksport</button>
-  </div>
-</header>
+  <!-- VENSTRE SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="brand">
+        <div class="brand-eyebrow">Change Master Cockpit</div>
+        <h1>Ansvarsområder</h1>
+      </div>
 
-<div class="layout">
-  <aside class="desktop-nav">
-    <button class="nav-btn active" data-tab="all"><span>Oversigt (Alle)</span><span class="nav-count" id="cnt-all">0</span></button>
-    <button class="nav-btn" data-tab="log"><span>Logbog</span><span class="nav-count" id="cnt-log">0</span></button>
-    <button class="nav-btn" data-tab="tasks"><span>Opgaver</span><span class="nav-count" id="cnt-tasks">0</span></button>
-    <button class="nav-btn" data-tab="notes"><span>Noter</span><span class="nav-count" id="cnt-notes">0</span></button>
-    <button class="nav-btn" data-tab="diary"><span>Privat Dagbog</span><span class="nav-count" id="cnt-diary">Låst</span></button>
+      <button class="nav-btn active" data-view="all" onclick="setView('all')">
+        <span class="nav-left"><span class="dot" style="background: var(--accent)"></span><span class="label">Alle aktive opgaver</span></span>
+        <span class="count-badge" id="count-all">0</span>
+      </button>
+
+      <button class="nav-btn" data-view="urgent" onclick="setView('urgent')">
+        <span class="nav-left"><span class="dot" style="background: #f87171"></span><span class="label">Forfaldne &amp; Næste 7 dage</span></span>
+        <span class="count-badge warn" id="count-urgent">0</span>
+      </button>
+
+      <div class="nav-section-label">Arbejdsbeskrivelse</div>
+      <div id="category-nav"></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="font-controls">
+        <span>Tekststørrelse</span>
+        <div class="font-btns">
+          <button class="font-step-btn" onclick="changeFontScale(-0.1)" title="Mindre tekst">A-</button>
+          <button class="font-step-btn" onclick="changeFontScale(0.1)" title="Større tekst">A+</button>
+        </div>
+      </div>
+
+      <button class="nav-btn" data-view="done" onclick="setView('done')">
+        <span class="nav-left"><span class="dot" style="background: #93908a"></span><span class="label">Afsluttede</span></span>
+        <span class="count-badge" id="count-done">0</span>
+      </button>
+      <button class="nav-btn" data-view="keywords" onclick="setView('keywords')">
+        <span class="nav-left"><span class="dot" style="background: #34d399"></span><span class="label">Nøgleord &amp; Regler</span></span>
+      </button>
+      <button class="nav-btn" onclick="copyStatusReport()">
+        <span class="nav-left"><span class="dot" style="background: #fbbf24"></span><span class="label">Kopiér statusrapport</span></span>
+      </button>
+      <button class="nav-btn" onclick="exportJSON()">
+        <span class="nav-left"><span class="dot" style="background: #60a5fa"></span><span class="label">Eksportér JSON backup</span></span>
+      </button>
+      <button class="nav-btn" onclick="document.getElementById('import-file').click()">
+        <span class="nav-left"><span class="dot" style="background: #c084fc"></span><span class="label">Importér JSON backup</span></span>
+      </button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)" />
+    </div>
   </aside>
 
-  <main>
-    <!-- 1. OVERSIGT / ALLE -->
-    <section class="panel active" id="panel-all">
-      <div class="card">
-        <div class="card-title">Global søgning på tværs af alt</div>
-        <div class="filter-bar">
-          <input type="search" id="global-search" placeholder="Søg på keywords, #tags, måleværdier, dato eller kategori...">
-          <input type="date" id="global-date" style="max-width:165px;">
-          <button class="btn-sm" id="clear-global-filter">Nulstil</button>
-        </div>
-        <div class="pill-row" id="global-pills">
-          <button class="pill active" data-gtype="all">Alle typer</button>
-          <button class="pill" data-gtype="log">Logbog</button>
-          <button class="pill" data-gtype="task">Opgaver</button>
-          <button class="pill" data-gtype="note">Noter</button>
-          <button class="pill" data-gtype="pinned">Fastgjorte</button>
-        </div>
+  <!-- HOVEDINDHOLD -->
+  <main class="main" onclick="closeSidebarOnOutsideClick(event)">
+    <div class="mobile-header">
+      <button class="menu-toggle" onclick="toggleSidebar(event)">☰ Kategorier</button>
+      <div class="font-btns">
+        <button class="font-step-btn" onclick="changeFontScale(-0.1)">A-</button>
+        <button class="font-step-btn" onclick="changeFontScale(0.1)">A+</button>
       </div>
-      <div id="list-all"></div>
-    </section>
+    </div>
 
-    <!-- 2. LOGBOG -->
-    <section class="panel" id="panel-log">
-      <div class="card">
-        <div class="card-title">
-          <span>Nyt logbogsindlæg</span>
-          <button class="btn-sm" id="log-now-btn">Nu (dato/tid)</button>
+    <!-- SPOTLIGHT OPRETTELSESFELT -->
+    <section class="spotlight-box">
+      <input
+        type="text"
+        id="task-input"
+        class="spotlight-input"
+        placeholder="Hvad skal der følges op på? (Skriv f.eks. eSOP, træning, sponsor, RUNI...)"
+        oninput="handleLiveCategorize()"
+        onkeydown="if(event.key==='Enter') addTask()"
+      />
+      <div class="spotlight-controls">
+        <div class="controls-left">
+          <button type="button" class="cat-pill-btn" id="selected-cat-pill" onclick="cycleManualCategory()" title="Klik for at skifte kategori manuelt">
+            <span class="dot" id="pill-dot"></span>
+            <span id="pill-label">C&amp;A &amp; Projektintegration</span>
+          </button>
+          <span class="auto-hint" id="auto-status">Standard</span>
         </div>
-        <div class="quick-templates">
-          <button class="btn-sm" data-tpl="Tidsstempel-tjek" data-status="OK">Hurtig tidsstempel-log</button>
-          <button class="btn-sm" data-tpl="Observation / Afvigelse" data-status="Obs">Observation / Afvigelse</button>
-          <button class="btn-sm" data-tpl="Udført vedligehold / service" data-status="OK">Udført arbejde</button>
-        </div>
-        <form id="log-form">
-          <div class="grid-3">
-            <div class="field">
-              <label>Dato & tidspunkt</label>
-              <input type="datetime-local" id="log-dt" required>
-            </div>
-            <div class="field">
-              <label>Kategori</label>
-              <select id="log-cat">
-                <option value="Drift / Arbejde">Drift / Arbejde</option>
-                <option value="Værksted / Køretøj">Værksted / Køretøj</option>
-                <option value="Måling / Tjek">Måling / Tjek</option>
-                <option value="Hjem & Privat">Hjem & Privat</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Status</label>
-              <select id="log-status">
-                <option value="Info">Info</option>
-                <option value="OK">OK / Udført</option>
-                <option value="Obs">Obs / Afvigelse</option>
-              </select>
-            </div>
-          </div>
-          <div class="grid-2">
-            <div class="field">
-              <label>Overskrift / Hændelse</label>
-              <input type="text" id="log-title" placeholder="F.eks. Olieskift, Rundgang linje 2, Måling..." required>
-            </div>
-            <div class="field">
-              <label>Måleværdi / Reference (valgfri)</label>
-              <input type="text" id="log-ref" placeholder="F.eks. 142.500 km, 2.4 bar, Sagsnr. 104...">
-            </div>
-          </div>
-          <div class="field">
-            <label>Detaljer / Beskrivelse</label>
-            <textarea id="log-body" placeholder="Beskriv observationer, udført arbejde eller næste skridt..."></textarea>
-          </div>
-          <button type="submit" class="btn-primary">Gem i logbog</button>
-        </form>
-      </div>
 
-      <div class="card">
-        <div class="card-title">
-          <span>Filtrér logbog</span>
-          <button class="btn-sm" id="export-log-md">Eksportér log (.md)</button>
-        </div>
-        <div class="filter-bar">
-          <input type="search" id="log-search" placeholder="Søg i logbog...">
-          <select id="log-filter-cat" style="max-width:180px;">
-            <option value="all">Alle kategorier</option>
-            <option value="Drift / Arbejde">Drift / Arbejde</option>
-            <option value="Værksted / Køretøj">Værksted / Køretøj</option>
-            <option value="Måling / Tjek">Måling / Tjek</option>
-            <option value="Hjem & Privat">Hjem & Privat</option>
+        <div class="controls-left">
+          <input type="text" id="board-input" class="mini-input" placeholder="Tavle (f.eks. eSOP)" style="width:160px" />
+          <input type="date" id="date-input" class="mini-input" />
+          <select id="prio-input" class="mini-select">
+            <option value="">Prioritet</option>
+            <option value="Høj prioritet">Høj</option>
+            <option value="Medium prioritet">Medium</option>
+            <option value="Lav prioritet">Lav</option>
           </select>
-          <select id="log-filter-status" style="max-width:160px;">
-            <option value="all">Alle statusser</option>
-            <option value="Info">Info</option>
-            <option value="OK">OK / Udført</option>
-            <option value="Obs">Obs / Afvigelse</option>
-          </select>
+          <button type="button" class="add-btn" onclick="addTask()">Tilføj</button>
         </div>
       </div>
-      <div id="list-log"></div>
     </section>
 
-    <!-- 3. OPGAVER -->
-    <section class="panel" id="panel-tasks">
-      <div class="card">
-        <div class="card-title">Ny opgave / huskeliste</div>
-        <form id="task-form">
-          <div class="grid-3">
-            <div class="field">
-              <label>Opgave</label>
-              <input type="text" id="task-title" placeholder="Hvad skal huskes eller gøres?" required>
-            </div>
-            <div class="field">
-              <label>Prioritet</label>
-              <select id="task-prio">
-                <option value="Normal">Normal</option>
-                <option value="Høj">Høj</option>
-                <option value="Lav">Lav</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Deadline (valgfri)</label>
-              <input type="date" id="task-due">
-            </div>
-          </div>
-          <div class="grid-2">
-            <div class="field">
-              <label>Kategori</label>
-              <input type="text" id="task-cat" value="Generelt" placeholder="F.eks. Arbejde, Værksted, Indkøb...">
-            </div>
-            <div class="field">
-              <label>Note / Detaljer (valgfri)</label>
-              <input type="text" id="task-body" placeholder="Evt. ekstra info eller reservedelsnr.">
-            </div>
-          </div>
-          <button type="submit" class="btn-primary">Tilføj opgave</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <div class="filter-bar" style="margin-bottom:0;">
-          <input type="search" id="task-search" placeholder="Søg i opgaver...">
-          <select id="task-filter" style="max-width:170px;">
-            <option value="open">Kun åbne</option>
-            <option value="all">Alle opgaver</option>
-            <option value="done">Kun færdige</option>
-          </select>
-          <button class="btn-sm btn-danger" id="clear-done-tasks">Slet færdige</button>
-        </div>
-      </div>
-      <div id="list-tasks"></div>
-    </section>
-
-    <!-- 4. NOTER -->
-    <section class="panel" id="panel-notes">
-      <div class="card">
-        <div class="card-title">Ny note</div>
-        <form id="note-form">
-          <div class="grid-3">
-            <div class="field">
-              <label>Titel</label>
-              <input type="text" id="note-title" placeholder="Overskrift på note..." required>
-            </div>
-            <div class="field">
-              <label>Kategori</label>
-              <input type="text" id="note-cat" value="Noter" placeholder="F.eks. Idéer, Koder, Opskrifter...">
-            </div>
-            <div class="field">
-              <label>Tags (kommasepareret)</label>
-              <input type="text" id="note-tags" placeholder="f.eks. vigtigt, vfr, projekt">
-            </div>
-          </div>
-          <div class="field">
-            <label>Indhold</label>
-            <textarea id="note-body" placeholder="Skriv din note her..." required></textarea>
-          </div>
-          <button type="submit" class="btn-primary">Gem note</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <div class="filter-bar" style="margin-bottom:0;">
-          <input type="search" id="note-search" placeholder="Søg i noter og #tags...">
-        </div>
-      </div>
-      <div id="list-notes"></div>
-    </section>
-
-    <!-- 5. PRIVAT DAGBOG (AES-GCM KRYPTERET) -->
-    <section class="panel" id="panel-diary">
-      <div id="diary-locked" class="card pin-box">
-        <h3 id="pin-heading" style="margin:0 0 6px 0;">Privat Dagbog</h3>
-        <p id="pin-sub" style="color:var(--muted); font-size:0.86rem; margin:0;">Indtast din 4-6 cifrede PIN-kode for at dekryptere dine indlæg.</p>
-        <div class="pin-dots" id="pin-dots"></div>
-        <div id="pin-error" style="color:var(--red); font-size:0.84rem; min-height:20px; margin-bottom:8px;"></div>
-        <div class="keypad" id="keypad">
-          <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
-          <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
-          <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
-          <button type="button" data-k="clear" class="btn-danger">Ryd</button><button type="button" data-k="0">0</button><button type="button" data-k="ok" class="btn-primary">OK</button>
-        </div>
-        <div style="margin-top:16px;">
-          <button type="button" class="btn-sm btn-danger" id="reset-diary-btn">Nulstil dagbog & PIN</button>
-        </div>
-      </div>
-
-      <div id="diary-unlocked" style="display:none;">
-        <div class="card">
-          <div class="card-title">
-            <span>Krypteret Dagbog (AES-256)</span>
-            <button type="button" class="btn-sm btn-danger" id="lock-diary-btn">Lås dagbog</button>
-          </div>
-          <form id="diary-form">
-            <div class="grid-2">
-              <div class="field">
-                <label>Dato</label>
-                <input type="date" id="diary-date" required>
-              </div>
-              <div class="field">
-                <label>Overskrift</label>
-                <input type="text" id="diary-title" placeholder="Dagens overskrift..." required>
-              </div>
-            </div>
-            <div class="field">
-              <label>Fortroligt indlæg</label>
-              <textarea id="diary-body" placeholder="Skrives og gemmes krypteret lokalt med din PIN..." required></textarea>
-            </div>
-            <button type="submit" class="btn-primary">Gem krypteret indlæg</button>
-          </form>
-        </div>
-
-        <div class="card">
-          <div class="filter-bar" style="margin-bottom:0;">
-            <input type="search" id="diary-search" placeholder="Søg i dine dekrypterede dagbogsnotater...">
-          </div>
-        </div>
-        <div id="list-diary"></div>
-      </div>
-    </section>
+    <!-- DYNAMISK VISNING -->
+    <div id="content-area"></div>
   </main>
-</div>
 
-<button class="fab" id="fab-add" title="Hurtig tilføj">+</button>
+  <div id="toast" class="toast"></div>
 
-<nav class="mobile-nav">
-  <button class="m-nav-btn active" data-tab="all"><span class="m-nav-icon">◉</span><span>Alle</span></button>
-  <button class="m-nav-btn" data-tab="log"><span class="m-nav-icon">⏱</span><span>Logbog</span></button>
-  <button class="m-nav-btn" data-tab="tasks"><span class="m-nav-icon">✓</span><span>Opgaver</span></button>
-  <button class="m-nav-btn" data-tab="notes"><span class="m-nav-icon">✎</span><span>Noter</span></button>
-  <button class="m-nav-btn" data-tab="diary"><span class="m-nav-icon">🔒</span><span>Dagbog</span></button>
-</nav>
+  <script>
+    const DEFAULT_CATEGORIES = [
+      {
+        id: "ca",
+        name: "C&A & Projektintegration",
+        color: "#60a5fa",
+        desc: "Fokusere på menneskesiden af projekter og sikre, at C&A-aktiviteter integreres i projektplanerne i tæt samarbejde med projektlederne.",
+        keywords: ["projekt", "projektplan", "projektleder", "projekttavle", "task force", "c&a", "change", "menneskesiden", "interessent", "rasci", "tidsplan", "milepæl", "ombyg", "runi", "wincc", "mmr", "cloud"]
+      },
+      {
+        id: "comm",
+        name: "Forandringskommunikation",
+        color: "#c084fc",
+        desc: "Sikre og understøtte projekternes kommunikationsindsats og den samlede kommunikationsplan (hvorfor & betydning i hverdagen).",
+        keywords: ["kommunikation", "kommunikationsplan", "hvorfor", "budskab", "nyhedsbrev", "infoskærm", "tavlemøde", "præsentation", "orientering", "dialog", "fortælling"]
+      },
+      {
+        id: "users",
+        name: "Understøttelse af slutbrugere",
+        color: "#34d399",
+        desc: "Understøtte det lokale ejerskab, samt støtte de ansvarlige undervejs, så organisationen forstår og mestrer nye funktioner og arbejdsmetoder.",
+        keywords: ["slutbruger", "ejerskab", "operatør", "hjælp til", "driftskontrolant", "træning", "oplæring", "sidemandsoplæring", "arbejdsmetode", "superbruger", "mestre", "støtte"]
+      },
+      {
+        id: "sponsors",
+        name: "Sponsorer & Ledere",
+        color: "#fbbf24",
+        desc: "Understøtte sponsorkoalitionen og klæde sponsorer og people managers på til deres forandringsroller.",
+        keywords: ["sponsor", "sponsorkoalition", "leder", "ledere", "people manager", "arbejdsleder", "teamleder", "ledelse", "forandringsrolle", "sparring", "klæde på"]
+      },
+      {
+        id: "anchoring",
+        name: "Forankring & Opfølgning",
+        color: "#f472b6",
+        desc: "Sikre opfølgning på implementering af nye værktøjer og arbejdsmåder, og fejre succeser i de relevante afdelinger.",
+        keywords: ["forankring", "opfølgning", "følg op", "implementering", "fejre", "succes", "audit", "6s", "eftersyn", "fastholdelse", "evaluering", "status"]
+      },
+      {
+        id: "esop",
+        name: "Dokumentation & eSOP",
+        color: "#fb923c",
+        desc: "Deltage i og drive eSOP som forandringsprojekt; sikre træning i udarbejdelse af eSOPs og understøtte introduktionen.",
+        keywords: ["esop", "sop", "instruks", "procedure", "betjeningsvejledning", "betjeningsvejledninger", "dokumentation", "vejledning", "kold-ende", "vedligehold", "oem"]
+      }
+    ];
 
-<!-- REDIGERINGSMODAL (ALLE TYPER) -->
-<div class="modal-backdrop" id="edit-modal">
-  <div class="modal">
-    <div class="modal-head">
-      <strong id="edit-modal-title">Rediger indlæg</strong>
-      <button type="button" class="btn-sm" id="close-edit-modal">Luk</button>
-    </div>
-    <form id="edit-form">
-      <input type="hidden" id="edit-id">
-      <input type="hidden" id="edit-type">
-      <div class="field">
-        <label>Titel / Overskrift</label>
-        <input type="text" id="edit-title" required>
-      </div>
-      <div class="grid-2" id="edit-row-meta">
-        <div class="field" id="edit-cat-wrap">
-          <label>Kategori</label>
-          <input type="text" id="edit-cat">
-        </div>
-        <div class="field" id="edit-extra-wrap">
-          <label id="edit-extra-label">Ekstra</label>
-          <input type="text" id="edit-extra">
-        </div>
-      </div>
-      <div class="grid-2" id="edit-row-dt">
-        <div class="field">
-          <label id="edit-date-label">Dato / Tid</label>
-          <input type="text" id="edit-date">
-        </div>
-        <div class="field" id="edit-select-wrap">
-          <label id="edit-select-label">Status / Prioritet</label>
-          <select id="edit-select"></select>
-        </div>
-      </div>
-      <div class="field">
-        <label>Beskrivelse / Indhold</label>
-        <textarea id="edit-body"></textarea>
-      </div>
-      <div style="display:flex; justify-content:flex-end; gap:8px;">
-        <button type="button" id="cancel-edit-btn">Annuller</button>
-        <button type="submit" class="btn-primary">Gem ændringer</button>
-      </div>
-    </form>
-  </div>
-</div>
+    const INITIAL_TASKS = [
+      { id: "t1", title: "Blækanlæg", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-11-20", priority: "", note: "", done: false },
+      { id: "t2", title: "Vægte til færdigvarer", categoryId: "ca", board: "Task Force", status: "Igangsat", date: "2026-11-19", priority: "Høj prioritet", note: "", done: false },
+      { id: "t3", title: "Hjælp til Driftskontrolant eSOP: Udtagningsfrekvens", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-11-16", priority: "", note: "", done: false },
+      { id: "t4", title: "Laves ny eSOP til Opfyldning af råvare", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-11-24", priority: "", note: "", done: false },
+      { id: "t5", title: "Overvågning og tømning af betontank", categoryId: "esop", board: "eSOP", status: "Venter", date: "2026-11-16", priority: "", note: "", done: false },
+      { id: "t6", title: "7 - Ovnbygning: Dæk 2+3 - 6S - Nødvendige eSOPs ikke opdateret", categoryId: "esop", board: "eSOP", status: "Venter", date: "2026-12-02", priority: "", note: "", done: false },
+      { id: "t7", title: "Foranstaltninger ved arbejde med og omkring hængende vægt", categoryId: "esop", board: "eSOP", status: "Venter", date: "2026-11-16", priority: "Medium prioritet", note: "", done: false },
+      { id: "t8", title: "Tilføjelse til eSOP Trådning af synål", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-12-14", priority: "", note: "", done: false },
+      { id: "t9", title: "eSOp ønskes på visuel kontrol", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-11-23", priority: "Medium prioritet", note: "", done: false },
+      { id: "t10", title: "Procedure for skift af hønsetråd", categoryId: "esop", board: "Kold-ende", status: "Igangsat", date: "2027-01-18", priority: "", note: "", done: false },
+      { id: "t11", title: "Ombyg hættestrækker - trådning af folie", categoryId: "ca", board: "Projekttavle", status: "Igangsat", date: "2026-11-16", priority: "", note: "", done: false },
+      { id: "t12", title: "trækstyrke (KUN OEM'er)", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-12-02", priority: "Medium prioritet", note: "", done: false },
+      { id: "t13", title: "Vedligeholdelse af delamineringen (Vokskar tøm og rens)", categoryId: "esop", board: "eSOP", status: "Venter", date: "2026-12-14", priority: "", note: "", done: false },
+      { id: "t14", title: "Opdatering af betjeningsvejledninger", categoryId: "esop", board: "Vedligehold", status: "Igangsat", date: "2026-11-16", priority: "Lav prioritet", note: "", done: false },
+      { id: "t15", title: "Fines brænder", categoryId: "esop", board: "eSOP", status: "Igangsat", date: "2026-12-14", priority: "Medium prioritet", note: "", done: false }
+    ];
 
-<!-- BACKUP & EKSPORT MODAL -->
-<div class="modal-backdrop" id="backup-modal">
-  <div class="modal">
-    <div class="modal-head">
-      <strong>Lokal data & Sikkerhedskopi</strong>
-      <button type="button" class="btn-sm" id="close-backup-modal">Luk</button>
-    </div>
-    <p style="font-size:0.88rem; color:var(--muted);">Al data gemmes i din browsers lokale lager (<code>localStorage</code>). Tag en JSON-sikkerhedskopi, hvis du vil flytte data til en anden enhed.</p>
-    <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px;">
-      <button type="button" class="btn-primary" id="export-json-btn">Download fuld backup (.json)</button>
-      <label style="display:block; text-align:center; padding:10px; border:1px dashed var(--border); border-radius:8px; cursor:pointer;">
-        Gendan fra backup (.json)
-        <input type="file" id="import-json-input" accept=".json" style="display:none;">
-      </label>
-      <button type="button" class="btn-danger" id="factory-reset-btn">Slet al data og nulstil</button>
-    </div>
-  </div>
-</div>
+    const STORAGE_KEY = "cm_cockpit_v6";
+    const FONT_KEY = "cm_cockpit_font_scale";
 
-<script>
-// Registrer Service Worker for 100% offline-drift på GitHub Pages
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  });
-}
+    let state = loadState();
+    let currentView = "all";
+    let selectedCategoryId = "ca";
+    let manualOverride = false;
+    let searchQuery = "";
+    let boardFilter = "";
+    let statusFilter = "";
+    let sortBy = "date";
+    let openNotes = {};
+    let fontScale = parseFloat(localStorage.getItem(FONT_KEY)) || 1.25;
 
-(function() {
-  const STORAGE_KEY = 'lommelog_data_v2';
-  const DIARY_KEY = 'lommelog_diary_v2';
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove("show"), 2800);
+    }
 
-  let state = loadState();
-  let activeTab = 'all';
-  let globalTypeFilter = 'all';
-  let unlockedPin = null;
-  let diaryEntries = [];
-  let pinBuffer = '';
+    function applyFontScale() {
+      document.documentElement.style.setProperty("--font-scale", fontScale.toFixed(2));
+      localStorage.setItem(FONT_KEY, fontScale.toFixed(2));
+    }
 
-  function defaultState() {
-    const nowIso = toLocalDateTimeInput(new Date());
-    return {
-      items: [
-        {
-          id: uid(), type: 'log', pinned: true,
-          title: 'Opstart & tjek af LommeLog',
-          cat: 'Drift / Arbejde', status: 'OK', ref: 'v2.0 Offline',
-          dt: nowIso,
-          body: 'Appen kører 100 % lokalt i browseren. Brug søgefeltet øverst til at finde keywords på tværs af alle poster.',
-          createdAt: Date.now()
-        },
-        {
-          id: uid(), type: 'task', pinned: false, done: false,
-          title: 'Test redigering og sikkerhedskopi',
-          cat: 'Generelt', prio: 'Normal', due: '',
-          body: 'Tryk på Rediger på en opgave eller note for at opdatere indholdet.',
-          createdAt: Date.now() - 10000
-        },
-        {
-          id: uid(), type: 'note', pinned: false,
-          title: 'Hurtige keywords & #tags',
-          cat: 'Noter', tags: ['guide', 'offline'],
-          body: 'Du kan søge direkte på både titel, tekst, måleværdier og #tags i søgefelterne.',
-          createdAt: Date.now() - 20000
+    function changeFontScale(delta) {
+      fontScale = Math.min(1.75, Math.max(0.95, fontScale + delta));
+      applyFontScale();
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("cm_cockpit_v5") || localStorage.getItem("cm_cockpit_v4");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.categories && parsed.tasks) {
+            parsed.tasks = parsed.tasks.map(t => ({ note: "", ...t }));
+            return parsed;
+          }
         }
-      ]
-    };
-  }
-
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return defaultState();
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed.items) ? parsed : defaultState();
-    } catch (e) {
-      return defaultState();
-    }
-  }
-
-  function saveState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    renderAll();
-  }
-
-  function uid() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-  }
-
-  function toLocalDateTimeInput(d) {
-    const pad = n => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  }
-
-  function toLocalDateInput(d) {
-    const pad = n => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  }
-
-  function formatDt(dtStr) {
-    if (!dtStr) return '';
-    return dtStr.replace('T', ' kl. ');
-  }
-
-  function esc(str) {
-    return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
-
-  // Navigation
-  function switchTab(tab) {
-    if (activeTab === 'diary' && tab !== 'diary') {
-      lockDiary();
-    }
-    activeTab = tab;
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + tab).classList.add('active');
-    document.querySelectorAll('[data-tab]').forEach(b => {
-      b.classList.toggle('active', b.dataset.tab === tab);
-    });
-    if (tab === 'diary') initDiaryLockView();
-  }
-
-  document.querySelectorAll('[data-tab]').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-  });
-
-  // Hurtig-tilføj FAB
-  document.getElementById('fab-add').addEventListener('click', () => {
-    if (activeTab === 'tasks') {
-      document.getElementById('task-title').focus();
-    } else if (activeTab === 'notes') {
-      document.getElementById('note-title').focus();
-    } else if (activeTab === 'diary' && unlockedPin) {
-      document.getElementById('diary-title').focus();
-    } else {
-      switchTab('log');
-      document.getElementById('log-dt').value = toLocalDateTimeInput(new Date());
-      document.getElementById('log-title').focus();
-    }
-  });
-
-  // Logbog formular
-  document.getElementById('log-dt').value = toLocalDateTimeInput(new Date());
-  document.getElementById('log-now-btn').addEventListener('click', () => {
-    document.getElementById('log-dt').value = toLocalDateTimeInput(new Date());
-  });
-  document.querySelectorAll('[data-tpl]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.getElementById('log-dt').value = toLocalDateTimeInput(new Date());
-      document.getElementById('log-title').value = btn.dataset.tpl;
-      document.getElementById('log-status').value = btn.dataset.status;
-      document.getElementById('log-body').focus();
-    });
-  });
-
-  document.getElementById('log-form').addEventListener('submit', e => {
-    e.preventDefault();
-    state.items.unshift({
-      id: uid(), type: 'log', pinned: false,
-      dt: document.getElementById('log-dt').value || toLocalDateTimeInput(new Date()),
-      cat: document.getElementById('log-cat').value,
-      status: document.getElementById('log-status').value,
-      title: document.getElementById('log-title').value.trim(),
-      ref: document.getElementById('log-ref').value.trim(),
-      body: document.getElementById('log-body').value.trim(),
-      createdAt: Date.now()
-    });
-    e.target.reset();
-    document.getElementById('log-dt').value = toLocalDateTimeInput(new Date());
-    saveState();
-  });
-
-  // Opgave formular
-  document.getElementById('task-form').addEventListener('submit', e => {
-    e.preventDefault();
-    state.items.unshift({
-      id: uid(), type: 'task', pinned: false, done: false,
-      title: document.getElementById('task-title').value.trim(),
-      prio: document.getElementById('task-prio').value,
-      due: document.getElementById('task-due').value,
-      cat: document.getElementById('task-cat').value.trim() || 'Generelt',
-      body: document.getElementById('task-body').value.trim(),
-      createdAt: Date.now()
-    });
-    e.target.reset();
-    document.getElementById('task-cat').value = 'Generelt';
-    saveState();
-  });
-
-  // Note formular
-  document.getElementById('note-form').addEventListener('submit', e => {
-    e.preventDefault();
-    const rawTags = document.getElementById('note-tags').value;
-    const tags = rawTags.split(',').map(t => t.trim().replace(/^#/, '')).filter(Boolean);
-    state.items.unshift({
-      id: uid(), type: 'note', pinned: false,
-      title: document.getElementById('note-title').value.trim(),
-      cat: document.getElementById('note-cat').value.trim() || 'Noter',
-      tags,
-      body: document.getElementById('note-body').value.trim(),
-      createdAt: Date.now()
-    });
-    e.target.reset();
-    document.getElementById('note-cat').value = 'Noter';
-    saveState();
-  });
-
-  // Søgning & filtre
-  ['global-search', 'global-date', 'log-search', 'log-filter-cat', 'log-filter-status', 'task-search', 'task-filter', 'note-search'].forEach(id => {
-    document.getElementById(id).addEventListener('input', renderAll);
-    document.getElementById(id).addEventListener('change', renderAll);
-  });
-
-  document.querySelectorAll('#global-pills .pill').forEach(p => {
-    p.addEventListener('click', () => {
-      document.querySelectorAll('#global-pills .pill').forEach(x => x.classList.remove('active'));
-      p.classList.add('active');
-      globalTypeFilter = p.dataset.gtype;
-      renderAll();
-    });
-  });
-
-  document.getElementById('clear-global-filter').addEventListener('click', () => {
-    document.getElementById('global-search').value = '';
-    document.getElementById('global-date').value = '';
-    globalTypeFilter = 'all';
-    document.querySelectorAll('#global-pills .pill').forEach(x => x.classList.toggle('active', x.dataset.gtype === 'all'));
-    renderAll();
-  });
-
-  document.getElementById('clear-done-tasks').addEventListener('click', () => {
-    state.items = state.items.filter(i => !(i.type === 'task' && i.done));
-    saveState();
-  });
-
-  // Eksport logbog til Markdown
-  document.getElementById('export-log-md').addEventListener('click', () => {
-    const logs = state.items.filter(i => i.type === 'log');
-    const lines = ['# LommeLog – Logbog', ''];
-    logs.forEach(l => {
-      lines.push(`## ${formatDt(l.dt)} – ${l.title}`);
-      lines.push(`- **Kategori:** ${l.cat} | **Status:** ${l.status}${l.ref ? ' | **Ref:** ' + l.ref : ''}`);
-      if (l.body) lines.push(`\n${l.body}`);
-      lines.push('\n---');
-    });
-    downloadFile('lommelog-logbog.md', lines.join('\n'), 'text/markdown');
-  });
-
-  // Rendering af kort
-  function renderItemCard(item) {
-    const typeLabel = item.type === 'log' ? 'Logbog' : item.type === 'task' ? 'Opgave' : 'Note';
-    let statusBadge = '';
-    if (item.type === 'log') {
-      const cls = item.status === 'OK' ? 'tag-ok' : item.status === 'Obs' ? 'tag-warn' : '';
-      statusBadge = `<span class="tag ${cls}">${esc(item.status)}</span>`;
-    } else if (item.type === 'task') {
-      const cls = item.prio === 'Høj' ? 'tag-danger' : item.prio === 'Lav' ? '' : 'tag-warn';
-      statusBadge = `<span class="tag ${cls}">${esc(item.prio)}</span>`;
+      } catch (e) {}
+      return { categories: DEFAULT_CATEGORIES, tasks: INITIAL_TASKS };
     }
 
-    const tagsHtml = (item.tags || []).map(t => `<span class="tag">#${esc(t)}</span>`).join(' ');
-    const subMeta = [
-      `<span class="tag">${typeLabel}</span>`,
-      statusBadge,
-      item.cat ? `<span>${esc(item.cat)}</span>` : '',
-      item.dt ? `<span>${esc(formatDt(item.dt))}</span>` : '',
-      item.due ? `<span>Deadline: ${esc(item.due)}</span>` : '',
-      item.ref ? `<span>Ref: <strong>${esc(item.ref)}</strong></span>` : '',
-      tagsHtml
-    ].filter(Boolean).join(' ');
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
 
-    const checkBtn = item.type === 'task'
-      ? `<button class="btn-sm" data-act="toggle" data-id="${item.id}">${item.done ? 'Genåbn' : 'Udført'}</button>`
-      : '';
+    function getDueInfo(dateStr) {
+      if (!dateStr) return null;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = new Date(dateStr + "T00:00:00");
+      if (isNaN(target.getTime())) return null;
+      const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
+      if (diffDays < 0) return { type: "overdue", label: `Overskredet (${Math.abs(diffDays)}d)` };
+      if (diffDays === 0) return { type: "soon", label: "I dag" };
+      if (diffDays <= 7) return { type: "soon", label: `Om ${diffDays}d` };
+      return null;
+    }
 
-    return `
-      <div class="item-card ${item.pinned ? 'pinned' : ''} ${item.done ? 'done' : ''}">
-        <div class="item-head">
-          <div>
-            <h4 class="item-title">${item.pinned ? '★ ' : ''}${esc(item.title)}</h4>
-            <div class="item-meta">${subMeta}</div>
-          </div>
-          <div class="item-actions">
-            ${checkBtn}
-            <button class="btn-sm" data-act="pin" data-id="${item.id}" title="Fastgør">★</button>
-            <button class="btn-sm" data-act="edit" data-id="${item.id}">Rediger</button>
-            <button class="btn-sm btn-danger" data-act="del" data-id="${item.id}">Slet</button>
-          </div>
-        </div>
-        ${item.body ? `<p class="item-body">${esc(item.body)}</p>` : ''}
-      </div>
-    `;
-  }
+    function isUrgentTask(task) {
+      if (task.done || !task.date) return false;
+      return getDueInfo(task.date) !== null;
+    }
 
-  function matchesQuery(item, q) {
-    if (!q) return true;
-    const hay = [
-      item.title, item.body, item.cat, item.ref, item.status, item.prio,
-      (item.tags || []).map(t => '#' + t).join(' ')
-    ].join(' ').toLowerCase();
-    return q.toLowerCase().split(/\s+/).every(word => hay.includes(word));
-  }
+    function detectCategory(text) {
+      const lower = text.toLowerCase();
+      let bestId = null;
+      let bestScore = 0;
 
-  function sortItems(arr) {
-    return [...arr].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || (b.createdAt || 0) - (a.createdAt || 0));
-  }
-
-  function renderAll() {
-    const logs = state.items.filter(i => i.type === 'log');
-    const tasks = state.items.filter(i => i.type === 'task');
-    const notes = state.items.filter(i => i.type === 'note');
-
-    document.getElementById('cnt-all').textContent = state.items.length;
-    document.getElementById('cnt-log').textContent = logs.length;
-    document.getElementById('cnt-tasks').textContent = tasks.filter(t => !t.done).length;
-    document.getElementById('cnt-notes').textContent = notes.length;
-
-    // 1. Global liste
-    const gq = document.getElementById('global-search').value.trim();
-    const gdate = document.getElementById('global-date').value;
-    const filteredAll = sortItems(state.items.filter(i => {
-      if (globalTypeFilter === 'pinned' && !i.pinned) return false;
-      if (['log', 'task', 'note'].includes(globalTypeFilter) && i.type !== globalTypeFilter) return false;
-      if (gdate) {
-        const dStr = i.dt ? i.dt.slice(0, 10) : (i.due || toLocalDateInput(new Date(i.createdAt)));
-        if (dStr !== gdate) return false;
+      for (const cat of state.categories) {
+        let score = 0;
+        for (const kw of cat.keywords) {
+          if (kw && lower.includes(kw.toLowerCase())) {
+            score += kw.length > 4 ? 2 : 1;
+          }
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          bestId = cat.id;
+        }
       }
-      return matchesQuery(i, gq);
-    }));
-    document.getElementById('list-all').innerHTML = filteredAll.length
-      ? filteredAll.map(renderItemCard).join('')
-      : '<div class="empty">Ingen indlæg matcher din søgning.</div>';
-
-    // 2. Logbog
-    const lq = document.getElementById('log-search').value.trim();
-    const lcat = document.getElementById('log-filter-cat').value;
-    const lstat = document.getElementById('log-filter-status').value;
-    const filteredLogs = sortItems(logs.filter(i => {
-      if (lcat !== 'all' && i.cat !== lcat) return false;
-      if (lstat !== 'all' && i.status !== lstat) return false;
-      return matchesQuery(i, lq);
-    }));
-    document.getElementById('list-log').innerHTML = filteredLogs.length
-      ? filteredLogs.map(renderItemCard).join('')
-      : '<div class="empty">Ingen logbogsindlæg fundet.</div>';
-
-    // 3. Opgaver
-    const tq = document.getElementById('task-search').value.trim();
-    const tf = document.getElementById('task-filter').value;
-    const filteredTasks = sortItems(tasks.filter(i => {
-      if (tf === 'open' && i.done) return false;
-      if (tf === 'done' && !i.done) return false;
-      return matchesQuery(i, tq);
-    }));
-    document.getElementById('list-tasks').innerHTML = filteredTasks.length
-      ? filteredTasks.map(renderItemCard).join('')
-      : '<div class="empty">Ingen opgaver fundet.</div>';
-
-    // 4. Noter
-    const nq = document.getElementById('note-search').value.trim();
-    const filteredNotes = sortItems(notes.filter(i => matchesQuery(i, nq)));
-    document.getElementById('list-notes').innerHTML = filteredNotes.length
-      ? filteredNotes.map(renderItemCard).join('')
-      : '<div class="empty">Ingen noter fundet.</div>';
-  }
-
-  // Delegerede klik-handlinger (Rediger, Slet, Pin, Udført)
-  document.querySelector('main').addEventListener('click', e => {
-    const btn = e.target.closest('[data-act]');
-    if (!btn) return;
-    const id = btn.dataset.id;
-    const act = btn.dataset.act;
-
-    if (act === 'diary-edit') {
-      const entry = diaryEntries.find(x => x.id === id);
-      if (entry) openEditModal(entry, 'diary');
-      return;
-    }
-    if (act === 'diary-del') {
-      diaryEntries = diaryEntries.filter(x => x.id !== id);
-      persistDiary();
-      return;
+      return bestId;
     }
 
-    const item = state.items.find(x => x.id === id);
-    if (!item) return;
-
-    if (act === 'toggle') {
-      item.done = !item.done;
-      saveState();
-    } else if (act === 'pin') {
-      item.pinned = !item.pinned;
-      saveState();
-    } else if (act === 'del') {
-      state.items = state.items.filter(x => x.id !== id);
-      saveState();
-    } else if (act === 'edit') {
-      openEditModal(item, item.type);
-    }
-  });
-
-  // Samlet redigeringsmodal for alle typer
-  function openEditModal(item, type) {
-    document.getElementById('edit-id').value = item.id;
-    document.getElementById('edit-type').value = type;
-    document.getElementById('edit-title').value = item.title || '';
-    document.getElementById('edit-body').value = item.body || '';
-
-    const catWrap = document.getElementById('edit-cat-wrap');
-    const extraWrap = document.getElementById('edit-extra-wrap');
-    const rowDt = document.getElementById('edit-row-dt');
-    const selWrap = document.getElementById('edit-select-wrap');
-    const sel = document.getElementById('edit-select');
-
-    catWrap.style.display = type === 'diary' ? 'none' : 'block';
-    document.getElementById('edit-cat').value = item.cat || '';
-
-    if (type === 'log') {
-      extraWrap.style.display = 'block';
-      document.getElementById('edit-extra-label').textContent = 'Måleværdi / Reference';
-      document.getElementById('edit-extra').value = item.ref || '';
-      rowDt.style.display = 'grid';
-      document.getElementById('edit-date-label').textContent = 'Dato & tid (ÅÅÅÅ-MM-DDTHH:MM)';
-      document.getElementById('edit-date').value = item.dt || '';
-      selWrap.style.display = 'block';
-      document.getElementById('edit-select-label').textContent = 'Status';
-      sel.innerHTML = '<option value="Info">Info</option><option value="OK">OK / Udført</option><option value="Obs">Obs / Afvigelse</option>';
-      sel.value = item.status || 'Info';
-    } else if (type === 'task') {
-      extraWrap.style.display = 'none';
-      rowDt.style.display = 'grid';
-      document.getElementById('edit-date-label').textContent = 'Deadline (ÅÅÅÅ-MM-DD)';
-      document.getElementById('edit-date').value = item.due || '';
-      selWrap.style.display = 'block';
-      document.getElementById('edit-select-label').textContent = 'Prioritet';
-      sel.innerHTML = '<option value="Normal">Normal</option><option value="Høj">Høj</option><option value="Lav">Lav</option>';
-      sel.value = item.prio || 'Normal';
-    } else if (type === 'note') {
-      extraWrap.style.display = 'block';
-      document.getElementById('edit-extra-label').textContent = 'Tags (kommasepareret)';
-      document.getElementById('edit-extra').value = (item.tags || []).join(', ');
-      rowDt.style.display = 'none';
-    } else if (type === 'diary') {
-      extraWrap.style.display = 'none';
-      rowDt.style.display = 'grid';
-      document.getElementById('edit-date-label').textContent = 'Dato (ÅÅÅÅ-MM-DD)';
-      document.getElementById('edit-date').value = item.date || '';
-      selWrap.style.display = 'none';
-    }
-
-    document.getElementById('edit-modal').classList.add('open');
-  }
-
-  function closeEditModal() {
-    document.getElementById('edit-modal').classList.remove('open');
-  }
-  document.getElementById('close-edit-modal').addEventListener('click', closeEditModal);
-  document.getElementById('cancel-edit-btn').addEventListener('click', closeEditModal);
-
-  document.getElementById('edit-form').addEventListener('submit', e => {
-    e.preventDefault();
-    const id = document.getElementById('edit-id').value;
-    const type = document.getElementById('edit-type').value;
-
-    if (type === 'diary') {
-      const entry = diaryEntries.find(x => x.id === id);
-      if (entry) {
-        entry.title = document.getElementById('edit-title').value.trim();
-        entry.date = document.getElementById('edit-date').value.trim();
-        entry.body = document.getElementById('edit-body').value.trim();
-        persistDiary();
+    function reCategorizeAllActive() {
+      let moved = 0;
+      for (const task of state.tasks) {
+        if (task.done) continue;
+        const matched = detectCategory(`${task.title} ${task.board || ""}`);
+        if (matched && matched !== task.categoryId) {
+          task.categoryId = matched;
+          moved++;
+        }
       }
-      closeEditModal();
-      return;
+      saveState();
+      render();
+      showToast(moved > 0 ? `${moved} opgaver blev flyttet ud fra dine nøgleord.` : "Alle aktive opgaver matcher allerede reglerne.");
     }
 
-    const item = state.items.find(x => x.id === id);
-    if (!item) return;
-
-    item.title = document.getElementById('edit-title').value.trim();
-    item.cat = document.getElementById('edit-cat').value.trim();
-    item.body = document.getElementById('edit-body').value.trim();
-
-    if (type === 'log') {
-      item.ref = document.getElementById('edit-extra').value.trim();
-      item.dt = document.getElementById('edit-date').value.trim();
-      item.status = document.getElementById('edit-select').value;
-    } else if (type === 'task') {
-      item.due = document.getElementById('edit-date').value.trim();
-      item.prio = document.getElementById('edit-select').value;
-    } else if (type === 'note') {
-      item.tags = document.getElementById('edit-extra').value.split(',').map(t => t.trim().replace(/^#/, '')).filter(Boolean);
-    }
-
-    closeEditModal();
-    saveState();
-  });
-
-  // AES-GCM 256-bit Krypteret Dagbog
-  async function deriveKey(pin, salt) {
-    const enc = new TextEncoder();
-    const keyMat = await crypto.subtle.importKey('raw', enc.encode(pin), 'PBKDF2', false, ['deriveKey']);
-    return crypto.subtle.deriveKey(
-      { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
-      keyMat,
-      { name: 'AES-GCM', length: 256 },
-      false,
-      ['encrypt', 'decrypt']
-    );
-  }
-
-  async function encryptDiaryData(pin, dataObj) {
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const key = await deriveKey(pin, salt);
-    const enc = new TextEncoder();
-    const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(JSON.stringify(dataObj)));
-    return {
-      salt: btoa(String.fromCharCode(...salt)),
-      iv: btoa(String.fromCharCode(...iv)),
-      cipher: btoa(String.fromCharCode(...new Uint8Array(cipher)))
-    };
-  }
-
-  async function decryptDiaryData(pin, stored) {
-    const salt = Uint8Array.from(atob(stored.salt), c => c.charCodeAt(0));
-    const iv = Uint8Array.from(atob(stored.iv), c => c.charCodeAt(0));
-    const cipher = Uint8Array.from(atob(stored.cipher), c => c.charCodeAt(0));
-    const key = await deriveKey(pin, salt);
-    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipher);
-    return JSON.parse(new TextDecoder().decode(plain));
-  }
-
-  function initDiaryLockView() {
-    pinBuffer = '';
-    updatePinDots();
-    document.getElementById('pin-error').textContent = '';
-    const hasDiary = !!localStorage.getItem(DIARY_KEY);
-    document.getElementById('pin-heading').textContent = hasDiary ? 'Privat Dagbog (Låst)' : 'Opret PIN-kode til Dagbog';
-    document.getElementById('pin-sub').textContent = hasDiary
-      ? 'Indtast din 4-6 cifrede PIN-kode.'
-      : 'Vælg en personlig 4-6 cifret kode til at kryptere din dagbog.';
-  }
-
-  function updatePinDots() {
-    const dots = document.getElementById('pin-dots');
-    dots.innerHTML = Array.from({ length: Math.max(4, pinBuffer.length) }, (_, idx) =>
-      `<span class="pin-dot ${idx < pinBuffer.length ? 'filled' : ''}"></span>`
-    ).join('');
-  }
-
-  document.getElementById('keypad').addEventListener('click', async e => {
-    const btn = e.target.closest('[data-k]');
-    if (!btn) return;
-    const k = btn.dataset.k;
-    if (k === 'clear') {
-      pinBuffer = '';
-      updatePinDots();
-      return;
-    }
-    if (k === 'ok') {
-      if (pinBuffer.length < 4) {
-        document.getElementById('pin-error').textContent = 'Koden skal være 4–6 cifre.';
+    function handleLiveCategorize() {
+      const text = document.getElementById("task-input").value;
+      if (!text.trim()) {
+        manualOverride = false;
+        if (state.categories.some(c => c.id === currentView)) {
+          selectedCategoryId = currentView;
+        } else {
+          selectedCategoryId = state.categories[0].id;
+        }
+        updatePillUI("Standard");
         return;
       }
-      const raw = localStorage.getItem(DIARY_KEY);
-      if (!raw) {
-        unlockedPin = pinBuffer;
-        diaryEntries = [];
-        await persistDiary();
-        showUnlockedDiary();
+
+      if (manualOverride) return;
+
+      const matched = detectCategory(text);
+      if (matched) {
+        selectedCategoryId = matched;
+        updatePillUI("Auto-match på nøgleord");
       } else {
-        try {
-          diaryEntries = await decryptDiaryData(pinBuffer, JSON.parse(raw));
-          unlockedPin = pinBuffer;
-          showUnlockedDiary();
-        } catch (err) {
-          pinBuffer = '';
-          updatePinDots();
-          document.getElementById('pin-error').textContent = 'Forkert PIN-kode.';
-        }
+        selectedCategoryId = state.categories.some(c => c.id === currentView) ? currentView : state.categories[0].id;
+        updatePillUI("Ingen match — standard");
       }
-      return;
     }
-    if (pinBuffer.length < 6) {
-      pinBuffer += k;
-      updatePinDots();
+
+    function cycleManualCategory() {
+      const idx = state.categories.findIndex(c => c.id === selectedCategoryId);
+      const next = state.categories[(idx + 1) % state.categories.length];
+      selectedCategoryId = next.id;
+      manualOverride = true;
+      updatePillUI("Valgt manuelt");
     }
-  });
 
-  function showUnlockedDiary() {
-    document.getElementById('diary-locked').style.display = 'none';
-    document.getElementById('diary-unlocked').style.display = 'block';
-    document.getElementById('diary-date').value = toLocalDateInput(new Date());
-    document.getElementById('cnt-diary').textContent = diaryEntries.length;
-    renderDiary();
-  }
-
-  function lockDiary() {
-    unlockedPin = null;
-    diaryEntries = [];
-    pinBuffer = '';
-    document.getElementById('diary-unlocked').style.display = 'none';
-    document.getElementById('diary-locked').style.display = 'block';
-    document.getElementById('cnt-diary').textContent = 'Låst';
-  }
-
-  document.getElementById('lock-diary-btn').addEventListener('click', lockDiary);
-  document.getElementById('reset-diary-btn').addEventListener('click', () => {
-    if (confirm('Er du sikker? Alle krypterede dagbogsindlæg slettes permanent.')) {
-      localStorage.removeItem(DIARY_KEY);
-      initDiaryLockView();
+    function updatePillUI(hintText) {
+      const cat = state.categories.find(c => c.id === selectedCategoryId) || state.categories[0];
+      document.getElementById("pill-dot").style.backgroundColor = cat.color;
+      document.getElementById("pill-label").textContent = cat.name;
+      if (hintText) document.getElementById("auto-status").textContent = hintText;
     }
-  });
 
-  async function persistDiary() {
-    if (!unlockedPin) return;
-    const encrypted = await encryptDiaryData(unlockedPin, diaryEntries);
-    localStorage.setItem(DIARY_KEY, JSON.stringify(encrypted));
-    document.getElementById('cnt-diary').textContent = diaryEntries.length;
-    renderDiary();
-  }
+    function addTask() {
+      const input = document.getElementById("task-input");
+      const title = input.value.trim();
+      if (!title) return;
 
-  document.getElementById('diary-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    diaryEntries.unshift({
-      id: uid(),
-      date: document.getElementById('diary-date').value,
-      title: document.getElementById('diary-title').value.trim(),
-      body: document.getElementById('diary-body').value.trim()
-    });
-    e.target.reset();
-    document.getElementById('diary-date').value = toLocalDateInput(new Date());
-    await persistDiary();
-  });
+      const board = document.getElementById("board-input").value.trim();
+      const date = document.getElementById("date-input").value;
+      const priority = document.getElementById("prio-input").value;
 
-  document.getElementById('diary-search').addEventListener('input', renderDiary);
+      state.tasks.unshift({
+        id: "t_" + Date.now(),
+        title,
+        categoryId: selectedCategoryId,
+        board,
+        status: "Igangsat",
+        date,
+        priority,
+        note: "",
+        done: false
+      });
 
-  function renderDiary() {
-    const q = document.getElementById('diary-search').value.trim().toLowerCase();
-    const list = diaryEntries.filter(d => !q || (d.title + ' ' + d.body + ' ' + d.date).toLowerCase().includes(q));
-    document.getElementById('list-diary').innerHTML = list.length
-      ? list.map(d => `
-        <div class="item-card" style="border-left-color:var(--purple);">
-          <div class="item-head">
-            <div>
-              <h4 class="item-title">${esc(d.title)}</h4>
-              <div class="item-meta"><span class="tag">${esc(d.date)}</span></div>
-            </div>
-            <div class="item-actions">
-              <button class="btn-sm" data-act="diary-edit" data-id="${d.id}">Rediger</button>
-              <button class="btn-sm btn-danger" data-act="diary-del" data-id="${d.id}">Slet</button>
-            </div>
-          </div>
-          <p class="item-body">${esc(d.body)}</p>
-        </div>
-      `).join('')
-      : '<div class="empty">Ingen dagbogsindlæg endnu.</div>';
-  }
-
-  // Backup & JSON Import/Eksport
-  const backupModal = document.getElementById('backup-modal');
-  document.getElementById('open-backup-btn').addEventListener('click', () => backupModal.classList.add('open'));
-  document.getElementById('close-backup-modal').addEventListener('click', () => backupModal.classList.remove('open'));
-
-  document.getElementById('export-json-btn').addEventListener('click', () => {
-    const payload = {
-      exportedAt: new Date().toISOString(),
-      data: state,
-      encryptedDiary: JSON.parse(localStorage.getItem(DIARY_KEY) || 'null')
-    };
-    downloadFile(`lommelog-backup-${toLocalDateInput(new Date())}.json`, JSON.stringify(payload, null, 2), 'application/json');
-  });
-
-  document.getElementById('import-json-input').addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const parsed = JSON.parse(ev.target.result);
-        if (parsed.data && Array.isArray(parsed.data.items)) {
-          state = parsed.data;
-          if (parsed.encryptedDiary) {
-            localStorage.setItem(DIARY_KEY, JSON.stringify(parsed.encryptedDiary));
-          }
-          saveState();
-          backupModal.classList.remove('open');
-          alert('Backup er gendannet!');
-        } else {
-          alert('Ugyldig backup-fil.');
-        }
-      } catch (err) {
-        alert('Kunne ikke læse filen.');
-      }
-    };
-    reader.readAsText(file);
-  });
-
-  document.getElementById('factory-reset-btn').addEventListener('click', () => {
-    if (confirm('Slet ALT (logbog, opgaver, noter og dagbog) permanent?')) {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(DIARY_KEY);
-      state = defaultState();
-      lockDiary();
+      input.value = "";
+      document.getElementById("board-input").value = "";
+      document.getElementById("date-input").value = "";
+      document.getElementById("prio-input").value = "";
+      manualOverride = false;
+      handleLiveCategorize();
       saveState();
-      backupModal.classList.remove('open');
+      render();
+      showToast("Opgave tilføjet");
     }
-  });
 
-  function downloadFile(filename, content, mime) {
-    const blob = new Blob([content], { type: mime });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+    function toggleDone(id) {
+      const task = state.tasks.find(t => t.id === id);
+      if (task) {
+        task.done = !task.done;
+        saveState();
+        render();
+      }
+    }
 
-  // Online/Offline indikator
-  function updateOnlineBadge() {
-    const el = document.getElementById('net-status');
-    el.textContent = navigator.onLine ? 'Online · Lokal lagring' : 'Offline · Klar';
-  }
-  window.addEventListener('online', updateOnlineBadge);
-  window.addEventListener('offline', updateOnlineBadge);
-  updateOnlineBadge();
+    function updateTaskField(id, field, value) {
+      const task = state.tasks.find(t => t.id === id);
+      if (task) {
+        task[field] = value;
+        saveState();
+        if (field !== "note") render();
+      }
+    }
 
-  renderAll();
-})();
-</script>
+    function postponeOneWeek(id) {
+      const task = state.tasks.find(t => t.id === id);
+      if (!task) return;
+      const base = task.date ? new Date(task.date + "T00:00:00") : new Date();
+      base.setDate(base.getDate() + 7);
+      const yyyy = base.getFullYear();
+      const mm = String(base.getMonth() + 1).padStart(2, "0");
+      const dd = String(base.getDate()).padStart(2, "0");
+      task.date = `${yyyy}-${mm}-${dd}`;
+      saveState();
+      render();
+      showToast(`Ny dato: ${dd}-${mm}-${yyyy}`);
+    }
+
+    function toggleNoteBox(id) {
+      openNotes[id] = !openNotes[id];
+      render();
+    }
+
+    function updateTaskTitle(id, newTitle) {
+      const task = state.tasks.find(t => t.id === id);
+      const clean = newTitle.trim();
+      if (task && clean) {
+        task.title = clean;
+        saveState();
+      }
+    }
+
+    function deleteTask(id) {
+      state.tasks = state.tasks.filter(t => t.id !== id);
+      saveState();
+      render();
+    }
+
+    function addKeyword(catId) {
+      const input = document.getElementById("kw-input-" + catId);
+      const val = input.value.trim().toLowerCase();
+      if (!val) return;
+      const cat = state.categories.find(c => c.id === catId);
+      if (cat && !cat.keywords.includes(val)) {
+        cat.keywords.push(val);
+        saveState();
+        render();
+      }
+    }
+
+    function removeKeyword(catId, kw) {
+      const cat = state.categories.find(c => c.id === catId);
+      if (cat) {
+        cat.keywords = cat.keywords.filter(k => k !== kw);
+        saveState();
+        render();
+      }
+    }
+
+    function setView(viewId) {
+      currentView = viewId;
+      searchQuery = "";
+      boardFilter = "";
+      statusFilter = "";
+      if (state.categories.some(c => c.id === viewId) && !manualOverride) {
+        selectedCategoryId = viewId;
+        updatePillUI("Standard for visning");
+      }
+      document.getElementById("sidebar").classList.remove("open");
+      render();
+    }
+
+    function escapeHtml(str) {
+      return (str || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function formatDateDK(iso) {
+      if (!iso) return "";
+      const p = iso.split("-");
+      return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : iso;
+    }
+
+    function copyStatusReport() {
+      const active = state.tasks.filter(t => !t.done);
+      const todayStr = new Date().toLocaleDateString("da-DK");
+      let lines = [`CHANGE MASTER STATUSOVERSIGT (${todayStr})`, `Aktive opgaver i alt: ${active.length}`, ""];
+
+      for (const cat of state.categories) {
+        const items = active.filter(t => t.categoryId === cat.id);
+        if (items.length === 0) continue;
+        lines.push(`■ ${cat.name.toUpperCase()} (${items.length})`);
+        for (const t of items) {
+          const meta = [
+            t.board ? `Tavle: ${t.board}` : "",
+            t.status || "",
+            t.date ? `Dato: ${formatDateDK(t.date)}` : "",
+            t.priority || ""
+          ].filter(Boolean).join(" | ");
+          lines.push(`  - ${t.title}${meta ? ` [${meta}]` : ""}`);
+          if (t.note && t.note.trim()) {
+            lines.push(`    Note: ${t.note.trim()}`);
+          }
+        }
+        lines.push("");
+      }
+
+      const text = lines.join("\n");
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast("Statusrapport kopieret til udklipsholder — klar til Outlook/Teams!");
+        }).catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      showToast("Statusrapport kopieret til udklipsholder!");
+    }
+
+    function render() {
+      const activeTasks = state.tasks.filter(t => !t.done);
+      const urgentTasks = activeTasks.filter(isUrgentTask);
+      const doneTasks = state.tasks.filter(t => t.done);
+
+      document.getElementById("count-all").textContent = activeTasks.length;
+      document.getElementById("count-urgent").textContent = urgentTasks.length;
+      document.getElementById("count-done").textContent = doneTasks.length;
+
+      const navContainer = document.getElementById("category-nav");
+      navContainer.innerHTML = state.categories.map(cat => {
+        const count = activeTasks.filter(t => t.categoryId === cat.id).length;
+        const activeClass = currentView === cat.id ? "active" : "";
+        return `
+          <button class="nav-btn ${activeClass}" onclick="setView('${cat.id}')">
+            <span class="nav-left">
+              <span class="dot" style="background:${cat.color}"></span>
+              <span class="label">${cat.name}</span>
+            </span>
+            <span class="count-badge">${count}</span>
+          </button>
+        `;
+      }).join("");
+
+      document.querySelectorAll(".sidebar > div > .nav-btn, .sidebar-footer > .nav-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.view === currentView);
+      });
+
+      const content = document.getElementById("content-area");
+
+      if (currentView === "keywords") {
+        content.innerHTML = `
+          <div class="view-header">
+            <div>
+              <h2 class="view-title">Nøgleord &amp; Auto-sortering</h2>
+              <p class="view-subtitle">Tilføj interne projektnavne, tavler eller fagudtryk — appen sorterer automatisk efter disse ord.</p>
+            </div>
+            <button class="report-btn" onclick="reCategorizeAllActive()">↻ Gen-sorter alle aktive opgaver nu</button>
+          </div>
+          <div class="kw-grid">
+            ${state.categories.map(cat => `
+              <div class="kw-card">
+                <div>
+                  <div class="kw-header">
+                    <span class="dot" style="background:${cat.color}"></span>
+                    <span>${cat.name}</span>
+                  </div>
+                  <p class="kw-desc">${cat.desc}</p>
+                  <div class="kw-tags">
+                    ${cat.keywords.map(kw => `
+                      <span class="kw-chip">${escapeHtml(kw)} <button onclick="removeKeyword('${cat.id}', '${kw.replace(/'/g, "\\'")}')">&times;</button></span>
+                    `).join("")}
+                  </div>
+                </div>
+                <div class="kw-add-row">
+                  <input type="text" id="kw-input-${cat.id}" class="mini-input" placeholder="Tilføj nyt nøgleord..." style="flex:1;" onkeydown="if(event.key==='Enter') addKeyword('${cat.id}')" />
+                  <button class="cat-pill-btn" onclick="addKeyword('${cat.id}')">+ Tilføj</button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        `;
+        return;
+      }
+
+      let baseList = [];
+      let title = "";
+      let subtitle = "";
+
+      if (currentView === "all") {
+        baseList = activeTasks;
+        title = "Alle aktive opgaver";
+        subtitle = `${activeTasks.length} aktive opgaver fordelt på dine 6 ansvarsområder`;
+      } else if (currentView === "urgent") {
+        baseList = urgentTasks;
+        title = "Forfaldne & Næste 7 dage";
+        subtitle = `${urgentTasks.length} opgaver der kræver opmærksomhed nu`;
+      } else if (currentView === "done") {
+        baseList = doneTasks;
+        title = "Afsluttede opgaver";
+        subtitle = `${doneTasks.length} gennemførte opgaver`;
+      } else {
+        const cat = state.categories.find(c => c.id === currentView);
+        baseList = activeTasks.filter(t => t.categoryId === currentView);
+        title = cat ? cat.name : "";
+        subtitle = cat ? cat.desc : "";
+      }
+
+      const boards = [...new Set(baseList.map(t => (t.board || "").trim()).filter(Boolean))];
+
+      let filtered = [...baseList];
+      if (boardFilter) {
+        filtered = filtered.filter(t => (t.board || "").trim() === boardFilter);
+      }
+      if (statusFilter) {
+        filtered = filtered.filter(t => t.status === statusFilter);
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        filtered = filtered.filter(t =>
+          t.title.toLowerCase().includes(q) ||
+          (t.board && t.board.toLowerCase().includes(q)) ||
+          (t.note && t.note.toLowerCase().includes(q))
+        );
+      }
+
+      if (sortBy === "date") {
+        filtered.sort((a, b) => (a.date || "9999-12-31").localeCompare(b.date || "9999-12-31"));
+      } else if (sortBy === "priority") {
+        const rank = { "Høj prioritet": 1, "Medium prioritet": 2, "Lav prioritet": 3, "": 4 };
+        filtered.sort((a, b) => (rank[a.priority || ""] || 4) - (rank[b.priority || ""] || 4));
+      }
+
+      content.innerHTML = `
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">${title}</h2>
+            <p class="view-subtitle">${subtitle}</p>
+          </div>
+          <div class="header-actions">
+            <button class="report-btn" onclick="copyStatusReport()" title="Kopiér pæn statusoversigt til Outlook eller Teams">📋 Kopiér status</button>
+            <input type="text" class="search-bar" placeholder="Søg i opgaver & noter..." value="${escapeHtml(searchQuery)}" oninput="searchQuery = this.value; render();" />
+          </div>
+        </div>
+
+        <div class="filter-strip">
+          <div class="filter-chips">
+            <button class="filter-chip ${!boardFilter && !statusFilter ? "active" : ""}" onclick="boardFilter=''; statusFilter=''; render();">Alle (${baseList.length})</button>
+            <button class="filter-chip ${statusFilter === 'Venter' ? "active" : ""}" onclick="statusFilter = statusFilter === 'Venter' ? '' : 'Venter'; render();">Venter</button>
+            <button class="filter-chip ${statusFilter === 'Igangsat' ? "active" : ""}" onclick="statusFilter = statusFilter === 'Igangsat' ? '' : 'Igangsat'; render();">Igangsat</button>
+            ${boards.map(b => `
+              <button class="filter-chip ${boardFilter === b ? "active" : ""}" onclick="boardFilter = boardFilter === '${b.replace(/'/g, "\\'")}' ? '' : '${b.replace(/'/g, "\\'")}'; render();">${escapeHtml(b)}</button>
+            `).join("")}
+          </div>
+
+          <select class="mini-select" onchange="sortBy = this.value; render();" title="Sortering">
+            <option value="date" ${sortBy === "date" ? "selected" : ""}>Sortér: Nærmeste dato</option>
+            <option value="priority" ${sortBy === "priority" ? "selected" : ""}>Sortér: Prioritet</option>
+            <option value="manual" ${sortBy === "manual" ? "selected" : ""}>Sortér: Senest oprettet</option>
+          </select>
+        </div>
+
+        <div class="task-list">
+          ${filtered.length === 0 ? `<div class="empty-state">Ingen opgaver matcher det valgte filter.</div>` : filtered.map(task => {
+            const cat = state.categories.find(c => c.id === task.categoryId) || state.categories[0];
+            const statusClass = task.status === "Venter" ? "status-venter" : "";
+            const prioClass = task.priority && task.priority.includes("Høj") ? "prio-høj" : (task.priority && task.priority.includes("Medium") ? "prio-medium" : "");
+            const due = !task.done ? getDueInfo(task.date) : null;
+            const hasNote = task.note && task.note.trim().length > 0;
+            const noteOpen = !!openNotes[task.id] || hasNote;
+
+            return `
+              <div class="task-row ${task.done ? "done" : ""}">
+                <div class="task-left">
+                  <button class="check-circle" onclick="toggleDone('${task.id}')" title="Markér som udført">✓</button>
+                  <div class="task-content">
+                    <div class="task-title-line">
+                      <div class="task-title" contenteditable="true" onblur="updateTaskTitle('${task.id}', this.textContent)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}">${escapeHtml(task.title)}</div>
+                      ${due ? `<span class="due-badge ${due.type === 'overdue' ? 'due-overdue' : 'due-soon'}">${due.label}</span>` : ""}
+                    </div>
+
+                    <div class="task-meta">
+                      <label class="inline-meta-field" title="Ret tavlenavn">
+                        <span class="inline-meta-label">Tavle:</span>
+                        <input type="text" class="inline-board-input" value="${escapeHtml(task.board)}" placeholder="Ingen" onchange="updateTaskField('${task.id}', 'board', this.value.trim())" onkeydown="if(event.key==='Enter') this.blur()" />
+                      </label>
+
+                      <label class="inline-meta-field ${statusClass}" title="Skift status">
+                        <select class="inline-select" onchange="updateTaskField('${task.id}', 'status', this.value)">
+                          <option value="Igangsat" ${task.status === "Igangsat" ? "selected" : ""}>Igangsat</option>
+                          <option value="Venter" ${task.status === "Venter" ? "selected" : ""}>Venter</option>
+                        </select>
+                      </label>
+
+                      <span class="inline-meta-field" title="Vælg ny dato eller udsæt +1 uge">
+                        <span class="inline-meta-label">Dato:</span>
+                        <input type="date" class="inline-date-input" value="${task.date || ""}" onchange="updateTaskField('${task.id}', 'date', this.value)" />
+                        <button type="button" class="plus-week-btn" onclick="postponeOneWeek('${task.id}')" title="Udsæt frist 7 dage">+7d</button>
+                      </span>
+
+                      <label class="inline-meta-field ${prioClass}" title="Skift prioritet">
+                        <select class="inline-select" onchange="updateTaskField('${task.id}', 'priority', this.value)">
+                          <option value="" ${!task.priority ? "selected" : ""}>Ingen prioritet</option>
+                          <option value="Høj prioritet" ${task.priority === "Høj prioritet" ? "selected" : ""}>Høj prioritet</option>
+                          <option value="Medium prioritet" ${task.priority === "Medium prioritet" ? "selected" : ""}>Medium prioritet</option>
+                          <option value="Lav prioritet" ${task.priority === "Lav prioritet" ? "selected" : ""}>Lav prioritet</option>
+                        </select>
+                      </label>
+
+                      <button type="button" class="note-toggle-btn ${hasNote ? "has-note" : ""}" onclick="toggleNoteBox('${task.id}')">
+                        ${hasNote ? "📝 Note" : "+ Note"}
+                      </button>
+                    </div>
+
+                    ${noteOpen ? `
+                      <textarea class="task-note-box" placeholder="Skriv næste skridt, aftale eller afklaring her..." oninput="updateTaskField('${task.id}', 'note', this.value)">${escapeHtml(task.note)}</textarea>
+                    ` : ""}
+                  </div>
+                </div>
+                <div class="task-right">
+                  <select class="row-cat-select" style="border-left: 4px solid ${cat.color}" onchange="updateTaskField('${task.id}', 'categoryId', this.value)">
+                    ${state.categories.map(c => `<option value="${c.id}" ${c.id === task.categoryId ? "selected" : ""}>${c.name}</option>`).join("")}
+                  </select>
+                  <button class="delete-btn" onclick="deleteTask('${task.id}')" title="Slet opgave">✕</button>
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `change-master-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.categories && imported.tasks) {
+            state = imported;
+            saveState();
+            render();
+            showToast("Backup indlæst!");
+          }
+        } catch (err) {
+          alert("Kunne ikke læse JSON-filen.");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = "";
+    }
+
+    function toggleSidebar(e) {
+      e.stopPropagation();
+      document.getElementById("sidebar").classList.toggle("open");
+    }
+
+    function closeSidebarOnOutsideClick(e) {
+      const sb = document.getElementById("sidebar");
+      if (sb.classList.contains("open") && !sb.contains(e.target)) {
+        sb.classList.remove("open");
+      }
+    }
+
+    applyFontScale();
+    updatePillUI("Standard");
+    render();
+  </script>
 </body>
 </html>
