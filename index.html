@@ -350,12 +350,19 @@
           </div>
           <div class="grid-2">
             <div class="field">
-              <label>Kategori</label>
-              <input type="text" id="task-cat" value="Generelt" placeholder="F.eks. Arbejde, Værksted, Indkøb...">
+              <label>Kategori (Ansvarsområde)</label>
+              <select id="task-cat">
+                <option value="C&A & Projektintegration">C&amp;A &amp; Projektintegration</option>
+                <option value="Forandringskommunikation">Forandringskommunikation</option>
+                <option value="Understøttelse af slutbrugere">Understøttelse af slutbrugere</option>
+                <option value="Sponsorer & Ledere">Sponsorer &amp; Ledere</option>
+                <option value="Forankring & Opfølgning">Forankring &amp; Opfølgning</option>
+                <option value="Dokumentation & eSOP" selected>Dokumentation &amp; eSOP</option>
+              </select>
             </div>
             <div class="field">
               <label>Note / Detaljer (valgfri)</label>
-              <input type="text" id="task-body" placeholder="Evt. ekstra info eller reservedelsnr.">
+              <input type="text" id="task-body" placeholder="Evt. tavle, aftale eller ekstra info...">
             </div>
           </div>
           <button type="submit" class="btn-primary">Tilføj opgave</button>
@@ -492,7 +499,16 @@
       <div class="grid-2" id="edit-row-meta">
         <div class="field" id="edit-cat-wrap">
           <label>Kategori</label>
-          <input type="text" id="edit-cat">
+          <input type="text" id="edit-cat-input">
+          <select id="edit-cat-select" style="display:none;">
+            <option value="C&A & Projektintegration">C&amp;A &amp; Projektintegration</option>
+            <option value="Forandringskommunikation">Forandringskommunikation</option>
+            <option value="Understøttelse af slutbrugere">Understøttelse af slutbrugere</option>
+            <option value="Sponsorer & Ledere">Sponsorer &amp; Ledere</option>
+            <option value="Forankring & Opfølgning">Forankring &amp; Opfølgning</option>
+            <option value="Dokumentation & eSOP">Dokumentation &amp; eSOP</option>
+            <option value="Generelt">Generelt</option>
+          </select>
         </div>
         <div class="field" id="edit-extra-wrap">
           <label id="edit-extra-label">Ekstra</label>
@@ -552,6 +568,15 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   const STORAGE_KEY = 'lommelog_data_v2';
   const DIARY_KEY = 'lommelog_diary_v2';
 
+  const TASK_CATEGORIES = [
+    'C&A & Projektintegration',
+    'Forandringskommunikation',
+    'Understøttelse af slutbrugere',
+    'Sponsorer & Ledere',
+    'Forankring & Opfølgning',
+    'Dokumentation & eSOP'
+  ];
+
   const CAT_LABELS = {
     ca: 'C&A & Projektintegration',
     comm: 'Forandringskommunikation',
@@ -583,7 +608,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         {
           id: uid(), type: 'task', pinned: false, done: false,
           title: 'Test redigering og sikkerhedskopi',
-          cat: 'Generelt', prio: 'Normal', due: '',
+          cat: 'Dokumentation & eSOP', prio: 'Normal', due: '',
           body: 'Tryk på Rediger på en opgave eller note for at opdatere indholdet.',
           createdAt: Date.now() - 10000
         },
@@ -637,7 +662,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
 
-  // Konverterer opgaver fra gårsdagens JSON-format (tasks / board / categoryId) til LommeLog-poster
   function convertLegacyTasks(tasksArr) {
     const baseTime = Date.now();
     return tasksArr.map((t, idx) => {
@@ -645,7 +669,8 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       if (t.priority && String(t.priority).toLowerCase().includes('høj')) prio = 'Høj';
       else if (t.priority && String(t.priority).toLowerCase().includes('lav')) prio = 'Lav';
 
-      const catName = CAT_LABELS[t.categoryId] || t.board || 'Generelt';
+      const mappedCat = CAT_LABELS[t.categoryId];
+      const catName = mappedCat || (TASK_CATEGORIES.includes(t.cat) ? t.cat : 'Dokumentation & eSOP');
       const details = [
         t.board ? `Tavle: ${t.board}` : '',
         t.status ? `Status: ${t.status}` : '',
@@ -667,7 +692,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     });
   }
 
-  // Navigation
   function switchTab(tab) {
     if (activeTab === 'diary' && tab !== 'diary') {
       lockDiary();
@@ -685,7 +709,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 
-  // Hurtig-tilføj FAB
   document.getElementById('fab-add').addEventListener('click', () => {
     if (activeTab === 'tasks') {
       document.getElementById('task-title').focus();
@@ -700,7 +723,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
 
-  // Logbog formular
   document.getElementById('log-dt').value = toLocalDateTimeInput(new Date());
   document.getElementById('log-now-btn').addEventListener('click', () => {
     document.getElementById('log-dt').value = toLocalDateTimeInput(new Date());
@@ -731,7 +753,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     saveState();
   });
 
-  // Opgave formular
   document.getElementById('task-form').addEventListener('submit', e => {
     e.preventDefault();
     state.items.unshift({
@@ -739,16 +760,15 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       title: document.getElementById('task-title').value.trim(),
       prio: document.getElementById('task-prio').value,
       due: document.getElementById('task-due').value,
-      cat: document.getElementById('task-cat').value.trim() || 'Generelt',
+      cat: document.getElementById('task-cat').value,
       body: document.getElementById('task-body').value.trim(),
       createdAt: Date.now()
     });
     e.target.reset();
-    document.getElementById('task-cat').value = 'Generelt';
+    document.getElementById('task-cat').value = 'Dokumentation & eSOP';
     saveState();
   });
 
-  // Note formular
   document.getElementById('note-form').addEventListener('submit', e => {
     e.preventDefault();
     const rawTags = document.getElementById('note-tags').value;
@@ -766,7 +786,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     saveState();
   });
 
-  // Søgning & filtre
   ['global-search', 'global-date', 'log-search', 'log-filter-cat', 'log-filter-status', 'task-search', 'task-filter', 'note-search'].forEach(id => {
     document.getElementById(id).addEventListener('input', renderAll);
     document.getElementById(id).addEventListener('change', renderAll);
@@ -794,7 +813,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     saveState();
   });
 
-  // Eksport logbog til Markdown
   document.getElementById('export-log-md').addEventListener('click', () => {
     const logs = state.items.filter(i => i.type === 'log');
     const lines = ['# LommeLog – Logbog', ''];
@@ -807,7 +825,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     downloadFile('lommelog-logbog.md', lines.join('\n'), 'text/markdown');
   });
 
-  // Rendering af kort
   function renderItemCard(item) {
     const typeLabel = item.type === 'log' ? 'Logbog' : item.type === 'task' ? 'Opgave' : 'Note';
     let statusBadge = '';
@@ -876,7 +893,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     document.getElementById('cnt-tasks').textContent = tasks.filter(t => !t.done).length;
     document.getElementById('cnt-notes').textContent = notes.length;
 
-    // 1. Global liste
     const gq = document.getElementById('global-search').value.trim();
     const gdate = document.getElementById('global-date').value;
     const filteredAll = sortItems(state.items.filter(i => {
@@ -892,7 +908,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       ? filteredAll.map(renderItemCard).join('')
       : '<div class="empty">Ingen indlæg matcher din søgning.</div>';
 
-    // 2. Logbog
     const lq = document.getElementById('log-search').value.trim();
     const lcat = document.getElementById('log-filter-cat').value;
     const lstat = document.getElementById('log-filter-status').value;
@@ -905,7 +920,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       ? filteredLogs.map(renderItemCard).join('')
       : '<div class="empty">Ingen logbogsindlæg fundet.</div>';
 
-    // 3. Opgaver
     const tq = document.getElementById('task-search').value.trim();
     const tf = document.getElementById('task-filter').value;
     const filteredTasks = sortItems(tasks.filter(i => {
@@ -917,7 +931,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       ? filteredTasks.map(renderItemCard).join('')
       : '<div class="empty">Ingen opgaver fundet.</div>';
 
-    // 4. Noter
     const nq = document.getElementById('note-search').value.trim();
     const filteredNotes = sortItems(notes.filter(i => matchesQuery(i, nq)));
     document.getElementById('list-notes').innerHTML = filteredNotes.length
@@ -925,7 +938,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       : '<div class="empty">Ingen noter fundet.</div>';
   }
 
-  // Delegerede klik-handlinger (Rediger, Slet, Pin, Udført)
   document.querySelector('main').addEventListener('click', e => {
     const btn = e.target.closest('[data-act]');
     if (!btn) return;
@@ -960,7 +972,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
 
-  // Samlet redigeringsmodal for alle typer
   function openEditModal(item, type) {
     document.getElementById('edit-id').value = item.id;
     document.getElementById('edit-type').value = type;
@@ -968,13 +979,30 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     document.getElementById('edit-body').value = item.body || '';
 
     const catWrap = document.getElementById('edit-cat-wrap');
+    const catInput = document.getElementById('edit-cat-input');
+    const catSelect = document.getElementById('edit-cat-select');
     const extraWrap = document.getElementById('edit-extra-wrap');
     const rowDt = document.getElementById('edit-row-dt');
     const selWrap = document.getElementById('edit-select-wrap');
     const sel = document.getElementById('edit-select');
 
     catWrap.style.display = type === 'diary' ? 'none' : 'block';
-    document.getElementById('edit-cat').value = item.cat || '';
+    if (type === 'task') {
+      catInput.style.display = 'none';
+      catSelect.style.display = 'block';
+      const val = item.cat || 'Dokumentation & eSOP';
+      if (!Array.from(catSelect.options).some(o => o.value === val)) {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        catSelect.appendChild(opt);
+      }
+      catSelect.value = val;
+    } else {
+      catInput.style.display = 'block';
+      catSelect.style.display = 'none';
+      catInput.value = item.cat || '';
+    }
 
     if (type === 'log') {
       extraWrap.style.display = 'block';
@@ -1039,7 +1067,9 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     if (!item) return;
 
     item.title = document.getElementById('edit-title').value.trim();
-    item.cat = document.getElementById('edit-cat').value.trim();
+    item.cat = type === 'task'
+      ? document.getElementById('edit-cat-select').value
+      : document.getElementById('edit-cat-input').value.trim();
     item.body = document.getElementById('edit-body').value.trim();
 
     if (type === 'log') {
@@ -1219,7 +1249,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       : '<div class="empty">Ingen dagbogsindlæg endnu.</div>';
   }
 
-  // Backup & JSON Import/Eksport (understøtter både LommeLog-backups og gårsdagens opgave-JSON)
   const backupModal = document.getElementById('backup-modal');
   document.getElementById('open-backup-btn').addEventListener('click', () => backupModal.classList.add('open'));
   document.getElementById('close-backup-modal').addEventListener('click', () => backupModal.classList.remove('open'));
@@ -1241,7 +1270,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       try {
         const parsed = JSON.parse(ev.target.result);
 
-        // 1) Fuld LommeLog backup
         if (parsed && parsed.data && Array.isArray(parsed.data.items)) {
           state = parsed.data;
           if (parsed.encryptedDiary) {
@@ -1250,9 +1278,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
           saveState();
           backupModal.classList.remove('open');
           alert('Backup er gendannet!');
-        }
-        // 2) Opgave-backup fra i går (tasks-array) -> lægges ind som opgaver uden at slette eksisterende log/noter
-        else if (parsed && Array.isArray(parsed.tasks)) {
+        } else if (parsed && Array.isArray(parsed.tasks)) {
           const converted = convertLegacyTasks(parsed.tasks);
           const existingTitles = new Set(state.items.filter(i => i.type === 'task').map(i => i.title.trim().toLowerCase()));
           const fresh = converted.filter(c => !existingTitles.has(c.title.trim().toLowerCase()));
@@ -1293,7 +1319,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     URL.revokeObjectURL(url);
   }
 
-  // Online/Offline indikator
   function updateOnlineBadge() {
     const el = document.getElementById('net-status');
     el.textContent = navigator.onLine ? 'Online · Lokal lagring' : 'Offline · Klar';
